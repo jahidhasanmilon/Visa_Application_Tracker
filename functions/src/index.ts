@@ -1,0 +1,152 @@
+import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { defineSecret } from 'firebase-functions/params';
+import { logger } from 'firebase-functions';
+import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+import nodemailer from 'nodemailer';
+
+initializeApp();
+
+// Keep this list in sync with ADMIN_EMAILS in src/constants/roles.ts.
+const ADMIN_EMAILS = ['jahidhasanmilon999@gmail.com'];
+
+// Must match TARGET_DAYS-style logic in src/constants/status.ts (REMINDER_WINDOW_DAYS)
+// and src/utils/dateHelpers.ts (enrichApplicant) — the 30-day countdown is measured
+// from the applicant's lastUpdated date.
+const REMINDER_WINDOW_DAYS = 30;
+
+// Mirrors src/constants/emailTemplate.ts — used only if the admin hasn't
+// saved a custom template yet at meta/emailTemplate.
+const DEFAULT_TEMPLATE = {
+  subject: 'Application Reminder (30-Day): {{name}} — {{serialNo}}',
+  body: `The 30-day follow-up window has passed for this application.
+
+Name: {{name}}
+Serial No: {{serialNo}}
+Status: {{status}}
+Last updated: {{lastUpdated}}
+Days overdue: {{daysOverdue}}
+
+Please review and follow up.`,
+};
+
+const GMAIL_USER = defineSecret('GMAIL_USER');
+const GMAIL_APP_PASSWORD = defineSecret('GMAIL_APP_PASSWORD');
+
+function daysBetween(a: string, b: string): number {
+  const A = new Date(`${a}T00:00:00`);
+  const B = new Date(`${b}T00:00:00`);
+  return Math.round((B.getTime() - A.getTime()) / 86400000);
+}
+
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function renderTemplate(template: string, vars: Record<string, string>): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => vars[key] ?? '');
+}
+
+interface ApplicantDoc {
+  name?: string;
+  serialNo?: string;
+  email?: string;
+  status?: string;
+  lastUpdated?: string;
+  reminderMailSent?: 'Not yet' | 'Urgent' | 'Done';
+  reminderEmailSentAt?: string;
+}
+
+interface EmailTemplateDoc {
+  subject?: string;
+  body?: string;
+}
+
+async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
+  const db = getFirestore();
+  const today = todayStr();
+
+  const templateSnap = await db.doc('meta/emailTemplate').get();
+  const templateDoc = templateSnap.data() as EmailTemplateDoc | undefined;
+  const template = {
+    subject: templateDoc?.subject || DEFAULT_TEMPLATE.subject,
+    body: templateDoc?.body || DEFAULT_TEMPLATE.body,
+  };
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user: GMAIL_USER.value(), pass: GMAIL_APP_PASSWORD.value() },
+  });
+
+  const snapshot = await db.collection('applicants').get();
+  let sent = 0;
+
+  for (const doc of snapshot.docs) {
+    const a = doc.data() as ApplicantDoc;
+    if (!a.lastUpdated || a.reminderMailSent !== 'Not yet') continue;
+
+    const reminderDaysLeft = REMINDER_WINDOW_DAYS - daysBetween(a.lastUpdated, today);
+    if (reminderDaysLeft > 0) continue;
+
+    // Already emailed for this cycle? (lastUpdated hasn't changed since the last send)
+    if (a.reminderEmailSentAt && a.reminderEmailSentAt >= a.lastUpdated) continue;
+
+    // No email on file (e.g. an admin-precreated ghost record for someone
+    // who hasn't signed up yet) — nothing to send to.
+    if (!a.email) {
+      logger.warn(`Skipping reminder for ${doc.id}: no email on file.`);
+      continue;
+    }
+
+    const vars = {
+      name: a.name ?? 'Applicant',
+      serialNo: a.serialNo ?? '',
+      status: a.status ?? '',
+      lastUpdated: a.lastUpdated,
+      daysOverdue: String(Math.abs(reminderDaysLeft)),
+    };
+
+    try {
+      // Only the applicant themselves — with ~1000 possible recipients,
+      // cc'ing admin on every single one would flood their inbox. Admin
+      // gets one digest email after the full sweep instead (see below).
+      await transporter.sendMail({
+        from: `VisaTrack <${GMAIL_USER.value()}>`,
+        to: a.email,
+        subject: renderTemplate(template.subject, vars),
+        text: renderTemplate(template.body, vars),
+      });
+      await doc.ref.update({ reminderEmailSentAt: today });
+      sent++;
+    } catch (err) {
+      logger.error(`Failed to send reminder email for ${doc.id}`, err);
+    }
+  }
+
+  if (sent > 0) {
+    try {
+      await transporter.sendMail({
+        from: `VisaTrack <${GMAIL_USER.value()}>`,
+        to: ADMIN_EMAILS.join(', '),
+        subject: `Reminder sweep: ${sent} email(s) sent`,
+        text: `The daily 30-day reminder sweep sent ${sent} email(s) out of ${snapshot.size} applicant record(s) checked.`,
+      });
+    } catch (err) {
+      logger.error('Failed to send admin digest email', err);
+    }
+  }
+
+  logger.info(`Reminder sweep complete: ${sent} email(s) sent.`);
+  return { sent, checked: snapshot.size };
+}
+
+export const sendReminderEmails = onSchedule(
+  {
+    schedule: '0 9 * * *',
+    timeZone: 'Asia/Dhaka',
+    secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
+  },
+  async () => {
+    await runReminderSweep();
+  },
+);

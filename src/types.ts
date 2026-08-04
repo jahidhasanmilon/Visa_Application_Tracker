@@ -1,0 +1,94 @@
+// Base statuses always available; admins can add further custom ones at runtime,
+// so this is intentionally a plain string rather than a closed union.
+export type StatusOption = string;
+export type ReminderStatus = 'Not yet' | 'Urgent' | 'Done';
+
+export interface Applicant {
+  id: string;
+  // Firebase Auth uid of the owning applicant (also the doc id for
+  // self-service records; admin-precreated "ghost" records may not have
+  // one yet, until that person signs up and claims their own doc).
+  uid?: string;
+  serialNo: string;
+  name: string;
+  email: string;
+  status: StatusOption;
+  created: string;      // ISO date string, e.g. "2026-07-05" — application created date
+  submitted: string;    // ISO date string — application submitted date (waiting time is measured from here)
+  notes: string;
+  lastUpdated: string;  // ISO date string, set manually by admin — not derived from anything
+  reminderMailSent: ReminderStatus; // "Application Reminder (30-Day)" — editable by admin and the applicant
+  // Server-only bookkeeping written by the sendReminderEmails Cloud Function
+  // (functions/src/index.ts) so it emails once per 30-day cycle, not every day.
+  // Never set by the client — Firestore rules only allow admin/applicant to
+  // touch reminderMailSent.
+  reminderEmailSentAt?: string;
+  // Admin-managed per-applicant to-do list. Toggleable by both admin and applicant.
+  checklist?: ChecklistItem[];
+  // Admin-managed per-applicant progress stepper, shown at the top of the
+  // applicant's dashboard in place of the fixed Applied/Submitted/... steps.
+  // Toggleable by both admin and applicant.
+  roadmap?: ChecklistItem[];
+}
+
+export interface ChecklistItem {
+  id: string;
+  label: string;
+  done: boolean;
+}
+
+export interface EnrichedApplicant extends Applicant {
+  // null when `submitted` isn't set yet (self-service applicants who
+  // haven't submitted their application) — nothing to count from yet.
+  waiting: number | null;
+  remaining: number | null;
+  urg: { label: string; color: string };
+  reminderDaysLeft: number; // 30 - (days since lastUpdated); negative once overdue
+  // Display-only: 'Not yet' becomes 'Urgent' once the window is up. Never
+  // overrides 'Done', and never gets written back — reminderMailSent stays
+  // whatever was explicitly chosen.
+  effectiveReminderStatus: ReminderStatus;
+}
+
+export interface ApplicantFormData {
+  serialNo: string;
+  name: string;
+  email: string;
+  status: StatusOption;
+  created: string;
+  submitted: string;
+  notes: string;
+  lastUpdated: string;
+  reminderMailSent: ReminderStatus;
+}
+
+export interface StatCounts {
+  total: number;
+  urgent: number;
+  overdue: number;
+  approved: number;
+}
+
+export interface PieDatum {
+  name: StatusOption;
+  value: number;
+}
+
+export interface EmailTemplate {
+  subject: string;
+  body: string;
+}
+
+export interface GuideSection {
+  heading: string;
+  body: string;
+}
+
+export interface Guide {
+  id: string;
+  title: string;
+  slug: string;
+  order: number;
+  sections: GuideSection[];
+  updatedAt?: string;
+}

@@ -1,0 +1,74 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Keep this list in sync with ADMIN_EMAILS in src/constants/roles.ts.
+    function isAdminEmail() {
+      return request.auth != null && request.auth.token.email in [
+        'jahidhasanmilon999@gmail.com'
+      ];
+    }
+
+    // Self-service applicant records are keyed BY the owner's Firebase Auth
+    // uid (applicantId == uid) — that's what lets someone create and own
+    // their own record without admin involvement. Admin can still
+    // precreate "ghost" records at other (random) doc ids for people who
+    // haven't signed up yet; those just aren't self-writable until that
+    // person signs up and gets their own uid-keyed doc.
+    match /applicants/{applicantId} {
+      // Admin can read everything. Applicants can only read their own record.
+      allow read: if isAdminEmail()
+        || (request.auth != null && request.auth.uid == applicantId);
+
+      // Admin can create any record (e.g. precreating a ghost record).
+      // A signed-in user can create ONLY their own uid-keyed record, and
+      // only with their own uid/email on it (no spoofing someone else's
+      // identity into a self-created doc).
+      allow create: if isAdminEmail()
+        || (
+          request.auth != null
+          && request.auth.uid == applicantId
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.email == request.auth.token.email
+        );
+
+      // Only admin can delete applicant records.
+      allow delete: if isAdminEmail();
+
+      // Admin can edit anything. An applicant may only update fields that
+      // are meant to be self-reported on their own record: reminder
+      // status, checklist/roadmap toggle-state, and — since the admin has
+      // no way to know a stranger's real visa status or submission date —
+      // their own status and submitted date. lastUpdated is included so
+      // the applicant's own 30-day reminder countdown can reset when they
+      // touch status/submitted/reminderMailSent (never for a mere
+      // checklist/roadmap toggle — see applicantsService.ts).
+      allow update: if isAdminEmail()
+        || (
+          request.auth != null
+          && request.auth.uid == applicantId
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['reminderMailSent', 'checklist', 'roadmap', 'status', 'submitted', 'lastUpdated'])
+        );
+    }
+
+    // Custom status options an admin has added beyond the built-in defaults.
+    match /meta/statusOptions {
+      allow read, write: if isAdminEmail();
+    }
+
+    // Editable subject/body for the 30-day reminder email (read by the
+    // sendReminderEmails Cloud Function via the Admin SDK, which bypasses
+    // these rules — this only governs the admin-panel editor).
+    match /meta/emailTemplate {
+      allow read, write: if isAdminEmail();
+    }
+
+    // Admin-curated guide/resource content — readable by anyone (including
+    // signed-out visitors), only the admin can write it.
+    match /guides/{guideId} {
+      allow read: if true;
+      allow write: if isAdminEmail();
+    }
+  }
+}
