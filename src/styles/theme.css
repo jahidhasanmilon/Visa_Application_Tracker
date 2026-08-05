@@ -330,6 +330,18 @@ button.app-sidebar-close { display: none; }
   .app-roadmap-connector { display: none; }
 }
 
+/* Wide desktop: connectors already flex-grow to fill the row, but on very
+   wide screens that leaves tiny circles stranded across a lot of empty
+   line — scale the stepper up and cap how far each connector stretches so
+   it reads as one balanced row instead of thin dots on long wires. */
+@media (min-width: 1200px) {
+  .app-roadmap-track { justify-content: center; }
+  .app-roadmap-step-btn { width: 96px; }
+  .app-roadmap-circle { width: 32px; height: 32px; font-size: 13px; }
+  .app-roadmap-label { font-size: 12px; }
+  .app-roadmap-connector { max-width: 110px; }
+}
+
 /* ---------- Cards ---------- */
 .app-card {
   background: var(--surface);
