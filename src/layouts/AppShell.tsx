@@ -113,7 +113,9 @@ export default function AppShell({ user, role }: AppShellProps) {
             </button>
           </div>
         </div>
-        <Outlet />
+        <div className="app-main-content">
+          <Outlet />
+        </div>
         <Footer />
       </main>
 

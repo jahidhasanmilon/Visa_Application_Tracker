@@ -10,7 +10,7 @@ import Footer from '../components/Footer';
 // the signed-in/signed-out fork, so this layout can't assume either.
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="app-root" style={{ minHeight: '100dvh' }}>
+    <div className="app-root" style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <div className="app-topbar" style={{ borderBottom: '1px solid var(--border)', padding: '18px 34px' }}>
         <Link to="/guides" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div className="app-logo-mark"><PlaneTakeoff size={18} /></div>
@@ -21,7 +21,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           <Link to="/login" className="app-btn app-btn-primary app-btn-sm">Sign in</Link>
         </div>
       </div>
-      {children}
+      <div style={{ flex: '1 0 auto' }}>{children}</div>
       <Footer />
       <WhatsAppFab />
     </div>
