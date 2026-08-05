@@ -5,9 +5,15 @@ interface LanguageToggleProps {
   style?: React.CSSProperties;
 }
 
+// Temporarily hidden everywhere it's mounted, per request — remove this
+// early return to bring the Bengali toggle back.
+const HIDDEN = true;
+
 // One-click EN / বাং switch — persists via LanguageProvider (localStorage).
 export default function LanguageToggle({ className = 'app-icon-btn', style }: LanguageToggleProps) {
   const { lang, setLang } = useLanguage();
+
+  if (HIDDEN) return null;
 
   return (
     <button

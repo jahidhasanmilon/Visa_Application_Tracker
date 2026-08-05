@@ -12,10 +12,11 @@ interface LanguageContextValue {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved === 'bn' ? 'bn' : 'en';
-  });
+  // Bengali toggle is temporarily hidden from the UI (no LanguageToggle
+  // mounted anywhere right now) — force English so nobody who previously
+  // switched to 'bn' gets stuck with no visible way to switch back. Restore
+  // the localStorage-backed initializer below when the toggle comes back.
+  const [lang, setLangState] = useState<Lang>('en');
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, lang);
