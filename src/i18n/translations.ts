@@ -76,6 +76,15 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.showPassword': 'Show password',
     'login.hidePassword': 'Hide password',
     'login.signUpLink': 'Sign up',
+    'login.err.invalidEmail': 'That email address looks invalid.',
+    'login.err.noAccount': "No account found with that email — sign up instead.",
+    'login.err.noAccountOrWrongPassword': "No account with this email, or the password is incorrect. New here? Create an account instead.",
+    'login.err.emailInUse': 'An account with that email already exists.',
+    'login.err.weakPassword': 'Password should be at least 6 characters.',
+    'login.err.popupClosed': 'Google sign-in was closed before finishing.',
+    'login.err.tooManyRequests': 'Too many attempts. Please wait a moment and try again.',
+    'login.err.generic': 'Something went wrong. Please try again.',
+    'login.createAccountInstead': 'Create an account',
 
     // Footer
     'footer.text': 'This is an unofficial community app with no affiliation to the German Embassy — © {{year}} VisaTrack. All rights reserved.',
@@ -288,6 +297,15 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.showPassword': 'পাসওয়ার্ড দেখান',
     'login.hidePassword': 'পাসওয়ার্ড লুকান',
     'login.signUpLink': 'সাইন আপ',
+    'login.err.invalidEmail': 'এই email address-টা সঠিক মনে হচ্ছে না।',
+    'login.err.noAccount': 'এই email দিয়ে কোনো account পাওয়া যায়নি — এর বদলে sign up করুন।',
+    'login.err.noAccountOrWrongPassword': 'এই email দিয়ে কোনো account নেই, অথবা পাসওয়ার্ড ভুল। নতুন এসেছেন? এর বদলে একটা account তৈরি করুন।',
+    'login.err.emailInUse': 'এই email দিয়ে ইতিমধ্যে একটা account আছে।',
+    'login.err.weakPassword': 'পাসওয়ার্ড অন্তত 6 characters হতে হবে।',
+    'login.err.popupClosed': 'শেষ হওয়ার আগেই Google sign-in বন্ধ হয়ে গেছে।',
+    'login.err.tooManyRequests': 'অনেকবার চেষ্টা হয়ে গেছে। একটু পর আবার চেষ্টা করুন।',
+    'login.err.generic': 'কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।',
+    'login.createAccountInstead': 'একটা account তৈরি করুন',
 
     // Footer
     'footer.text': 'এটি একটি অনানুষ্ঠানিক কমিউনিটি অ্যাপ, জার্মান দূতাবাসের সাথে কোনো সম্পর্ক নেই — © {{year}} VisaTrack। সর্বস্বত্ব সংরক্ষিত।',

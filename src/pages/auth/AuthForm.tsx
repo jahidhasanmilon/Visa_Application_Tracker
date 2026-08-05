@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import {
-  signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, resetPassword, friendlyAuthError,
+  signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, resetPassword, authErrorKey, isNoAccountError,
 } from '../../services/authService';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -22,12 +22,14 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [noAccountHint, setNoAccountHint] = useState(false);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
 
   function switchMode(next: 'signin' | 'signup' | 'reset') {
     setMode(next);
     setError('');
+    setNoAccountHint(false);
     setNotice('');
   }
 
@@ -44,6 +46,7 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setNoAccountHint(false);
     setNotice('');
     setBusy(true);
     try {
@@ -58,7 +61,8 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
       }
     } catch (err) {
       const code = (err as { code?: string }).code || '';
-      setError(friendlyAuthError(code));
+      setError(t(authErrorKey(code)));
+      setNoAccountHint(mode === 'signin' && isNoAccountError(code));
     } finally {
       setBusy(false);
     }
@@ -66,13 +70,14 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
 
   async function handleGoogle() {
     setError('');
+    setNoAccountHint(false);
     setBusy(true);
     try {
       const cred = await signInWithGoogle();
       await afterAuth(cred.user.email);
     } catch (err) {
       const code = (err as { code?: string }).code || '';
-      setError(friendlyAuthError(code));
+      setError(t(authErrorKey(code)));
     } finally {
       setBusy(false);
     }
@@ -120,7 +125,16 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
           </div>
         )}
 
-        {error && <div style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 14 }}>{error}</div>}
+        {error && (
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ color: 'var(--danger)', fontSize: 13 }}>{error}</div>
+            {noAccountHint && allowSignUp && (
+              <a href="#" onClick={(e) => { e.preventDefault(); switchMode('signup'); }} style={{ display: 'inline-block', marginTop: 4, fontSize: 12.5, fontWeight: 600, color: 'var(--violet)', textDecoration: 'none' }}>
+                {t('login.createAccountInstead')}
+              </a>
+            )}
+          </div>
+        )}
         {notice && <div style={{ color: 'var(--success)', fontSize: 13, marginBottom: 14 }}>{notice}</div>}
 
         <button className="app-btn app-btn-primary app-btn-block" type="submit" disabled={busy}>

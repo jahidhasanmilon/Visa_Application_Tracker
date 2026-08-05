@@ -49,17 +49,27 @@ export async function uploadProfilePhoto(file: File): Promise<string> {
   return url;
 }
 
-// Turns Firebase's error codes into messages a non-developer can read.
-export function friendlyAuthError(code: string): string {
+// Turns Firebase's error codes into an i18n key (AuthForm resolves it via
+// t() so the message respects the current language). Firebase's newer SDKs
+// collapse "no such user" and "wrong password" into the same
+// auth/invalid-credential code (email-enumeration protection), so that case
+// gets a message covering both possibilities rather than guessing.
+export function authErrorKey(code: string): string {
   switch (code) {
-    case 'auth/invalid-email': return 'That email address looks invalid.';
-    case 'auth/user-not-found': return 'No account found with that email.';
+    case 'auth/invalid-email': return 'login.err.invalidEmail';
+    case 'auth/user-not-found': return 'login.err.noAccount';
     case 'auth/wrong-password':
-    case 'auth/invalid-credential': return 'Incorrect email or password.';
-    case 'auth/email-already-in-use': return 'An account with that email already exists.';
-    case 'auth/weak-password': return 'Password should be at least 6 characters.';
-    case 'auth/popup-closed-by-user': return 'Google sign-in was closed before finishing.';
-    case 'auth/too-many-requests': return 'Too many attempts. Please wait a moment and try again.';
-    default: return 'Something went wrong. Please try again.';
+    case 'auth/invalid-credential': return 'login.err.noAccountOrWrongPassword';
+    case 'auth/email-already-in-use': return 'login.err.emailInUse';
+    case 'auth/weak-password': return 'login.err.weakPassword';
+    case 'auth/popup-closed-by-user': return 'login.err.popupClosed';
+    case 'auth/too-many-requests': return 'login.err.tooManyRequests';
+    default: return 'login.err.generic';
   }
+}
+
+// Whether this error code means the sign-in attempt likely has no matching
+// account — used to surface a "Create account" shortcut instead of just text.
+export function isNoAccountError(code: string): boolean {
+  return code === 'auth/user-not-found' || code === 'auth/invalid-credential';
 }
