@@ -25,6 +25,7 @@ import Guides from './pages/Guides';
 import GuideDetail from './pages/GuideDetail';
 import About from './pages/About';
 import Help from './pages/Help';
+import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
 import './styles/theme.css';
 
@@ -42,6 +43,7 @@ const publicRoutes = (
   <>
     <Route path="/guides" element={<PublicLayout><Guides /></PublicLayout>} />
     <Route path="/guides/:slug" element={<PublicLayout><GuideDetail /></PublicLayout>} />
+    <Route path="/privacy" element={<PublicLayout><Privacy /></PublicLayout>} />
   </>
 );
 

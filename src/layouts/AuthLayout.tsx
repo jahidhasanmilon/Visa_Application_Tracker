@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import { PlaneTakeoff } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 import Footer from '../components/Footer';
@@ -45,7 +46,10 @@ export default function AuthLayout({ eyebrow, headline, sub, stats, children }: 
           <ThemeToggle />
         </div>
         <div className="app-auth-form-wrap">{children}</div>
-        <div className="app-auth-footer"><Footer /></div>
+        <div className="app-auth-footer">
+          <Link to="/privacy" className="app-privacy-link">Privacy & Terms</Link>
+          <Footer />
+        </div>
       </div>
     </div>
   );

@@ -517,7 +517,11 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .app-auth-theme-toggle { position: absolute; top: 18px; right: 18px; }
 .app-auth-mobile-brand { display: none; }
 .app-auth-footer { position: absolute; bottom: 0; left: 0; right: 0; }
-.app-auth-footer .app-footer { padding: 12px 20px; }
+.app-privacy-link {
+  display: block; text-align: center; font-size: 11px; color: var(--muted);
+  text-decoration: underline; padding: 0 20px;
+}
+.app-auth-footer .app-footer { padding: 2px 20px 12px; }
 
 .app-role-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; }
 .app-role-card {
