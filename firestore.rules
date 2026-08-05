@@ -124,6 +124,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdminEmail();
     }
+    match /meta/privacy {
+      allow read: if true;
+      allow write: if isAdminEmail();
+    }
 
     // Admin-configurable ordering for the applicant sidebar.
     match /meta/navOrder {

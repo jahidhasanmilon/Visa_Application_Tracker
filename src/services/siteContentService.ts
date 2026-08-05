@@ -4,6 +4,7 @@ import type { HelpInfo } from '../types';
 
 const HELP_DOC = doc(db, 'meta', 'help');
 const ABOUT_DOC = doc(db, 'meta', 'about');
+const PRIVACY_DOC = doc(db, 'meta', 'privacy');
 
 const DEFAULT_HELP: HelpInfo = { whatsappLink: '', email: '', notes: '' };
 
@@ -26,4 +27,15 @@ export function subscribeAbout(onData: (body: string | null) => void): () => voi
 
 export async function saveAbout(body: string): Promise<void> {
   await setDoc(ABOUT_DOC, { body });
+}
+
+// null means no custom text saved yet.
+export function subscribePrivacy(onData: (body: string | null) => void): () => void {
+  return onSnapshot(PRIVACY_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { body?: string }).body ?? '') : null);
+  });
+}
+
+export async function savePrivacy(body: string): Promise<void> {
+  await setDoc(PRIVACY_DOC, { body });
 }
