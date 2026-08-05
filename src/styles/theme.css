@@ -111,7 +111,7 @@ html, body { background: var(--bg); }
    the app shell's mobile off-canvas sidebar). */
 .app-footer {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
-  padding: 9px 20px; font-size: 10.5px; color: var(--muted); text-align: center;
+  padding: 16px 34px; font-size: 11.5px; color: var(--muted); text-align: center; line-height: 1.6;
   background: var(--surface); border-top: 1px solid var(--border);
   transition: left 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
@@ -253,7 +253,7 @@ button.app-sidebar-close { display: none; }
 .app-page-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 25px; color: var(--ink); line-height: 1.2; }
 .app-page-subtitle { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
 .app-topbar-actions { display: flex; align-items: center; gap: 10px; }
-.app-content { padding: 0 34px 84px; display: flex; flex-direction: column; gap: 20px; }
+.app-content { padding: 0 34px 100px; display: flex; flex-direction: column; gap: 20px; }
 
 /* ---------- Avatar ---------- */
 .app-avatar {
@@ -595,14 +595,14 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .app-auth-mobile-brand { display: flex; align-items: center; gap: 8px; position: absolute; top: 18px; left: 18px; }
 
   .app-topbar { padding: 20px 18px 14px; }
-  .app-content { padding: 0 18px 76px; }
+  .app-content { padding: 0 18px 92px; }
   .app-auth-form-side { padding: 32px 22px; }
 }
 
 @media (max-width: 560px) {
   .app-page-title { font-size: 21px; }
   .app-topbar { padding: 16px 14px 12px; }
-  .app-content { padding: 0 14px 68px; gap: 14px; }
+  .app-content { padding: 0 14px 84px; gap: 14px; }
   .app-card-pad { padding: 16px; }
   .app-modal { padding: 20px; }
   .app-modal h3 { font-size: 17px; }

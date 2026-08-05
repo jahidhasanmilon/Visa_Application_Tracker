@@ -20,7 +20,7 @@ export default function WhatsAppFab() {
       title="Join the WhatsApp group"
       aria-label="Join the WhatsApp group"
       style={{
-        position: 'fixed', bottom: 52, right: 22, zIndex: 40,
+        position: 'fixed', bottom: 68, right: 22, zIndex: 40,
         width: 52, height: 52, borderRadius: '50%',
         background: '#25D366', color: '#fff',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
