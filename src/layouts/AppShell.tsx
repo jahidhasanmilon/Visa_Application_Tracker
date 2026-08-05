@@ -41,7 +41,7 @@ export default function AppShell({ user, role }: AppShellProps) {
           <div className="app-logo-mark"><PlaneTakeoff size={18} /></div>
           <div style={{ flex: 1 }}>
             <div className="app-logo-text">VisaTrack</div>
-            <div className="app-logo-sub">{role === 'admin' ? 'Admin console' : 'Applicant portal'}</div>
+            {role === 'admin' && <div className="app-logo-sub">Admin console</div>}
           </div>
           <button className="app-icon-btn app-sidebar-close" style={{ color: 'var(--sidebar-text)' }} onClick={() => setMobileNavOpen(false)} aria-label="Close menu">
             <X size={18} />
