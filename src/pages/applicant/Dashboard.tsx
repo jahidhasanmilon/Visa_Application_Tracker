@@ -82,6 +82,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
   const meta = getStatusMeta(a.status);
   const [savingReminder, setSavingReminder] = useState(false);
   const [savingRoadmap, setSavingRoadmap] = useState(false);
+  const [roadmapError, setRoadmapError] = useState('');
 
   const roadmapItems = useMemo(() => effectiveRoadmap(a, roadmapTemplate), [a, roadmapTemplate]);
   const checklist = useMemo(() => effectiveChecklist(a, checklistTemplate), [a, checklistTemplate]);
@@ -101,9 +102,13 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
 
   async function toggleStep(step: ChecklistItem) {
     setSavingRoadmap(true);
+    setRoadmapError('');
     try {
       const next = roadmapItems.map(s => s.id === step.id ? { ...s, done: !s.done } : s);
       await updateRoadmap(a.id, next);
+    } catch (err) {
+      console.error('updateRoadmap failed', err);
+      setRoadmapError(t('status.updateFailed'));
     } finally {
       setSavingRoadmap(false);
     }
@@ -174,6 +179,9 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
           </div>
         ))}
       </div>
+      {roadmapError && (
+        <div style={{ color: 'var(--danger)', fontSize: 12.5, marginTop: -8, marginBottom: 14 }}>{roadmapError}</div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
         <Field label={t('status.appliedOn')} value={fmtDate(a.created)} />

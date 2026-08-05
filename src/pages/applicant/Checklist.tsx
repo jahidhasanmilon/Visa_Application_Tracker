@@ -32,12 +32,17 @@ function ChecklistCard({ applicant, template }: { applicant: Applicant; template
   const { t } = useLanguage();
   const items = effectiveChecklist(applicant, template);
   const [saving, setSaving] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
   async function toggle(item: ChecklistItem) {
     setSaving(item.id);
+    setError('');
     try {
       const next = items.map(i => i.id === item.id ? { ...i, done: !i.done } : i);
       await updateChecklist(applicant.id, next);
+    } catch (err) {
+      console.error('updateChecklist failed', err);
+      setError(t('status.updateFailed'));
     } finally {
       setSaving(null);
     }
@@ -52,6 +57,7 @@ function ChecklistCard({ applicant, template }: { applicant: Applicant; template
         </div>
       </div>
 
+      {error && <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{error}</div>}
       {items.length === 0 ? (
         <div className="app-empty">{t('checklist.empty')}</div>
       ) : (
