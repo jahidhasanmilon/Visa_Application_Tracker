@@ -28,8 +28,8 @@ html.lang-bn .app-brand-font {
   --accent: #F5A524;
   --accent-ink: #6B4400;
   --accent-soft: #FDF0DA;
-  --violet: #6C5CE7;
-  --violet-soft: #ECE9FD;
+  --violet: #4B5875;
+  --violet-soft: #E7E9F0;
 
   --success: #12B76A;
   --success-soft: #DFF7EB;
@@ -67,7 +67,8 @@ html.lang-bn .app-brand-font {
 
   --accent-ink: #FFD79B;
   --accent-soft: rgba(245, 165, 36, 0.16);
-  --violet-soft: rgba(108, 92, 231, 0.22);
+  --violet: #8A94AC;
+  --violet-soft: rgba(75, 88, 117, 0.32);
 
   --success-soft: rgba(18, 183, 106, 0.18);
   --info-soft: rgba(62, 123, 250, 0.2);
