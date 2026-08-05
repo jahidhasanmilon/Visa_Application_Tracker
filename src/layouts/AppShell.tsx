@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { LogOut, PlaneTakeoff, Menu, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import type { AppRole } from '../constants/roles';
@@ -74,7 +74,9 @@ export default function AppShell({ user, role }: AppShellProps) {
 
         <div className="app-sidebar-footer">
           <div className="app-sidebar-user">
-            <UserAvatar user={user} plain />
+            <Link to="/app/dashboard" title="Home" aria-label="Home" style={{ lineHeight: 0 }}>
+              <UserAvatar user={user} plain />
+            </Link>
             <div className="app-sidebar-user-info" style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 12.5, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {displayNameFor(user)}

@@ -189,7 +189,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
         <Field
           label="Last updated"
           value={fmtDate(a.lastUpdated)}
-          tooltip="Your 30-day reminder countdown below resets from this date — it updates automatically whenever you change your status, submitted date, or reminder."
+          tooltip="Counts down from this date — jumps to today automatically when you change the reminder status."
         />
       </div>
 

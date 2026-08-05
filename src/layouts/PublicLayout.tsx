@@ -21,9 +21,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           <Link to="/login" className="app-btn app-btn-primary app-btn-sm">Sign in</Link>
         </div>
       </div>
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 20px 110px' }}>
-        {children}
-      </div>
+      {children}
       <Footer />
       <WhatsAppFab />
     </div>

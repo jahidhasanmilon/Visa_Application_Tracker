@@ -106,7 +106,13 @@ export default function AdminGuides() {
                   <div className="app-card-title">{g.title}</div>
                   <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3 }}>
                     {g.category || 'General'} · /guides/{g.slug} · {g.sections.length} section{g.sections.length === 1 ? '' : 's'} · order {g.order}
-                    {g.attachmentName && <> · <FileText size={11} style={{ verticalAlign: -1 }} /> {g.attachmentName}</>}
+                    {g.attachmentName && (
+                      <>
+                        {' · '}<FileText size={11} style={{ verticalAlign: -1 }} /> {g.attachmentName}
+                        {' '}
+                        <a href={g.attachmentUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--violet)', fontWeight: 600 }}>View</a>
+                      </>
+                    )}
                   </div>
                 </div>
                 <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => openEdit(g)}><Pencil size={14} /></button>
@@ -202,6 +208,9 @@ export default function AdminGuides() {
                 <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>
                   {pendingFile ? pendingFile.name : form.attachmentName || 'No file attached'}
                 </span>
+                {!pendingFile && form.attachmentUrl && (
+                  <a href={form.attachmentUrl} target="_blank" rel="noreferrer" className="app-card-link">View</a>
+                )}
                 <input ref={fileInputRef} type="file" accept="application/pdf" onChange={handleFileChange} style={{ display: 'none' }} />
               </div>
             </div>

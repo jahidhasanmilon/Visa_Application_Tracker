@@ -72,7 +72,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
           <label>Last updated *</label>
           <input className="app-input" type="date" value={lastUpdated} onChange={e => setLastUpdated(e.target.value)} />
           <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
-            Your Application Reminder (30-Day) countdown counts down from this date. It also jumps to today automatically whenever you change the reminder status — set it here only if you're correcting it.
+            Counts down from this date — jumps to today automatically when you change the reminder status.
           </div>
         </div>
 

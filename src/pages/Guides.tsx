@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, ChevronRight } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
 import { subscribeGuides } from '../services/guidesService';
 import type { Guide } from '../types';
 
@@ -26,21 +27,20 @@ export default function Guides() {
   }, [guides]);
 
   return (
-    <div>
-      <div className="app-page-title" style={{ marginBottom: 4 }}>Guides &amp; Resources</div>
-      <div className="app-page-subtitle" style={{ marginBottom: 24 }}>
-        Everything the community has put together about the Germany Opportunity Card process — sign in to track your own application against it.
-      </div>
-
-      {guides === null ? (
-        <div className="app-empty">Loading…</div>
-      ) : guides.length === 0 ? (
-        <div className="app-card app-card-pad">
-          <div className="app-empty">No guides published yet — check back soon.</div>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-          {grouped.map(([category, items]) => (
+    <>
+      <PageHeader
+        title="Guides & Resources"
+        subtitle="Everything the community has put together about the Germany Opportunity Card process."
+      />
+      <div className="app-content">
+        {guides === null ? (
+          <div className="app-empty">Loading…</div>
+        ) : guides.length === 0 ? (
+          <div className="app-card app-card-pad">
+            <div className="app-empty">No guides published yet — check back soon.</div>
+          </div>
+        ) : (
+          grouped.map(([category, items]) => (
             <div key={category}>
               <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--muted)', marginBottom: 10 }}>
                 {category}
@@ -71,9 +71,9 @@ export default function Guides() {
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+          ))
+        )}
+      </div>
+    </>
   );
 }
