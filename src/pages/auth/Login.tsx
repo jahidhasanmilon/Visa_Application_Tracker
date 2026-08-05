@@ -10,7 +10,7 @@ export default function Login() {
     <AuthLayout
       eyebrow="Welcome"
       headline="Every visa application, tracked to the day it's decided."
-      sub="Sign in to track your own application — or manage the whole pipeline for the group."
+      sub="Sign in to see exactly where your application stands, day by day."
       stats={[
         { value: 'Live', label: 'Status sync' },
         { value: '0', label: 'Spreadsheets needed' },
