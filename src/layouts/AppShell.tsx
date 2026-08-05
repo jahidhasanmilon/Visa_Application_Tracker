@@ -3,7 +3,7 @@ import { Link, NavLink, Outlet } from 'react-router-dom';
 import { LogOut, PlaneTakeoff, Menu, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import type { AppRole } from '../constants/roles';
-import { ADMIN_NAV, APPLICANT_NAV } from '../constants/nav';
+import { ADMIN_NAV, APPLICANT_NAV, NAV_SECTION_KEYS, type NavSection } from '../constants/nav';
 import { signOut } from '../services/authService';
 import { useApplicantNavOrder } from '../hooks/useNavOrder';
 import ThemeToggle from '../components/ThemeToggle';
@@ -64,23 +64,20 @@ export default function AppShell({ user, role }: AppShellProps) {
         </div>
 
         <nav className="app-nav">
-          {navItems.map(({ to, label, icon: Icon }) => {
-            const navLabel = to === '/app/dashboard' && role !== 'admin'
-              ? t('nav.myStatus')
-              : t(NAV_LABEL_KEYS[to] ?? '') || label;
-            return (
-              <NavLink
-                key={to}
-                to={to}
-                className={({ isActive }) => `app-nav-item${isActive ? ' active' : ''}`}
-                onClick={() => setMobileNavOpen(false)}
-                title={navLabel}
-              >
-                <Icon size={17} />
-                <span className="app-nav-label">{navLabel}</span>
-              </NavLink>
-            );
-          })}
+          {role === 'admin' ? (
+            navItems.map(item => renderNavItem(item, t, role, () => setMobileNavOpen(false)))
+          ) : (
+            (['main', 'account', 'support'] as NavSection[]).map(section => {
+              const items = (navItems as typeof APPLICANT_NAV).filter(i => i.section === section);
+              if (items.length === 0) return null;
+              return (
+                <div key={section} className="app-nav-section">
+                  <div className="app-nav-section-label">{t(NAV_SECTION_KEYS[section])}</div>
+                  {items.map(item => renderNavItem(item, t, role, () => setMobileNavOpen(false)))}
+                </div>
+              );
+            })
+          )}
         </nav>
 
         <div className="app-sidebar-footer">
@@ -134,6 +131,35 @@ export default function AppShell({ user, role }: AppShellProps) {
 
       <WhatsAppFab />
     </div>
+  );
+}
+
+interface NavItemLike {
+  to: string;
+  label: string;
+  icon: typeof PlaneTakeoff;
+}
+
+function renderNavItem(
+  { to, label, icon: Icon }: NavItemLike,
+  t: (key: string) => string,
+  role: AppRole,
+  onNavigate: () => void,
+) {
+  const navLabel = to === '/app/dashboard' && role !== 'admin'
+    ? t('nav.myStatus')
+    : t(NAV_LABEL_KEYS[to] ?? '') || label;
+  return (
+    <NavLink
+      key={to}
+      to={to}
+      className={({ isActive }) => `app-nav-item${isActive ? ' active' : ''}`}
+      onClick={onNavigate}
+      title={navLabel}
+    >
+      <Icon size={17} />
+      <span className="app-nav-label">{navLabel}</span>
+    </NavLink>
   );
 }
 

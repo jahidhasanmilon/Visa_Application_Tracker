@@ -235,6 +235,13 @@ button.app-sidebar-close { display: none; }
 }
 .app-nav-item svg { flex-shrink: 0; opacity: 0.9; }
 
+.app-nav-section { display: flex; flex-direction: column; gap: 3px; }
+.app-nav-section + .app-nav-section { margin-top: 16px; }
+.app-nav-section-label {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--sidebar-text-dim); padding: 6px 12px 4px;
+}
+
 .app-sidebar-footer {
   margin-top: auto;
   padding-top: 16px;
@@ -592,6 +599,7 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .app-sidebar.collapsed .app-logo-text,
   .app-sidebar.collapsed .app-logo-sub,
   .app-sidebar.collapsed .app-nav-label,
+  .app-sidebar.collapsed .app-nav-section-label,
   .app-sidebar.collapsed .app-sidebar-user-info {
     display: none;
   }

@@ -32,6 +32,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     'shell.adminConsole': 'Admin console',
     'shell.signOut': 'Sign out',
     'shell.home': 'Home',
+    'nav.section.main': 'Main',
+    'nav.section.account': 'Account',
+    'nav.section.support': 'Support',
 
     // Common
     'common.save': 'Save',
@@ -254,6 +257,9 @@ export const translations: Record<Lang, Record<string, string>> = {
     'shell.adminConsole': 'অ্যাডমিন কনসোল',
     'shell.signOut': 'সাইন আউট',
     'shell.home': 'হোম',
+    'nav.section.main': 'প্রধান',
+    'nav.section.account': 'অ্যাকাউন্ট',
+    'nav.section.support': 'সহায়তা',
 
     // Common
     'common.save': 'সেভ করুন',
