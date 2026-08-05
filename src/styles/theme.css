@@ -304,16 +304,6 @@ button.app-sidebar-close { display: none; }
   100% { background-position: 0 50%; }
 }
 
-/* ---------- My Status reminder countdown (circle) ---------- */
-.app-status-countdown {
-  width: 112px; height: 112px; border-radius: 50%; flex-shrink: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 6px;
-}
-.app-status-countdown-num { font-weight: 800; font-size: 30px; line-height: 1; }
-.app-status-countdown-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 3px; }
-.app-status-countdown-sub { font-size: 9.5px; opacity: 0.8; margin-top: 2px; }
-
 /* ---------- Road to Success stepper ---------- */
 .app-roadmap-track { display: flex; flex-wrap: nowrap; align-items: flex-start; margin: 22px 0; }
 .app-roadmap-step { display: flex; align-items: flex-start; min-width: 0; }
@@ -642,18 +632,14 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .app-stat-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
   .app-toolbar .app-input-wrap { min-width: 0; }
 
-  /* My Status card on small phones: name/status block goes full-width and
-     centered, the countdown stays a fixed-size circle centered below it;
-     roadmap gets fewer, wider columns so step labels don't feel cramped.
-     Scoped to this one card (not the generic .app-card-head used elsewhere). */
+  /* My Status card on small phones: countdown block goes full-width and
+     centered instead of an awkward fixed-width chip; roadmap gets fewer,
+     wider columns so step labels don't feel cramped. Scoped to this one
+     card (not the generic .app-card-head used elsewhere). */
   .app-status-card-head { justify-content: center; }
-  .app-status-card-head > *:first-child { flex: 1 1 100%; text-align: center; }
+  .app-status-card-head > * { flex: 1 1 100%; }
+  .app-status-card-head > *:last-child { text-align: center; }
   .app-roadmap-track { grid-template-columns: repeat(3, 1fr) !important; row-gap: 22px; }
   .app-roadmap-circle { width: 30px; height: 30px; font-size: 12px; }
   .app-roadmap-label { font-size: 11px; }
-
-  .app-status-countdown { width: 92px; height: 92px; padding: 4px; }
-  .app-status-countdown-num { font-size: 24px; }
-  .app-status-countdown-label { font-size: 9px; }
-  .app-status-countdown-sub { font-size: 8px; }
 }
