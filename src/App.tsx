@@ -17,7 +17,6 @@ import AdminChecklist from './pages/admin/Checklist';
 import AdminGuides from './pages/admin/Guides';
 import AdminAdmins from './pages/admin/Admins';
 import AdminVivaQuestions from './pages/admin/VivaQuestions';
-import AdminHelp from './pages/admin/Help';
 import ApplicantDashboard from './pages/applicant/Dashboard';
 import ApplicantChecklist from './pages/applicant/Checklist';
 import ApplicantVivaQuestions from './pages/applicant/VivaQuestions';
@@ -25,6 +24,7 @@ import HowToUse from './pages/applicant/HowToUse';
 import Guides from './pages/Guides';
 import GuideDetail from './pages/GuideDetail';
 import About from './pages/About';
+import Help from './pages/Help';
 import Profile from './pages/Profile';
 import './styles/theme.css';
 
@@ -97,7 +97,7 @@ export default function App() {
         <Route path="analytics" element={role === 'admin' ? <AdminAnalytics /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="guides" element={role === 'admin' ? <AdminGuides /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="admins" element={role === 'admin' ? <AdminAdmins /> : <Navigate to="/app/dashboard" replace />} />
-        <Route path="help" element={role === 'admin' ? <AdminHelp /> : <Navigate to="/app/dashboard" replace />} />
+        <Route path="help" element={<Help role={role} />} />
         <Route path="viva-questions" element={role === 'admin' ? <AdminVivaQuestions /> : <ApplicantVivaQuestions />} />
         <Route path="how-to-use" element={role === 'admin' ? <Navigate to="/app/dashboard" replace /> : <HowToUse />} />
         <Route path="about" element={<About role={role} />} />

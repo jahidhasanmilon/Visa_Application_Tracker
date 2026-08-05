@@ -26,6 +26,7 @@ export const APPLICANT_NAV = [
   { to: '/app/viva-questions', label: 'Viva Questions', icon: HelpCircle },
   { to: '/guides', label: 'Guides & Resources', icon: BookOpen },
   { to: '/app/how-to-use', label: 'How to Use', icon: Compass },
+  { to: '/app/help', label: 'Help', icon: LifeBuoy },
   { to: '/app/about', label: 'About', icon: Info },
   { to: '/app/profile', label: 'Profile', icon: UserCircle },
 ];
