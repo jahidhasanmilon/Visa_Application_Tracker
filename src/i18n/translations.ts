@@ -90,7 +90,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.createAccountInstead': 'Create an account',
 
     // Footer
-    'footer.text': 'This is an unofficial community app with no affiliation to the German Embassy — © {{year}} VisaTrack. All rights reserved.',
+    'footer.text': 'This is an unofficial app with no affiliation to the German Embassy — © {{year}} VisaTrack. All rights reserved.',
 
     // My Status (applicant dashboard)
     'status.title': 'My Status',
@@ -315,7 +315,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.createAccountInstead': 'একটা account তৈরি করুন',
 
     // Footer
-    'footer.text': 'এটি একটি অনানুষ্ঠানিক কমিউনিটি অ্যাপ, জার্মান দূতাবাসের সাথে কোনো সম্পর্ক নেই — © {{year}} VisaTrack। সর্বস্বত্ব সংরক্ষিত।',
+    'footer.text': 'এটি একটি অনানুষ্ঠানিক অ্যাপ, জার্মান দূতাবাসের সাথে কোনো সম্পর্ক নেই — © {{year}} VisaTrack। সর্বস্বত্ব সংরক্ষিত।',
 
     // My Status (applicant dashboard)
     'status.title': 'আমার স্ট্যাটাস',
