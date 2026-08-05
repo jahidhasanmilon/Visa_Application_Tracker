@@ -15,11 +15,22 @@ service cloud.firestore {
     }
 
     // Dynamic admin list. Doc id = lowercase email; content is just a
-    // marker. Only admins can read/manage this (exists() checks above
-    // don't require read permission on the path being checked, so this
-    // doesn't create a bootstrapping problem for isAdminEmail() itself).
+    // marker. isAdminEmail()'s exists() check bypasses this rule (that's
+    // how Firestore rules work — an in-rule exists()/get() never
+    // re-triggers the target path's own rules), so no bootstrapping issue
+    // there. But every signed-in user's OWN role resolution (useAuth.ts)
+    // does a plain client-side `getDoc`/`onSnapshot` on admins/{their own
+    // email} to find out whether they're an admin — that needs its own
+    // allowance, or every non-admin gets a permission-denied error and
+    // hangs on the loading screen forever, never learning they're "just"
+    // an applicant. `get` (single-doc reads) is opened to anyone reading
+    // their own email's doc; `list` (enumerating the whole collection,
+    // used only by the admin-only Admins management page) stays
+    // admin-only, so nobody can browse who else is an admin.
     match /admins/{email} {
-      allow read, write: if isAdminEmail();
+      allow get: if request.auth != null && request.auth.token.email == email;
+      allow list: if isAdminEmail();
+      allow write: if isAdminEmail();
     }
 
     // Self-service applicant records are keyed BY the owner's Firebase Auth

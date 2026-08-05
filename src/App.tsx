@@ -55,7 +55,8 @@ export default function App() {
   // (ApplicantDetailsModal) is dismissible and shown once the record exists.
   useEffect(() => {
     if (role === 'applicant' && user && myApplicant === null) {
-      createOwnApplicant(user.uid, user.email || '', user.displayName || '');
+      createOwnApplicant(user.uid, user.email || '', user.displayName || '')
+        .catch((err) => console.error('createOwnApplicant failed', err));
     }
   }, [role, user, myApplicant]);
 

@@ -22,10 +22,14 @@ export function subscribeApplicants(onData: (applicants: Applicant[]) => void): 
 // Applicant-portal view: a self-service applicant's record lives at
 // applicants/{uid} — a single doc, not a query, since the doc id IS their uid.
 export function subscribeMyApplicant(uid: string, onData: (applicant: Applicant | null) => void): () => void {
-  return onSnapshot(doc(db, APPLICANTS_COL, uid), (snap) => {
-    if (!snap.exists()) { onData(null); return; }
-    onData({ ...(snap.data() as Omit<Applicant, 'id'>), id: snap.id });
-  });
+  return onSnapshot(
+    doc(db, APPLICANTS_COL, uid),
+    (snap) => {
+      if (!snap.exists()) { onData(null); return; }
+      onData({ ...(snap.data() as Omit<Applicant, 'id'>), id: snap.id });
+    },
+    (err) => console.error('subscribeMyApplicant failed', err),
+  );
 }
 
 // Called once, right after sign-up (or first sign-in with no record yet), to
