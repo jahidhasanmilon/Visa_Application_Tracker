@@ -188,7 +188,7 @@ function RoadmapEditor({ applicant, template }: { applicant: EnrichedApplicant; 
                 color: step.done ? 'var(--success)' : 'var(--neutral)',
               }}
             >
-              {step.done ? 'Done' : 'Not yet'}
+              {step.done ? 'Done' : 'Pending'}
             </button>
             <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{step.label}</span>
             <button type="button" className="app-icon-btn" disabled={saving || i === 0} onClick={() => moveStep(i, -1)} aria-label="Move up">

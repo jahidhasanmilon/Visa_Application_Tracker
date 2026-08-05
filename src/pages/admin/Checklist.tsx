@@ -187,7 +187,7 @@ function ChecklistEditor({ applicant, template }: { applicant: EnrichedApplicant
                   color: item.done ? 'var(--success)' : 'var(--neutral)',
                 }}
               >
-                {item.done ? 'Done' : 'Not yet'}
+                {item.done ? 'Done' : 'Pending'}
               </button>
               <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500, textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--muted)' : 'var(--ink)' }}>
                 {item.label}
