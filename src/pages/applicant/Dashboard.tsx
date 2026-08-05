@@ -115,7 +115,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
 
   return (
     <div className="app-card app-card-pad">
-      <div className="app-card-head" style={{ alignItems: 'flex-start' }}>
+      <div className="app-card-head app-status-card-head" style={{ alignItems: 'flex-start' }}>
         <div>
           <div className="app-card-title">{a.name || 'Your application'}</div>
           {a.serialNo && <div className="app-mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>{a.serialNo}</div>}

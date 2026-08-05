@@ -623,4 +623,15 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .app-auth-form-side { padding: 26px 16px; }
   .app-stat-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
   .app-toolbar .app-input-wrap { min-width: 0; }
+
+  /* My Status card on small phones: countdown block goes full-width and
+     centered instead of an awkward fixed-width chip; roadmap gets fewer,
+     wider columns so step labels don't feel cramped. Scoped to this one
+     card (not the generic .app-card-head used elsewhere). */
+  .app-status-card-head { justify-content: center; }
+  .app-status-card-head > * { flex: 1 1 100%; }
+  .app-status-card-head > *:last-child { text-align: center; }
+  .app-roadmap-track { grid-template-columns: repeat(3, 1fr) !important; row-gap: 22px; }
+  .app-roadmap-circle { width: 30px; height: 30px; font-size: 12px; }
+  .app-roadmap-label { font-size: 11px; }
 }
