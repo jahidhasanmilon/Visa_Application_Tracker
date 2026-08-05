@@ -116,8 +116,6 @@ html, body { background: var(--bg); }
   pointer-events: none;
   transition: left 0.2s ease;
 }
-.app-shell:not(.collapsed) .app-footer { left: 248px; }
-.app-shell.collapsed .app-footer { left: 76px; }
 
 .app-sidebar {
   background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
@@ -554,6 +552,13 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 /* ---------- Collapsible sidebar (desktop/tablet) ---------- */
 @media (min-width: 881px) {
   button.app-sidebar-collapse-btn { display: inline-flex; }
+
+  /* Fixed footer's left offset needs to clear the sidebar — only relevant
+     once there IS a persistent sidebar (desktop/tablet); on mobile the
+     sidebar is an off-canvas overlay, so the footer stays full-width
+     there (see the max-width: 880px block below). */
+  .app-shell:not(.collapsed) .app-footer { left: 248px; }
+  .app-shell.collapsed .app-footer { left: 76px; }
 
   .app-shell.collapsed { grid-template-columns: 76px 1fr; }
 
