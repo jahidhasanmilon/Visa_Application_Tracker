@@ -75,16 +75,21 @@ export async function updateReminderStatus(id: string, reminderMailSent: Reminde
 }
 
 // Used by ApplicantDetailsModal ("Add your details" / "Edit my details") —
-// the only place name/serialNo/created/submitted get self-edited.
+// the only place name/serialNo/created/submitted/lastUpdated get
+// self-edited directly. `lastUpdated` here is whatever the user set in the
+// form — not silently forced to today — since it's what the 30-day
+// reminder countdown counts down from (see enrichApplicant/deriveStatus
+// logic in utils/dateHelpers.ts, and REMINDER_WINDOW_DAYS-based math).
 export interface MyDetails {
   name: string;
   serialNo: string;
   created: string;
   submitted: string;
+  lastUpdated: string;
 }
 
 export async function updateMyDetails(id: string, details: MyDetails): Promise<void> {
-  await updateDoc(doc(db, APPLICANTS_COL, id), { ...details, lastUpdated: todayStr() });
+  await updateDoc(doc(db, APPLICANTS_COL, id), { ...details });
 }
 
 // Whole-array replace — callers compute the new array (add/remove/toggle)

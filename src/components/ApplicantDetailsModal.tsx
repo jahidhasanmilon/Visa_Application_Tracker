@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { updateMyDetails } from '../services/applicantsService';
+import { todayStr } from '../utils/dateHelpers';
 import type { Applicant } from '../types';
 
 interface ApplicantDetailsModalProps {
@@ -17,20 +18,21 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
   const [serialNo, setSerialNo] = useState(applicant.serialNo);
   const [created, setCreated] = useState(applicant.created);
   const [submitted, setSubmitted] = useState(applicant.submitted);
+  const [lastUpdated, setLastUpdated] = useState(applicant.lastUpdated || todayStr());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   if (!open) return null;
 
   async function handleSave() {
-    if (!name.trim() || !created || !submitted) {
-      setError('Name, applied date, and submitted date are required.');
+    if (!name.trim() || !created || !submitted || !lastUpdated) {
+      setError('Name, applied date, submitted date, and last updated date are all required.');
       return;
     }
     setError('');
     setSaving(true);
     try {
-      await updateMyDetails(applicant.id, { name: name.trim(), serialNo: serialNo.trim(), created, submitted });
+      await updateMyDetails(applicant.id, { name: name.trim(), serialNo: serialNo.trim(), created, submitted, lastUpdated });
       onClose();
     } finally {
       setSaving(false);
@@ -63,6 +65,14 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
           <div className="app-field" style={{ flex: 1 }}>
             <label>Submitted date *</label>
             <input className="app-input" type="date" value={submitted} onChange={e => setSubmitted(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="app-field">
+          <label>Last updated *</label>
+          <input className="app-input" type="date" value={lastUpdated} onChange={e => setLastUpdated(e.target.value)} />
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
+            Your Application Reminder (30-Day) countdown counts down from this date. It also jumps to today automatically whenever you change the reminder status — set it here only if you're correcting it.
           </div>
         </div>
 
