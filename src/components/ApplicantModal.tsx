@@ -1,4 +1,4 @@
-import { REMINDER_OPTIONS } from '../constants/status';
+import { REMINDER_OPTIONS, REMINDER_LABELS } from '../constants/status';
 import type { ApplicantFormData, ReminderStatus } from '../types';
 
 interface ApplicantModalProps {
@@ -59,7 +59,7 @@ export default function ApplicantModal({
         <div className="app-field">
           <label>Application Reminder (30-Day)</label>
           <select className="app-select" value={form.reminderMailSent} onChange={e => setForm({ ...form, reminderMailSent: e.target.value as ReminderStatus })}>
-            {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{REMINDER_LABELS[r]}</option>)}
           </select>
         </div>
 

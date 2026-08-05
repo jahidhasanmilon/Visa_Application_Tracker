@@ -1,5 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react';
-import { getStatusMeta, REMINDER_META } from '../constants/status';
+import { getStatusMeta, REMINDER_META, REMINDER_LABELS } from '../constants/status';
 import { fmtDate } from '../utils/dateHelpers';
 import type { EnrichedApplicant } from '../types';
 
@@ -42,7 +42,7 @@ export default function ApplicantRow({
       <td className="app-mono" style={{ fontSize: 12.5 }}>{fmtDate(a.lastUpdated)}</td>
       <td>
         <span className="app-badge" style={{ background: reminderMeta.bg, color: reminderMeta.color, marginRight: 6 }}>
-          {a.effectiveReminderStatus}
+          {REMINDER_LABELS[a.effectiveReminderStatus]}
         </span>
         <span style={{ fontSize: 11.5, color: a.reminderDaysLeft > 0 ? 'var(--muted)' : 'var(--danger)' }}>
           {a.reminderDaysLeft > 0 ? `${a.reminderDaysLeft}d left` : a.reminderDaysLeft === 0 ? 'Due today' : `${Math.abs(a.reminderDaysLeft)}d overdue`}

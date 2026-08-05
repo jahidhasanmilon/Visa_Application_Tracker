@@ -47,3 +47,11 @@ export const REMINDER_META: Record<ReminderStatus, { color: string; bg: string }
   'Urgent':  { color: 'var(--danger)',  bg: 'var(--danger-soft)' },
   'Done':    { color: 'var(--success)', bg: 'var(--success-soft)' },
 };
+
+// Display-only relabeling — the stored/compared value stays 'Not yet'
+// everywhere in the data model; only what's shown on screen changes.
+export const REMINDER_LABELS: Record<ReminderStatus, string> = {
+  'Not yet': 'Pending',
+  'Urgent': 'Urgent',
+  'Done': 'Done',
+};

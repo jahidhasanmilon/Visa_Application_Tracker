@@ -5,7 +5,7 @@ import ApplicantDetailsModal from '../../components/ApplicantDetailsModal';
 import InfoTooltip from '../../components/InfoTooltip';
 import { updateReminderStatus, updateRoadmap } from '../../services/applicantsService';
 import { enrichApplicant, effectiveRoadmap, effectiveChecklist, fmtDate, todayStr } from '../../utils/dateHelpers';
-import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
+import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META, REMINDER_LABELS } from '../../constants/status';
 import { useRoadmapTemplate, useChecklistTemplate } from '../../hooks/useTemplates';
 import { useLanguage } from '../../i18n/LanguageContext';
 import type { Applicant, ChecklistItem, EnrichedApplicant, ReminderStatus } from '../../types';
@@ -210,7 +210,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
                 color: REMINDER_META[a.effectiveReminderStatus].color,
                 textTransform: 'none', fontSize: 10.5, padding: '2px 8px',
               }}>
-                {a.effectiveReminderStatus}
+                {REMINDER_LABELS[a.effectiveReminderStatus]}
               </span>
             )}
           </label>
@@ -220,7 +220,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
             disabled={savingReminder}
             onChange={e => handleReminderChange(e.target.value as ReminderStatus)}
           >
-            {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{REMINDER_LABELS[r]}</option>)}
           </select>
           <div style={{ fontSize: 11.5, color: a.reminderDaysLeft > 0 ? 'var(--muted)' : 'var(--danger)', marginTop: 6 }}>
             {a.reminderDaysLeft > 0
