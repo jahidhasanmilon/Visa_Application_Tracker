@@ -7,6 +7,7 @@ import { useChecklistTemplate } from '../../hooks/useTemplates';
 import { updateChecklist } from '../../services/applicantsService';
 import { saveChecklistTemplate } from '../../services/templatesService';
 import { ListDetailSkeleton } from '../../components/Skeleton';
+import { effectiveChecklist, isCustomizedList } from '../../utils/dateHelpers';
 import type { ChecklistItem, EnrichedApplicant } from '../../types';
 
 export default function AdminChecklist() {
@@ -22,14 +23,14 @@ export default function AdminChecklist() {
   });
 
   const selected = enriched.find(a => a.id === selectedId) || null;
-  const customizedCount = enriched.filter(a => a.checklist && a.checklist.length > 0).length;
+  const customizedCount = enriched.filter(a => isCustomizedList(a.checklist, template ?? [])).length;
 
   async function resetAllToDefault() {
     if (!confirm(`Reset all ${customizedCount} customized applicant(s) back to the shared default checklist? This removes their custom items.`)) return;
     setResettingAll(true);
     try {
       await Promise.all(
-        enriched.filter(a => a.checklist && a.checklist.length > 0).map(a => updateChecklist(a.id, []))
+        enriched.filter(a => isCustomizedList(a.checklist, template ?? [])).map(a => updateChecklist(a.id, []))
       );
     } finally {
       setResettingAll(false);
@@ -110,10 +111,11 @@ export default function AdminChecklist() {
 }
 
 function ChecklistEditor({ applicant, template }: { applicant: EnrichedApplicant; template: ChecklistItem[] }) {
-  const isCustomized = !!(applicant.checklist && applicant.checklist.length > 0);
-  const items = isCustomized
-    ? applicant.checklist!
-    : template.map(t => ({ id: crypto.randomUUID(), label: t.label, done: false }));
+  const isCustomized = isCustomizedList(applicant.checklist, template);
+  // Re-derived from the live template (keeping this applicant's own
+  // done/not-done state) until admin actually adds/removes/reorders an item
+  // here — only then does it become a genuine per-applicant customization.
+  const items = effectiveChecklist(applicant, template);
   const [newLabel, setNewLabel] = useState('');
   const [saving, setSaving] = useState(false);
 

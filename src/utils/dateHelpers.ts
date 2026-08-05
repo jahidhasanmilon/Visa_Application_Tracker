@@ -38,12 +38,38 @@ export function serialNumberValue(serialNo: string): number {
   return match ? parseInt(match[1], 10) : Number.MAX_SAFE_INTEGER;
 }
 
-// status is never stored — always derived from roadmap progress.
-// `roadmapTemplate` is the shared default; an applicant's own `roadmap`
-// array (if non-empty) takes precedence, same fallback rule used
-// everywhere else the roadmap is rendered.
+// Ticking a single box writes a FULL item-array snapshot into the
+// applicant's own record (see updateRoadmap/updateChecklist) — every item
+// copied straight from the template keeps the template's own id. So an
+// applicant's saved list is "genuinely customized" only if it contains an
+// item whose id isn't in the current template at all — that only happens
+// via the admin's "customize this one applicant" editor, which always
+// mints a fresh id. A plain progress snapshot (every id still traces back
+// to the template) is NOT a customization, just ticked/unticked state.
+export function isCustomizedList(stored: ChecklistItem[] | undefined, template: ChecklistItem[]): boolean {
+  if (!stored || stored.length === 0) return false;
+  const templateIds = new Set(template.map(t => t.id));
+  return stored.some(s => !templateIds.has(s.id));
+}
+
+// Genuinely customized applicants keep their own list untouched (that's the
+// point of customizing). Everyone else gets re-derived from the LIVE
+// template every time — so admin edits (new/removed/reordered/renamed
+// steps) show up immediately for anyone who has only ever ticked boxes —
+// while keeping each item's own done/not-done state where it still exists.
+function mergeWithTemplate(stored: ChecklistItem[] | undefined, template: ChecklistItem[]): ChecklistItem[] {
+  if (!stored || stored.length === 0) return template;
+  if (isCustomizedList(stored, template)) return stored;
+  const doneById = new Map(stored.map(s => [s.id, s.done]));
+  return template.map(t => ({ ...t, done: doneById.get(t.id) ?? false }));
+}
+
 export function effectiveRoadmap(a: Applicant, roadmapTemplate: ChecklistItem[]): ChecklistItem[] {
-  return a.roadmap && a.roadmap.length > 0 ? a.roadmap : roadmapTemplate;
+  return mergeWithTemplate(a.roadmap, roadmapTemplate);
+}
+
+export function effectiveChecklist(a: Applicant, checklistTemplate: ChecklistItem[]): ChecklistItem[] {
+  return mergeWithTemplate(a.checklist, checklistTemplate);
 }
 
 export function deriveStatus(a: Applicant, roadmapTemplate: ChecklistItem[]): string {

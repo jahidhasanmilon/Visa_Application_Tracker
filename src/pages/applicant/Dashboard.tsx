@@ -4,7 +4,7 @@ import PageHeader from '../../components/PageHeader';
 import ApplicantDetailsModal from '../../components/ApplicantDetailsModal';
 import InfoTooltip from '../../components/InfoTooltip';
 import { updateReminderStatus, updateRoadmap } from '../../services/applicantsService';
-import { enrichApplicant, fmtDate, todayStr } from '../../utils/dateHelpers';
+import { enrichApplicant, effectiveRoadmap, effectiveChecklist, fmtDate, todayStr } from '../../utils/dateHelpers';
 import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
 import { useRoadmapTemplate, useChecklistTemplate } from '../../hooks/useTemplates';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -83,13 +83,8 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
   const [savingReminder, setSavingReminder] = useState(false);
   const [savingRoadmap, setSavingRoadmap] = useState(false);
 
-  const roadmapItems = useMemo(() => (
-    a.roadmap && a.roadmap.length > 0 ? a.roadmap : roadmapTemplate
-  ), [a.roadmap, roadmapTemplate]);
-
-  const checklist = useMemo(() => (
-    a.checklist && a.checklist.length > 0 ? a.checklist : checklistTemplate
-  ), [a.checklist, checklistTemplate]);
+  const roadmapItems = useMemo(() => effectiveRoadmap(a, roadmapTemplate), [a, roadmapTemplate]);
+  const checklist = useMemo(() => effectiveChecklist(a, checklistTemplate), [a, checklistTemplate]);
 
   const totalDone = roadmapItems.filter(s => s.done).length + checklist.filter(i => i.done).length;
   const totalItems = roadmapItems.length + checklist.length;

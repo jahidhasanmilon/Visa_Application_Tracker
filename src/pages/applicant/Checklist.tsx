@@ -3,6 +3,7 @@ import { Check, Circle } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import { updateChecklist } from '../../services/applicantsService';
 import { useChecklistTemplate } from '../../hooks/useTemplates';
+import { effectiveChecklist } from '../../utils/dateHelpers';
 import { useLanguage } from '../../i18n/LanguageContext';
 import type { Applicant, ChecklistItem } from '../../types';
 
@@ -29,9 +30,7 @@ export default function ApplicantChecklist({ applicant }: ApplicantChecklistProp
 
 function ChecklistCard({ applicant, template }: { applicant: Applicant; template: ChecklistItem[] }) {
   const { t } = useLanguage();
-  const items = applicant.checklist && applicant.checklist.length > 0
-    ? applicant.checklist
-    : template;
+  const items = effectiveChecklist(applicant, template);
   const [saving, setSaving] = useState<string | null>(null);
 
   async function toggle(item: ChecklistItem) {

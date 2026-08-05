@@ -7,6 +7,7 @@ import { useRoadmapTemplate } from '../../hooks/useTemplates';
 import { updateRoadmap } from '../../services/applicantsService';
 import { saveRoadmapTemplate } from '../../services/templatesService';
 import { ListDetailSkeleton } from '../../components/Skeleton';
+import { effectiveRoadmap, isCustomizedList } from '../../utils/dateHelpers';
 import type { ChecklistItem, EnrichedApplicant } from '../../types';
 
 export default function AdminRoadmap() {
@@ -22,14 +23,14 @@ export default function AdminRoadmap() {
   });
 
   const selected = enriched.find(a => a.id === selectedId) || null;
-  const customizedCount = enriched.filter(a => a.roadmap && a.roadmap.length > 0).length;
+  const customizedCount = enriched.filter(a => isCustomizedList(a.roadmap, template ?? [])).length;
 
   async function resetAllToDefault() {
     if (!confirm(`Reset all ${customizedCount} customized applicant(s) back to the shared default roadmap? This removes their custom steps.`)) return;
     setResettingAll(true);
     try {
       await Promise.all(
-        enriched.filter(a => a.roadmap && a.roadmap.length > 0).map(a => updateRoadmap(a.id, []))
+        enriched.filter(a => isCustomizedList(a.roadmap, template ?? [])).map(a => updateRoadmap(a.id, []))
       );
     } finally {
       setResettingAll(false);
@@ -110,11 +111,11 @@ export default function AdminRoadmap() {
 }
 
 function RoadmapEditor({ applicant, template }: { applicant: EnrichedApplicant; template: ChecklistItem[] }) {
-  const steps = useMemo(() => (
-    applicant.roadmap && applicant.roadmap.length > 0
-      ? applicant.roadmap
-      : template.map(t => ({ id: crypto.randomUUID(), label: t.label, done: false }))
-  ), [applicant.roadmap, template]);
+  // Re-derived from the live template (keeping this applicant's own
+  // done/not-done state) until admin actually adds/removes/reorders a step
+  // here — only then does it become a genuine per-applicant customization
+  // (see isCustomizedList/effectiveRoadmap in utils/dateHelpers.ts).
+  const steps = useMemo(() => effectiveRoadmap(applicant, template), [applicant, template]);
 
   const [newLabel, setNewLabel] = useState('');
   const [saving, setSaving] = useState(false);
@@ -151,7 +152,7 @@ function RoadmapEditor({ applicant, template }: { applicant: EnrichedApplicant; 
     save(next);
   }
 
-  const isCustomized = !!(applicant.roadmap && applicant.roadmap.length > 0);
+  const isCustomized = isCustomizedList(applicant.roadmap, template);
 
   function resetToDefault() {
     if (!confirm(`Reset ${applicant.name}'s roadmap back to the shared default? This removes their custom steps.`)) return;
