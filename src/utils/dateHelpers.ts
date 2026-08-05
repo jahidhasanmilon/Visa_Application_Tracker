@@ -52,14 +52,40 @@ export function isCustomizedList(stored: ChecklistItem[] | undefined, template: 
   return stored.some(s => !templateIds.has(s.id));
 }
 
-// Genuinely customized applicants keep their own list untouched (that's the
-// point of customizing). Everyone else gets re-derived from the LIVE
-// template every time — so admin edits (new/removed/reordered/renamed
-// steps) show up immediately for anyone who has only ever ticked boxes —
-// while keeping each item's own done/not-done state where it still exists.
+// Genuinely customized applicants keep their own items, order and
+// done-state exactly as admin set them — but any brand-new step added to
+// the shared default afterwards still hasn't reached them, since it simply
+// isn't in their list yet. Insert it too, positioned to match where it
+// sits in the default (in practice new template items are always appended
+// at the end, so this almost always means "append at the end" here too),
+// so customizing one person's list doesn't cut them off from later
+// additions to the shared default.
+function insertNewTemplateItems(stored: ChecklistItem[], template: ChecklistItem[]): ChecklistItem[] {
+  const storedIds = new Set(stored.map(s => s.id));
+  const missing = template.filter(t => !storedIds.has(t.id));
+  if (missing.length === 0) return stored;
+
+  const templateIndexById = new Map(template.map((t, i) => [t.id, i]));
+  const result = [...stored];
+  for (const item of missing) {
+    const itemTemplateIndex = templateIndexById.get(item.id)!;
+    let insertAt = result.length;
+    for (let i = 0; i < result.length; i++) {
+      const ti = templateIndexById.get(result[i].id);
+      if (ti !== undefined && ti > itemTemplateIndex) { insertAt = i; break; }
+    }
+    result.splice(insertAt, 0, { ...item, done: false });
+  }
+  return result;
+}
+
+// Non-customized applicants get re-derived from the LIVE template every
+// time — so admin edits (new/removed/reordered/renamed steps) show up
+// immediately for anyone who has only ever ticked boxes — while keeping
+// each item's own done/not-done state where it still exists.
 function mergeWithTemplate(stored: ChecklistItem[] | undefined, template: ChecklistItem[]): ChecklistItem[] {
   if (!stored || stored.length === 0) return template;
-  if (isCustomizedList(stored, template)) return stored;
+  if (isCustomizedList(stored, template)) return insertNewTemplateItems(stored, template);
   const doneById = new Map(stored.map(s => [s.id, s.done]));
   return template.map(t => ({ ...t, done: doneById.get(t.id) ?? false }));
 }
