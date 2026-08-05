@@ -144,10 +144,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
 
       <ProgressBar pct={progressPct} />
 
-      <div
-        className="app-roadmap-track"
-        style={{ '--rm-cols': Math.max(1, Math.ceil(roadmapItems.length / 2)) } as React.CSSProperties}
-      >
+      <div className="app-roadmap-track">
         {roadmapItems.map((step, i) => (
           <div key={step.id} className="app-roadmap-step">
             <button

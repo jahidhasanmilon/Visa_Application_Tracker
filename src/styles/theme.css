@@ -323,7 +323,7 @@ button.app-sidebar-close { display: none; }
 @media (max-width: 880px) {
   .app-roadmap-track {
     display: grid;
-    grid-template-columns: repeat(var(--rm-cols, 5), 1fr);
+    grid-template-columns: repeat(5, 1fr);
     row-gap: 18px; column-gap: 6px;
   }
   .app-roadmap-step-btn { width: 100%; }
@@ -647,7 +647,7 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   /* My Status card on small phones: no override here — the countdown chip
      just wraps onto its own line via the base .app-card-head flex-wrap and
      lands at the left edge on its own, same as the very first version. */
-  .app-roadmap-track { grid-template-columns: repeat(3, 1fr) !important; row-gap: 22px; }
-  .app-roadmap-circle { width: 30px; height: 30px; font-size: 12px; }
-  .app-roadmap-label { font-size: 11px; }
+  .app-roadmap-track { grid-template-columns: repeat(5, 1fr) !important; row-gap: 22px; column-gap: 4px; }
+  .app-roadmap-circle { width: 24px; height: 24px; font-size: 10.5px; }
+  .app-roadmap-label { font-size: 9.5px; }
 }
