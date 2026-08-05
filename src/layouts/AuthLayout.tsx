@@ -14,12 +14,12 @@ export default function AuthLayout({ eyebrow, headline, sub, stats, children }: 
   return (
     <div className="app-root app-auth-screen">
       <div className="app-auth-art">
-        <div className="app-auth-brand" style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, position: 'relative', zIndex: 1 }}>
           <div className="app-logo-mark"><PlaneTakeoff size={18} /></div>
           <div className="app-logo-text">VisaTrack</div>
         </div>
 
-        <div className="app-auth-copy" style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
           <div className="app-role-pill" style={{ background: 'rgba(255,255,255,0.12)', color: '#fff', marginBottom: 14 }}>{eyebrow}</div>
           <div className="app-auth-headline">{headline}</div>
           <div className="app-auth-sub">{sub}</div>
@@ -36,6 +36,10 @@ export default function AuthLayout({ eyebrow, headline, sub, stats, children }: 
       </div>
 
       <div className="app-auth-form-side">
+        <div className="app-auth-mobile-brand">
+          <div className="app-logo-mark"><PlaneTakeoff size={16} /></div>
+          <div className="app-logo-text" style={{ color: 'var(--ink)' }}>VisaTrack</div>
+        </div>
         <div className="app-auth-theme-toggle">
           <ThemeToggle />
         </div>
