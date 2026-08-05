@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { subscribeHelp } from '../services/siteContentService';
+import { useLanguage } from '../i18n/LanguageContext';
 
 // The actual WhatsApp glyph (not a generic chat-bubble icon) — standard
 // outline used across open-source projects, rendered inline so it's
@@ -16,6 +17,7 @@ function WhatsAppIcon({ size }: { size: number }) {
 // mounted in both AppShell (signed in) and PublicLayout (signed out).
 // Renders nothing until admin has set a link via the Help editor.
 export default function WhatsAppFab() {
+  const { t } = useLanguage();
   const [link, setLink] = useState('');
 
   useEffect(() => subscribeHelp(h => setLink(h.whatsappLink)), []);
@@ -27,8 +29,8 @@ export default function WhatsAppFab() {
       href={link}
       target="_blank"
       rel="noreferrer"
-      title="Join the WhatsApp group"
-      aria-label="Join the WhatsApp group"
+      title={t('common.joinWhatsapp')}
+      aria-label={t('common.joinWhatsapp')}
       style={{
         position: 'fixed', bottom: 22, right: 22, zIndex: 40,
         width: 52, height: 52, borderRadius: '50%',

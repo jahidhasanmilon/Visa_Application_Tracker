@@ -4,10 +4,12 @@ import PageHeader from '../../components/PageHeader';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
 import { saveApplicantNavOrder } from '../../services/navOrderService';
 import { useApplicantNavOrder } from '../../hooks/useNavOrder';
-import { APPLICANT_NAV } from '../../constants/nav';
+import { APPLICANT_NAV, NAV_LABEL_KEYS } from '../../constants/nav';
 import { OWNER_EMAIL } from '../../constants/roles';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function AdminAdmins() {
+  const { t } = useLanguage();
   const [admins, setAdmins] = useState<string[] | null>(null);
   const [newEmail, setNewEmail] = useState('');
   const [adding, setAdding] = useState(false);
@@ -19,8 +21,8 @@ export default function AdminAdmins() {
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     const email = newEmail.trim().toLowerCase();
-    if (!email || !email.includes('@')) { setError('Enter a valid email address.'); return; }
-    if (email === OWNER_EMAIL || admins?.includes(email)) { setError('Already an admin.'); return; }
+    if (!email || !email.includes('@')) { setError(t('admin.errInvalidEmail')); return; }
+    if (email === OWNER_EMAIL || admins?.includes(email)) { setError(t('admin.errAlreadyAdmin')); return; }
     setError('');
     setAdding(true);
     try {
@@ -38,11 +40,11 @@ export default function AdminAdmins() {
 
   return (
     <>
-      <PageHeader title="Admins" subtitle="Who has full admin access to VisaTrack." />
+      <PageHeader title={t('admin.admins.title')} subtitle={t('admin.admins.subtitle')} />
       <div className="app-content">
         <div className="app-card app-card-pad">
           <div className="app-card-head">
-            <div className="app-card-title">Add an admin</div>
+            <div className="app-card-title">{t('admin.addAdmin')}</div>
           </div>
           <form onSubmit={handleAdd} style={{ display: 'flex', gap: 8 }}>
             <input
@@ -54,7 +56,7 @@ export default function AdminAdmins() {
               style={{ flex: 1 }}
             />
             <button className="app-btn app-btn-primary app-btn-sm" type="submit" disabled={adding}>
-              <Plus size={14} /> Add
+              <Plus size={14} /> {t('common.add')}
             </button>
           </form>
           {error && <div style={{ color: 'var(--danger)', fontSize: 12.5, marginTop: 8 }}>{error}</div>}
@@ -62,19 +64,19 @@ export default function AdminAdmins() {
 
         <div className="app-card app-card-pad">
           <div className="app-card-head">
-            <div className="app-card-title">Current admins</div>
+            <div className="app-card-title">{t('admin.currentAdmins')}</div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 10 }}>
               <ShieldCheck size={16} color="var(--violet)" />
               <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{OWNER_EMAIL}</span>
-              <span className="app-badge" style={{ background: 'var(--violet-soft)', color: 'var(--violet)' }}>Owner</span>
+              <span className="app-badge" style={{ background: 'var(--violet-soft)', color: 'var(--violet)' }}>{t('admin.owner')}</span>
             </div>
 
             {admins === null ? (
-              <div className="app-empty">Loading…</div>
+              <div className="app-empty">{t('common.loading')}</div>
             ) : admins.length === 0 ? (
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', padding: '4px 2px' }}>No other admins yet.</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', padding: '4px 2px' }}>{t('admin.noOtherAdmins')}</div>
             ) : (
               admins.map(email => (
                 <div key={email} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', border: '1px solid var(--border)', borderRadius: 10 }}>
@@ -82,8 +84,8 @@ export default function AdminAdmins() {
                   <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600 }}>{email}</span>
                   {confirmRemove === email ? (
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button className="app-btn app-btn-danger app-btn-sm" onClick={() => handleRemove(email)}>Confirm</button>
-                      <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setConfirmRemove(null)}>Cancel</button>
+                      <button className="app-btn app-btn-danger app-btn-sm" onClick={() => handleRemove(email)}>{t('common.confirm')}</button>
+                      <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setConfirmRemove(null)}>{t('common.cancel')}</button>
                     </div>
                   ) : (
                     <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setConfirmRemove(email)}>
@@ -103,6 +105,7 @@ export default function AdminAdmins() {
 }
 
 function ApplicantNavOrderCard() {
+  const { t } = useLanguage();
   const savedOrder = useApplicantNavOrder();
   const order = savedOrder && savedOrder.length > 0
     ? [...savedOrder, ...APPLICANT_NAV.map(i => i.to).filter(to => !savedOrder.includes(to))]
@@ -127,24 +130,25 @@ function ApplicantNavOrderCard() {
   return (
     <div className="app-card app-card-pad">
       <div className="app-card-head">
-        <div className="app-card-title">Applicant sidebar order</div>
+        <div className="app-card-title">{t('admin.navOrderTitle')}</div>
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: -8, marginBottom: 14 }}>
-        What applicants see first in their sidebar.
+        {t('admin.navOrderSubtitle')}
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {order.map((to, i) => {
           const item = byTo.get(to);
           if (!item) return null;
           const Icon = item.icon;
+          const label = t(NAV_LABEL_KEYS[to] ?? '') || item.label;
           return (
             <div key={to} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
               <Icon size={15} color="var(--muted-2)" />
-              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{item.label}</span>
-              <button type="button" className="app-icon-btn" disabled={saving || i === 0} onClick={() => move(i, -1)} aria-label="Move up">
+              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
+              <button type="button" className="app-icon-btn" disabled={saving || i === 0} onClick={() => move(i, -1)} aria-label={t('admin.moveUp')}>
                 <ArrowUp size={14} />
               </button>
-              <button type="button" className="app-icon-btn" disabled={saving || i === order.length - 1} onClick={() => move(i, 1)} aria-label="Move down">
+              <button type="button" className="app-icon-btn" disabled={saving || i === order.length - 1} onClick={() => move(i, 1)} aria-label={t('admin.moveDown')}>
                 <ArrowDown size={14} />
               </button>
             </div>

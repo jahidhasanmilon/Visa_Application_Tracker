@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import {
   signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, resetPassword, friendlyAuthError,
 } from '../../services/authService';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface AuthFormProps {
   title: string;
@@ -15,6 +16,7 @@ interface AuthFormProps {
 }
 
 export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true, guard }: AuthFormProps) {
+  const { t } = useLanguage();
   const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,7 +49,7 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
     try {
       if (mode === 'reset') {
         await resetPassword(email);
-        setNotice(`Password reset link sent to ${email}. Check your inbox.`);
+        setNotice(t('login.resetSent', { email }));
       } else {
         const cred = mode === 'signin'
           ? await signInWithEmail(email, password)
@@ -79,15 +81,15 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
   return (
     <div>
       <div className="app-page-title" style={{ marginBottom: 4 }}>
-        {mode === 'reset' ? 'Reset your password' : title}
+        {mode === 'reset' ? t('login.resetTitle') : title}
       </div>
       <div style={{ color: 'var(--muted)', fontSize: 13.5, marginBottom: 24 }}>
-        {mode === 'reset' ? "Enter your account's email and we'll send you a reset link." : subtitle}
+        {mode === 'reset' ? t('login.resetSub') : subtitle}
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="app-field">
-          <label>Email</label>
+          <label>{t('login.email')}</label>
           <div className="app-input-wrap">
             <Mail size={16} />
             <input type="email" required value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" />
@@ -95,14 +97,14 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
         </div>
         {mode !== 'reset' && (
           <div className="app-field">
-            <label>Password</label>
+            <label>{t('login.password')}</label>
             <div className="app-input-wrap">
               <Lock size={16} />
               <input type={showPassword ? 'text' : 'password'} required minLength={6} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" />
               <button
                 type="button"
                 onClick={() => setShowPassword(s => !s)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                 style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -111,7 +113,7 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
             {mode === 'signin' && (
               <div style={{ textAlign: 'right', marginTop: 6 }}>
                 <a href="#" onClick={(e) => { e.preventDefault(); switchMode('reset'); }} style={{ fontSize: 12.5, color: 'var(--muted)', textDecoration: 'none' }}>
-                  Forgot password?
+                  {t('login.forgotPassword')}
                 </a>
               </div>
             )}
@@ -122,31 +124,31 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
         {notice && <div style={{ color: 'var(--success)', fontSize: 13, marginBottom: 14 }}>{notice}</div>}
 
         <button className="app-btn app-btn-primary app-btn-block" type="submit" disabled={busy}>
-          {busy ? 'Please wait…' : mode === 'signin' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send reset link'}
+          {busy ? t('login.pleaseWait') : mode === 'signin' ? t('login.signIn') : mode === 'signup' ? t('login.signUp') : t('login.sendResetLink')}
         </button>
       </form>
 
       {mode === 'reset' ? (
         <div style={{ textAlign: 'center', marginTop: 18, fontSize: 13, color: 'var(--muted)' }}>
-          <a href="#" onClick={(e) => { e.preventDefault(); switchMode('signin'); }} style={{ color: 'var(--ink)', fontWeight: 600 }}>← Back to sign in</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); switchMode('signin'); }} style={{ color: 'var(--ink)', fontWeight: 600 }}>{t('login.backToSignIn')}</a>
         </div>
       ) : (
         <>
-          <div className="app-divider-text">or</div>
+          <div className="app-divider-text">{t('login.or')}</div>
 
           <button className="app-btn app-btn-ghost app-btn-block" onClick={handleGoogle} disabled={busy}>
-            Continue with Google
+            {t('login.google')}
           </button>
 
           {allowSignUp && (
             <div style={{ textAlign: 'center', marginTop: 18, fontSize: 13, color: 'var(--muted)' }}>
               {mode === 'signin' ? (
-                <>Don't have an account?{' '}
-                  <a href="#" onClick={(e) => { e.preventDefault(); switchMode('signup'); }} style={{ color: 'var(--ink)', fontWeight: 600 }}>Sign up</a>
+                <>{t('login.noAccount')}{' '}
+                  <a href="#" onClick={(e) => { e.preventDefault(); switchMode('signup'); }} style={{ color: 'var(--ink)', fontWeight: 600 }}>{t('login.signUpLink')}</a>
                 </>
               ) : (
-                <>Already have an account?{' '}
-                  <a href="#" onClick={(e) => { e.preventDefault(); switchMode('signin'); }} style={{ color: 'var(--ink)', fontWeight: 600 }}>Sign in</a>
+                <>{t('login.haveAccount')}{' '}
+                  <a href="#" onClick={(e) => { e.preventDefault(); switchMode('signin'); }} style={{ color: 'var(--ink)', fontWeight: 600 }}>{t('login.signIn')}</a>
                 </>
               )}
             </div>

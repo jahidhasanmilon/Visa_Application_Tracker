@@ -9,9 +9,11 @@ import { useRoadmapTemplate } from '../../hooks/useTemplates';
 import { todayStr } from '../../utils/dateHelpers';
 import { addApplicant, updateApplicant, deleteApplicant } from '../../services/applicantsService';
 import { EMPTY_FORM } from '../../data/seedData';
+import { useLanguage } from '../../i18n/LanguageContext';
 import type { Applicant, ApplicantFormData, StatusOption, EnrichedApplicant } from '../../types';
 
 export default function AdminApplications() {
+  const { t } = useLanguage();
   const { enriched, loading } = useApplicants();
   const roadmapTemplate = useRoadmapTemplate();
   const statusOptions = useMemo(() => statusOptionsFromRoadmap(roadmapTemplate || []), [roadmapTemplate]);
@@ -70,7 +72,7 @@ export default function AdminApplications() {
   if (loading) {
     return (
       <>
-        <PageHeader title="Applications" subtitle="Loading…" />
+        <PageHeader title={t('admin.applications.title')} subtitle={t('admin.applications.loading')} />
         <TableSkeleton />
       </>
     );
@@ -78,7 +80,7 @@ export default function AdminApplications() {
 
   return (
     <>
-      <PageHeader title="Applications" subtitle={`${enriched.length} applicant${enriched.length === 1 ? '' : 's'} on file.`} />
+      <PageHeader title={t('admin.applications.title')} subtitle={t('admin.applications.subtitle', { n: enriched.length, s: enriched.length === 1 ? '' : 's' })} />
       <div className="app-content">
         <div className="app-card app-card-pad">
           <Toolbar

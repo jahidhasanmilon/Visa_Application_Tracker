@@ -10,6 +10,7 @@ import type { AppRole } from '../constants/roles';
 import type { Applicant } from '../types';
 import { signOut, uploadProfilePhoto, updateDisplayName } from '../services/authService';
 import { displayNameFor } from '../utils/userDisplay';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface ProfileProps {
   user: User;
@@ -19,6 +20,7 @@ interface ProfileProps {
 }
 
 export default function Profile({ user, role, applicant, onUserUpdate }: ProfileProps) {
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -33,11 +35,11 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
     e.target.value = '';
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please choose an image file.');
+      setUploadError(t('profile.errImageFile'));
       return;
     }
     if (file.size > 3 * 1024 * 1024) {
-      setUploadError('Image must be under 3MB.');
+      setUploadError(t('profile.errImageSize'));
       return;
     }
     setUploadError('');
@@ -46,7 +48,7 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
       await uploadProfilePhoto(file);
       onUserUpdate();
     } catch {
-      setUploadError('Upload failed. Please try again.');
+      setUploadError(t('profile.errUploadFailed'));
     } finally {
       setUploading(false);
     }
@@ -61,7 +63,7 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
   async function saveName() {
     const trimmed = nameInput.trim();
     if (!trimmed) {
-      setNameError('Name cannot be empty.');
+      setNameError(t('profile.errNameEmpty'));
       return;
     }
     setSavingName(true);
@@ -71,7 +73,7 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
       onUserUpdate();
       setEditingName(false);
     } catch {
-      setNameError('Could not save name. Please try again.');
+      setNameError(t('profile.errNameSave'));
     } finally {
       setSavingName(false);
     }
@@ -79,7 +81,7 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
 
   return (
     <>
-      <PageHeader title="Profile" subtitle="Your account details." />
+      <PageHeader title={t('profile.title')} subtitle={t('profile.subtitle')} />
       <div className="app-content">
         <div className="app-card app-card-pad" style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
           <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -89,7 +91,7 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
               className="app-icon-btn"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              title="Change profile photo"
+              title={t('profile.changePhoto')}
               style={{
                 position: 'absolute', bottom: -2, right: -2, width: 24, height: 24, padding: 0,
                 borderRadius: '50%', background: 'var(--violet)', color: '#fff',
@@ -121,17 +123,17 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
                   autoFocus
                   style={{ maxWidth: 220, fontSize: 15, padding: '6px 10px' }}
                 />
-                <button type="button" className="app-icon-btn" onClick={saveName} disabled={savingName} title="Save" aria-label="Save name">
+                <button type="button" className="app-icon-btn" onClick={saveName} disabled={savingName} title={t('profile.saveName')} aria-label={t('profile.saveName')}>
                   {savingName ? <Loader2 size={15} className="app-spin" /> : <Check size={15} />}
                 </button>
-                <button type="button" className="app-icon-btn" onClick={() => setEditingName(false)} disabled={savingName} title="Cancel" aria-label="Cancel">
+                <button type="button" className="app-icon-btn" onClick={() => setEditingName(false)} disabled={savingName} title={t('profile.cancelEdit')} aria-label={t('profile.cancelEdit')}>
                   <X size={15} />
                 </button>
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div className="app-brand-font" style={{ fontWeight: 700, fontSize: 18 }}>{displayNameFor(user)}</div>
-                <button type="button" className="app-icon-btn" onClick={startEditName} title="Edit name" aria-label="Edit name">
+                <button type="button" className="app-icon-btn" onClick={startEditName} title={t('profile.editName')} aria-label={t('profile.editName')}>
                   <Pencil size={13} />
                 </button>
               </div>
@@ -144,14 +146,14 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
             </div>
             <div className="app-role-pill" style={{ marginTop: 10 }}>
               {role === 'admin' ? <ShieldCheck size={12} /> : <UserRound size={12} />}
-              {role === 'admin' ? 'Admin' : 'Applicant'}
+              {role === 'admin' ? t('profile.admin') : t('profile.applicant')}
             </div>
             {uploadError && (
               <div style={{ color: 'var(--danger)', fontSize: 12, marginTop: 8 }}>{uploadError}</div>
             )}
           </div>
           <button className="app-btn app-btn-ghost" onClick={() => signOut()}>
-            <LogOut size={15} /> Sign out
+            <LogOut size={15} /> {t('profile.signOut')}
           </button>
         </div>
 
@@ -162,38 +164,38 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
 }
 
 function AdminSummary() {
+  const { t } = useLanguage();
   const { stats, loading } = useApplicants();
   if (loading) return null;
   return (
     <div className="app-card app-card-pad">
       <div className="app-card-head">
-        <div className="app-card-title">At a glance</div>
+        <div className="app-card-title">{t('profile.atAGlance')}</div>
       </div>
       <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
-        <SummaryStat label="Applicants managed" value={stats.total} />
-        <SummaryStat label="Roadmap complete" value={stats.approved} />
-        <SummaryStat label="Overdue" value={stats.overdue} />
+        <SummaryStat label={t('profile.applicantsManaged')} value={stats.total} />
+        <SummaryStat label={t('profile.roadmapComplete')} value={stats.approved} />
+        <SummaryStat label={t('profile.overdue')} value={stats.overdue} />
       </div>
     </div>
   );
 }
 
 function ApplicantSummary({ email, applicant }: { email: string | null; applicant?: Applicant | null }) {
+  const { t } = useLanguage();
   const [detailsOpen, setDetailsOpen] = useState(false);
   return (
     <div className="app-card app-card-pad">
       <div className="app-card-head">
-        <div className="app-card-title">How this works</div>
+        <div className="app-card-title">{t('profile.howThisWorks')}</div>
         {applicant && (
           <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}>
-            <Pencil size={14} /> Edit my details
+            <Pencil size={14} /> {t('status.editDetails')}
           </button>
         )}
       </div>
       <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.7, margin: 0 }}>
-        This is your own tracking record, tied to <strong style={{ color: 'var(--ink)' }}>{email}</strong>.
-        You control it — toggle your roadmap/checklist to update your status, and use "Edit my details" to keep
-        your name, applied date, and submitted date current.
+        {t('profile.howItWorksBody', { email: email ?? '' })}
       </p>
       {applicant && (
         <ApplicantDetailsModal open={detailsOpen} applicant={applicant} onClose={() => setDetailsOpen(false)} />

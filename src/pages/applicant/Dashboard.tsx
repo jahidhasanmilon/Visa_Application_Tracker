@@ -7,6 +7,7 @@ import { updateReminderStatus, updateRoadmap } from '../../services/applicantsSe
 import { enrichApplicant, fmtDate, todayStr } from '../../utils/dateHelpers';
 import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
 import { useRoadmapTemplate, useChecklistTemplate } from '../../hooks/useTemplates';
+import { useLanguage } from '../../i18n/LanguageContext';
 import type { Applicant, ChecklistItem, EnrichedApplicant, ReminderStatus } from '../../types';
 
 const DISMISS_KEY_PREFIX = 'visa-tracker-details-prompt-dismissed-';
@@ -20,6 +21,7 @@ interface ApplicantDashboardProps {
 }
 
 export default function ApplicantDashboard({ applicant }: ApplicantDashboardProps) {
+  const { t } = useLanguage();
   const roadmapTemplate = useRoadmapTemplate();
   const checklistTemplate = useChecklistTemplate();
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -42,17 +44,17 @@ export default function ApplicantDashboard({ applicant }: ApplicantDashboardProp
   return (
     <>
       <PageHeader
-        title="My Status"
-        subtitle="Track your own progress — you're in control of this record."
+        title={t('status.title')}
+        subtitle={t('status.subtitle')}
         actions={
           <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}>
-            <Pencil size={14} /> <span className="app-btn-label-responsive">Edit my details</span>
+            <Pencil size={14} /> <span className="app-btn-label-responsive">{t('status.editDetails')}</span>
           </button>
         }
       />
       <div className="app-content">
         {enriched === null || checklistTemplate === null || roadmapTemplate === null ? (
-          <div className="app-empty">Loading…</div>
+          <div className="app-empty">{t('common.loading')}</div>
         ) : (
           <ApplicationCard a={enriched} checklistTemplate={checklistTemplate} roadmapTemplate={roadmapTemplate} />
         )}
@@ -76,6 +78,7 @@ interface ApplicationCardProps {
 }
 
 function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationCardProps) {
+  const { t } = useLanguage();
   const meta = getStatusMeta(a.status);
   const [savingReminder, setSavingReminder] = useState(false);
   const [savingRoadmap, setSavingRoadmap] = useState(false);
@@ -117,11 +120,11 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
     <div className="app-card app-card-pad">
       <div className="app-card-head app-status-card-head" style={{ alignItems: 'flex-start' }}>
         <div>
-          <div className="app-card-title">{a.name || 'Your application'}</div>
+          <div className="app-card-title">{a.name || t('status.yourApplication')}</div>
           {a.serialNo && <div className="app-mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>{a.serialNo}</div>}
           <span className="app-badge" style={{ background: meta.bg, color: meta.color, fontSize: 13, padding: '6px 14px', marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <meta.icon size={14} /> {a.status}
-            <InfoTooltip text="Automatic — this matches whichever roadmap step you've completed furthest, not something you set directly." />
+            <InfoTooltip text={t('status.statusTooltip')} />
           </span>
         </div>
 
@@ -133,9 +136,9 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
             {Math.abs(a.reminderDaysLeft)}
           </div>
           <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 3 }}>
-            {a.reminderDaysLeft > 0 ? 'days left' : a.reminderDaysLeft === 0 ? 'due today' : 'days overdue'}
+            {a.reminderDaysLeft > 0 ? t('status.daysLeft') : a.reminderDaysLeft === 0 ? t('status.dueToday') : t('status.daysOverdue')}
           </div>
-          <div style={{ fontSize: 9.5, opacity: 0.8, marginTop: 2 }}>Reminder (30-Day)</div>
+          <div style={{ fontSize: 9.5, opacity: 0.8, marginTop: 2 }}>{t('status.reminderTitle')}</div>
         </div>
       </div>
 
@@ -152,7 +155,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
               className="app-roadmap-step-btn"
               onClick={() => toggleStep(step)}
               disabled={savingRoadmap}
-              title={step.done ? 'Mark as not yet' : 'Mark as done'}
+              title={step.done ? t('status.markNotYet') : t('status.markDone')}
             >
               <div
                 className="app-roadmap-circle"
@@ -178,29 +181,29 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-        <Field label="Applied on" value={fmtDate(a.created)} />
-        <Field label="Submitted on" value={fmtDate(a.submitted)} />
+        <Field label={t('status.appliedOn')} value={fmtDate(a.created)} />
+        <Field label={t('status.submittedOn')} value={fmtDate(a.submitted)} />
         <Field
-          label="Waiting"
-          value={a.waiting === null ? '—' : `${a.waiting} days`}
+          label={t('status.waiting')}
+          value={a.waiting === null ? '—' : `${a.waiting} ${t('status.daysSuffix')}`}
         />
         <Field
-          label={a.remaining === null ? 'Estimated remaining' : a.remaining > 0 ? 'Estimated remaining' : 'Status'}
-          value={a.remaining === null ? 'Not submitted yet' : a.remaining > 0 ? `${a.remaining} days (est.)` : `${Math.abs(a.remaining)}d past target`}
+          label={a.remaining === null ? t('status.estimatedRemaining') : a.remaining > 0 ? t('status.estimatedRemaining') : t('status.statusLabel')}
+          value={a.remaining === null ? t('status.notSubmittedYet') : a.remaining > 0 ? t('status.remainingEstDays', { n: a.remaining }) : t('status.pastTarget', { n: Math.abs(a.remaining) })}
           color={a.urg.color}
-          tooltip="A rough estimate based on a 365-day target window, not a guarantee from the embassy."
+          tooltip={t('status.remainingTooltip')}
         />
         <Field
-          label="Last updated"
+          label={t('status.lastUpdated')}
           value={fmtDate(a.lastUpdated)}
-          tooltip="Counts down from this date — jumps to today automatically when you change the reminder status."
+          tooltip={t('status.lastUpdatedTooltip')}
         />
       </div>
 
       <div style={{ paddingTop: 14, marginTop: 14, borderTop: '1px solid var(--border)' }}>
         <div className="app-field" style={{ margin: 0, maxWidth: 240 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            Application Reminder (30-Day)
+            {t('status.reminderFullTitle')}
             {a.effectiveReminderStatus !== a.reminderMailSent && (
               <span className="app-badge" style={{
                 background: REMINDER_META[a.effectiveReminderStatus].bg,
@@ -221,10 +224,10 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
           </select>
           <div style={{ fontSize: 11.5, color: a.reminderDaysLeft > 0 ? 'var(--muted)' : 'var(--danger)', marginTop: 6 }}>
             {a.reminderDaysLeft > 0
-              ? `${a.reminderDaysLeft} days left until you should expect an embassy email`
+              ? t('status.daysLeftUntilEmbassy', { n: a.reminderDaysLeft })
               : a.reminderDaysLeft === 0
-                ? 'An embassy email is expected today'
-                : `${Math.abs(a.reminderDaysLeft)} days past when an embassy email was expected`}
+                ? t('status.embassyEmailToday')
+                : t('status.daysPastEmbassy', { n: Math.abs(a.reminderDaysLeft) })}
           </div>
         </div>
       </div>
@@ -233,10 +236,11 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
 }
 
 function ProgressBar({ pct }: { pct: number }) {
+  const { t } = useLanguage();
   return (
     <div style={{ marginTop: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>
-        <span>Overall progress</span>
+        <span>{t('status.overallProgress')}</span>
         <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{pct}%</span>
       </div>
       <div style={{ height: 8, borderRadius: 999, background: 'var(--neutral-soft)', overflow: 'hidden' }}>

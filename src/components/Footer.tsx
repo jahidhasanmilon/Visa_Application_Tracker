@@ -1,7 +1,10 @@
+import { useLanguage } from '../i18n/LanguageContext';
+
 export default function Footer() {
+  const { t } = useLanguage();
   return (
     <div className="app-footer">
-      This is an unofficial community app with no affiliation to the German Embassy — © {new Date().getFullYear()} VisaTrack. All rights reserved.
+      {t('footer.text', { year: new Date().getFullYear() })}
     </div>
   );
 }

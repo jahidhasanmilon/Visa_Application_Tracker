@@ -4,6 +4,7 @@ import PageHeader from '../components/PageHeader';
 import { subscribeHelp, saveHelp } from '../services/siteContentService';
 import type { AppRole } from '../constants/roles';
 import type { HelpInfo } from '../types';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const EMPTY: HelpInfo = { whatsappLink: '', email: '', notes: '' };
 
@@ -12,6 +13,7 @@ interface HelpProps {
 }
 
 export default function Help({ role }: HelpProps) {
+  const { t } = useLanguage();
   const [help, setHelp] = useState<HelpInfo>(EMPTY);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<HelpInfo>(EMPTY);
@@ -37,33 +39,33 @@ export default function Help({ role }: HelpProps) {
   return (
     <>
       <PageHeader
-        title="Help"
-        subtitle="How to reach the community and get support."
+        title={t('help.title')}
+        subtitle={t('help.subtitle')}
         actions={role === 'admin' && !editing ? (
-          <button className="app-btn app-btn-ghost app-btn-sm" onClick={startEdit}><Pencil size={14} /> Edit</button>
+          <button className="app-btn app-btn-ghost app-btn-sm" onClick={startEdit}><Pencil size={14} /> {t('common.edit')}</button>
         ) : undefined}
       />
       <div className="app-content">
         {editing ? (
           <div className="app-card app-card-pad">
             <div className="app-field">
-              <label>WhatsApp group link</label>
+              <label>{t('help.whatsappLinkLabel')}</label>
               <input className="app-input" value={draft.whatsappLink} onChange={e => setDraft({ ...draft, whatsappLink: e.target.value })} placeholder="https://chat.whatsapp.com/..." />
               <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
-                The floating WhatsApp button only appears once this is set.
+                {t('help.whatsappLinkHint')}
               </div>
             </div>
             <div className="app-field">
-              <label>Support email</label>
+              <label>{t('help.supportEmailLabel')}</label>
               <input className="app-input" type="email" value={draft.email} onChange={e => setDraft({ ...draft, email: e.target.value })} placeholder="help@example.com" />
             </div>
             <div className="app-field">
-              <label>Notes</label>
-              <textarea className="app-textarea" value={draft.notes} onChange={e => setDraft({ ...draft, notes: e.target.value })} placeholder="Anything else applicants should know about getting help." style={{ minHeight: 120 }} />
+              <label>{t('help.notes')}</label>
+              <textarea className="app-textarea" value={draft.notes} onChange={e => setDraft({ ...draft, notes: e.target.value })} placeholder={t('help.notesPlaceholder')} style={{ minHeight: 120 }} />
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</button>
-              <button className="app-btn app-btn-primary app-btn-sm" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
+              <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditing(false)} disabled={saving}>{t('common.cancel')}</button>
+              <button className="app-btn app-btn-primary app-btn-sm" onClick={save} disabled={saving}>{saving ? t('common.saving') : t('common.save')}</button>
             </div>
           </div>
         ) : (
@@ -74,8 +76,8 @@ export default function Help({ role }: HelpProps) {
                   <MessageCircle size={18} />
                 </div>
                 <div>
-                  <div className="app-card-title">Join the WhatsApp group</div>
-                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>Chat with the community directly</div>
+                  <div className="app-card-title">{t('help.joinWhatsapp')}</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t('help.chatDirectly')}</div>
                 </div>
               </a>
             )}
@@ -86,19 +88,19 @@ export default function Help({ role }: HelpProps) {
                 </div>
                 <div>
                   <div className="app-card-title">{help.email}</div>
-                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>Email for support</div>
+                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t('help.emailForSupport')}</div>
                 </div>
               </a>
             )}
             {help.notes && (
               <div className="app-card app-card-pad">
-                <div className="app-card-title" style={{ marginBottom: 8 }}>Notes</div>
+                <div className="app-card-title" style={{ marginBottom: 8 }}>{t('help.notes')}</div>
                 <div style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>{help.notes}</div>
               </div>
             )}
             {!help.whatsappLink && !help.email && !help.notes && (
               <div className="app-card app-card-pad">
-                <div className="app-empty">{role === 'admin' ? 'Nothing set yet — click Edit to add a WhatsApp link, email, or notes.' : 'No contact info published yet.'}</div>
+                <div className="app-empty">{role === 'admin' ? t('help.emptyAdmin') : t('help.emptyApplicant')}</div>
               </div>
             )}
           </div>

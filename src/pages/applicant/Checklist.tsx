@@ -3,6 +3,7 @@ import { Check, Circle } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import { updateChecklist } from '../../services/applicantsService';
 import { useChecklistTemplate } from '../../hooks/useTemplates';
+import { useLanguage } from '../../i18n/LanguageContext';
 import type { Applicant, ChecklistItem } from '../../types';
 
 interface ApplicantChecklistProps {
@@ -10,13 +11,14 @@ interface ApplicantChecklistProps {
 }
 
 export default function ApplicantChecklist({ applicant }: ApplicantChecklistProps) {
+  const { t } = useLanguage();
   const template = useChecklistTemplate();
   return (
     <>
-      <PageHeader title="Checklist" subtitle="Your own to-do list — check things off as you complete them." />
+      <PageHeader title={t('checklist.title')} subtitle={t('checklist.subtitle')} />
       <div className="app-content">
         {template === null ? (
-          <div className="app-empty">Loading…</div>
+          <div className="app-empty">{t('common.loading')}</div>
         ) : (
           <ChecklistCard applicant={applicant} template={template} />
         )}
@@ -26,6 +28,7 @@ export default function ApplicantChecklist({ applicant }: ApplicantChecklistProp
 }
 
 function ChecklistCard({ applicant, template }: { applicant: Applicant; template: ChecklistItem[] }) {
+  const { t } = useLanguage();
   const items = applicant.checklist && applicant.checklist.length > 0
     ? applicant.checklist
     : template;
@@ -51,7 +54,7 @@ function ChecklistCard({ applicant, template }: { applicant: Applicant; template
       </div>
 
       {items.length === 0 ? (
-        <div className="app-empty">No checklist items yet.</div>
+        <div className="app-empty">{t('checklist.empty')}</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {items.map(item => (
@@ -81,7 +84,7 @@ function ChecklistCard({ applicant, template }: { applicant: Applicant; template
                 background: item.done ? 'var(--success-soft)' : 'var(--neutral-soft)',
                 color: item.done ? 'var(--success)' : 'var(--neutral)',
               }}>
-                {item.done ? 'Done' : 'Not yet'}
+                {item.done ? t('checklist.done') : t('checklist.notYet')}
               </span>
             </button>
           ))}

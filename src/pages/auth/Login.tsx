@@ -1,23 +1,25 @@
 import AuthLayout from '../../layouts/AuthLayout';
 import AuthForm from './AuthForm';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 // One login screen for everyone — no admin/applicant portal choice. Role is
 // resolved after sign-in (see useAuth.ts) from whether the signed-in email
 // is in the admins collection, so an admin lands on the admin dashboard and
 // everyone else lands on their own applicant dashboard automatically.
 export default function Login() {
+  const { t } = useLanguage();
   return (
     <AuthLayout
-      eyebrow="Welcome"
-      headline="Every visa application, tracked to the day it's decided."
-      sub="Sign in to see exactly where your application stands, day by day."
+      eyebrow={t('login.welcome')}
+      headline={t('login.headline')}
+      sub={t('login.sub')}
       stats={[
-        { value: 'Live', label: 'Status sync' },
-        { value: '0', label: 'Spreadsheets needed' },
-        { value: '1', label: 'Account, everything' },
+        { value: t('login.statLive'), label: t('login.statLiveLabel') },
+        { value: t('login.statZero'), label: t('login.statZeroLabel') },
+        { value: t('login.statOne'), label: t('login.statOneLabel') },
       ]}
     >
-      <AuthForm title="Sign in" subtitle="Use your email to sign in or create an account." />
+      <AuthForm title={t('login.title')} subtitle={t('login.subtitle')} />
     </AuthLayout>
   );
 }

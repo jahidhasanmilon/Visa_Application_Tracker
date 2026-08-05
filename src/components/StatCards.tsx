@@ -1,4 +1,5 @@
 import { Users, AlarmClock, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { useLanguage } from '../i18n/LanguageContext';
 import type { StatCounts } from '../types';
 
 interface StatCardsProps {
@@ -6,11 +7,12 @@ interface StatCardsProps {
 }
 
 export default function StatCards({ stats }: StatCardsProps) {
+  const { t } = useLanguage();
   const cards = [
-    { label: 'Total applicants', value: stats.total, icon: Users, color: 'var(--violet)', bg: 'var(--violet-soft)' },
-    { label: 'Due within 30 days', value: stats.urgent, icon: AlarmClock, color: 'var(--warning-ink)', bg: 'var(--warning-soft)' },
-    { label: 'Overdue', value: stats.overdue, icon: AlertTriangle, color: 'var(--danger)', bg: 'var(--danger-soft)' },
-    { label: 'Roadmap complete', value: stats.approved, icon: CheckCircle2, color: 'var(--success)', bg: 'var(--success-soft)' },
+    { label: t('admin.totalApplicants'), value: stats.total, icon: Users, color: 'var(--violet)', bg: 'var(--violet-soft)' },
+    { label: t('admin.dueWithin30'), value: stats.urgent, icon: AlarmClock, color: 'var(--warning-ink)', bg: 'var(--warning-soft)' },
+    { label: t('admin.overdue'), value: stats.overdue, icon: AlertTriangle, color: 'var(--danger)', bg: 'var(--danger-soft)' },
+    { label: t('admin.roadmapComplete'), value: stats.approved, icon: CheckCircle2, color: 'var(--success)', bg: 'var(--success-soft)' },
   ];
 
   return (

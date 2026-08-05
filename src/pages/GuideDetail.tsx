@@ -3,9 +3,11 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, ExternalLink } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { subscribeGuideBySlug } from '../services/guidesService';
+import { useLanguage } from '../i18n/LanguageContext';
 import type { Guide } from '../types';
 
 export default function GuideDetail() {
+  const { t } = useLanguage();
   const { slug = '' } = useParams<{ slug: string }>();
   const { pathname } = useLocation();
   const [guide, setGuide] = useState<Guide | null | undefined>(undefined);
@@ -24,15 +26,15 @@ export default function GuideDetail() {
   const guidesListPath = pathname.startsWith('/app/') ? '/app/guides' : '/guides';
   const backLink = (
     <Link to={guidesListPath} className="app-card-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-      <ArrowLeft size={14} /> All resources
+      <ArrowLeft size={14} /> {t('guides.backToGuides')}
     </Link>
   );
 
   if (guide === undefined) {
     return (
       <>
-        <PageHeader title="Guides & Resources" actions={backLink} />
-        <div className="app-content"><div className="app-empty">Loading…</div></div>
+        <PageHeader title={t('nav.guides')} actions={backLink} />
+        <div className="app-content"><div className="app-empty">{t('common.loading')}</div></div>
       </>
     );
   }
@@ -40,10 +42,10 @@ export default function GuideDetail() {
   if (guide === null) {
     return (
       <>
-        <PageHeader title="Guides & Resources" actions={backLink} />
+        <PageHeader title={t('nav.guides')} actions={backLink} />
         <div className="app-content">
           <div className="app-card app-card-pad">
-            <div className="app-empty">This resource doesn't exist (or was removed).</div>
+            <div className="app-empty">{t('guides.notFound')}</div>
           </div>
         </div>
       </>
@@ -70,7 +72,7 @@ export default function GuideDetail() {
                   <FileText size={16} /> {a.name}
                 </div>
                 <a href={a.url} target="_blank" rel="noreferrer" className="app-card-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                  Open in new tab <ExternalLink size={13} />
+                  {t('guides.openInNewTab')} <ExternalLink size={13} />
                 </a>
               </div>
               {isPdf ? (
@@ -85,7 +87,7 @@ export default function GuideDetail() {
                 />
               ) : (
                 <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
-                  This file type can't be previewed here — use "Open in new tab" above.
+                  {t('guides.cannotPreview')}
                 </div>
               )}
             </div>

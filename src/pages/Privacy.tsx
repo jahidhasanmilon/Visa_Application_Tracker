@@ -3,6 +3,7 @@ import { Pencil } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { subscribePrivacy, savePrivacy } from '../services/siteContentService';
 import { useAuth } from '../hooks/useAuth';
+import { useLanguage } from '../i18n/LanguageContext';
 
 const FALLBACK_PRIVACY = 'Content coming soon.';
 
@@ -10,6 +11,7 @@ const FALLBACK_PRIVACY = 'Content coming soon.';
 // admin status via useAuth() instead of taking a role prop, since it's
 // mounted from the shared publicRoutes block in App.tsx.
 export default function Privacy() {
+  const { t } = useLanguage();
   const { role } = useAuth();
   const [body, setBody] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -36,9 +38,10 @@ export default function Privacy() {
   return (
     <>
       <PageHeader
-        title="Privacy & Terms"
+        title={t('privacy.title')}
+        subtitle={t('privacy.subtitle')}
         actions={role === 'admin' && !editing ? (
-          <button className="app-btn app-btn-ghost app-btn-sm" onClick={startEdit}><Pencil size={14} /> Edit</button>
+          <button className="app-btn app-btn-ghost app-btn-sm" onClick={startEdit}><Pencil size={14} /> {t('common.edit')}</button>
         ) : undefined}
       />
       <div className="app-content">
@@ -47,8 +50,8 @@ export default function Privacy() {
             <>
               <textarea className="app-textarea" value={draft} onChange={e => setDraft(e.target.value)} style={{ minHeight: 260 }} placeholder="Privacy policy and terms of use…" />
               <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</button>
-                <button className="app-btn app-btn-primary app-btn-sm" onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save'}</button>
+                <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditing(false)} disabled={saving}>{t('common.cancel')}</button>
+                <button className="app-btn app-btn-primary app-btn-sm" onClick={save} disabled={saving}>{saving ? t('common.saving') : t('common.save')}</button>
               </div>
             </>
           ) : (

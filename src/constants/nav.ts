@@ -30,3 +30,22 @@ export const APPLICANT_NAV = [
   { to: '/app/about', label: 'About', icon: Info },
   { to: '/app/profile', label: 'Profile', icon: UserCircle },
 ];
+
+// Maps each nav item's route to its i18n key, since ADMIN_NAV/APPLICANT_NAV
+// labels above are used as-is elsewhere (e.g. Admins reorder page).
+export const NAV_LABEL_KEYS: Record<string, string> = {
+  '/app/dashboard': 'nav.dashboard',
+  '/app/applications': 'nav.applications',
+  '/app/tracker': 'nav.tracker',
+  '/app/checklist': 'nav.checklist',
+  '/app/roadmap': 'nav.roadmap',
+  '/app/viva-questions': 'nav.vivaQuestions',
+  '/app/reminder-email': 'nav.reminderEmail',
+  '/app/analytics': 'nav.analytics',
+  '/app/guides': 'nav.guides',
+  '/app/help': 'nav.help',
+  '/app/about': 'nav.about',
+  '/app/admins': 'nav.admins',
+  '/app/profile': 'nav.profile',
+  '/app/how-to-use': 'nav.howToUse',
+};

@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { BookOpen, ChevronRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { subscribeGuides } from '../services/guidesService';
+import { useLanguage } from '../i18n/LanguageContext';
 import type { Guide } from '../types';
 
-const UNCATEGORIZED = 'General';
-
 export default function Guides() {
+  const { t } = useLanguage();
+  const UNCATEGORIZED = t('guides.uncategorized');
   const [guides, setGuides] = useState<Guide[] | null>(null);
 
   useEffect(() => {
@@ -29,15 +30,15 @@ export default function Guides() {
   return (
     <>
       <PageHeader
-        title="Guides & Resources"
-        subtitle="Everything the community has put together about the Germany Opportunity Card process."
+        title={t('nav.guides')}
+        subtitle={t('guides.subtitle')}
       />
       <div className="app-content">
         {guides === null ? (
-          <div className="app-empty">Loading…</div>
+          <div className="app-empty">{t('common.loading')}</div>
         ) : guides.length === 0 ? (
           <div className="app-card app-card-pad">
-            <div className="app-empty">No resources published yet — check back soon.</div>
+            <div className="app-empty">{t('guides.empty')}</div>
           </div>
         ) : (
           grouped.map(([category, items]) => (
