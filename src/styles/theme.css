@@ -106,15 +106,10 @@ html, body { background: var(--bg); }
   transition: grid-template-columns 0.2s ease;
 }
 
-/* Fixed footer, all devices — plain text, no bar/box (no background or
-   border) — left offset matches the sidebar so it never sits under it;
-   full-width wherever there's no sidebar (PublicLayout, or the app
-   shell's mobile off-canvas sidebar). */
+/* Normal, in-flow footer — plain text at the end of the page content, not
+   pinned to the viewport. Scrolls with the page like a regular footer. */
 .app-footer {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
-  padding: 10px 34px; font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5;
-  pointer-events: none;
-  transition: left 0.2s ease;
+  padding: 16px 34px; font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5;
 }
 
 .app-sidebar {
@@ -252,7 +247,7 @@ button.app-sidebar-close { display: none; }
 .app-page-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 25px; color: var(--ink); line-height: 1.2; }
 .app-page-subtitle { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
 .app-topbar-actions { display: flex; align-items: center; gap: 10px; }
-.app-content { padding: 0 34px 64px; display: flex; flex-direction: column; gap: 20px; }
+.app-content { padding: 0 34px 44px; display: flex; flex-direction: column; gap: 20px; }
 
 .app-pdf-frame { width: 100%; height: 75vh; min-height: 320px; max-height: 700px; border: 1px solid var(--border); border-radius: 10px; }
 @media (max-width: 560px) {
@@ -553,13 +548,6 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 @media (min-width: 881px) {
   button.app-sidebar-collapse-btn { display: inline-flex; }
 
-  /* Fixed footer's left offset needs to clear the sidebar — only relevant
-     once there IS a persistent sidebar (desktop/tablet); on mobile the
-     sidebar is an off-canvas overlay, so the footer stays full-width
-     there (see the max-width: 880px block below). */
-  .app-shell:not(.collapsed) .app-footer { left: 248px; }
-  .app-shell.collapsed .app-footer { left: 76px; }
-
   .app-shell.collapsed { grid-template-columns: 76px 1fr; }
 
   .app-sidebar.collapsed { padding-left: 10px; padding-right: 10px; }
@@ -594,8 +582,6 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .app-sidebar.mobile-open { transform: translateX(0); }
   button.app-sidebar-close { display: inline-flex; }
 
-  .app-shell .app-footer { left: 0; }
-
   .app-auth-screen { grid-template-columns: 1fr; }
   .app-auth-art { display: none; }
   .app-kanban { grid-template-columns: minmax(210px, 1fr); }
@@ -606,14 +592,14 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .app-auth-mobile-brand { display: flex; align-items: center; gap: 8px; position: absolute; top: 18px; left: 18px; }
 
   .app-topbar { padding: 20px 18px 14px; }
-  .app-content { padding: 0 18px 60px; }
+  .app-content { padding: 0 18px 36px; }
   .app-auth-form-side { padding: 32px 22px; }
 }
 
 @media (max-width: 560px) {
   .app-page-title { font-size: 21px; }
   .app-topbar { padding: 16px 14px 12px; }
-  .app-content { padding: 0 14px 58px; gap: 14px; }
+  .app-content { padding: 0 14px 28px; gap: 14px; }
   .app-card-pad { padding: 16px; }
   .app-modal { padding: 20px; }
   .app-modal h3 { font-size: 17px; }
