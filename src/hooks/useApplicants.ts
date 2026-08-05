@@ -4,12 +4,11 @@ import { subscribeApplicants } from '../services/applicantsService';
 import { useRoadmapTemplate } from './useTemplates';
 import type { Applicant, EnrichedApplicant, StatCounts, PieDatum } from '../types';
 
-// The full, ordered list of status values that can occur — the roadmap
-// template's step labels (in order) plus the two states outside the
-// roadmap's forward progression. Used to build admin Tracker columns,
-// Analytics funnel, and the Applications status filter.
+// The full, ordered list of status values that can occur — 'Not started'
+// plus the roadmap template's step labels, in order. Used to build admin
+// Tracker columns, Analytics funnel, and the Applications status filter.
 export function statusOptionsFromRoadmap(roadmapTemplate: { label: string }[]): string[] {
-  return ['Not started', ...roadmapTemplate.map(s => s.label), 'Rejected'];
+  return ['Not started', ...roadmapTemplate.map(s => s.label)];
 }
 
 export function useApplicants() {

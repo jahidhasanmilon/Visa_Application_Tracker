@@ -47,8 +47,13 @@ function daysBetween(a: string, b: string): number {
   return Math.round((B.getTime() - A.getTime()) / 86400000);
 }
 
+// Mirrors src/utils/dateHelpers.ts — Bangladesh's calendar date
+// (Asia/Dhaka), not raw UTC, so the server-side overdue check agrees with
+// what applicants see client-side.
 function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date());
 }
 
 function renderTemplate(template: string, vars: Record<string, string>): string {
@@ -69,13 +74,11 @@ interface ApplicantDoc {
   reminderMailSent?: 'Not yet' | 'Urgent' | 'Done';
   reminderEmailSentAt?: string;
   roadmap?: RoadmapItem[];
-  rejected?: boolean;
 }
 
 // Mirrors deriveStatus() in src/utils/dateHelpers.ts — status is never
-// stored, only ever derived from roadmap progress (or the rejected flag).
+// stored, only ever derived from roadmap progress.
 function deriveStatus(a: ApplicantDoc, roadmapTemplate: RoadmapItem[]): string {
-  if (a.rejected) return 'Rejected';
   const roadmap = a.roadmap && a.roadmap.length > 0 ? a.roadmap : roadmapTemplate;
   const done = roadmap.filter(s => s.done);
   return done.length > 0 ? done[done.length - 1].label : 'Not started';

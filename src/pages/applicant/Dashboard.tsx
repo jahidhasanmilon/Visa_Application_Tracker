@@ -73,7 +73,6 @@ interface ApplicationCardProps {
 
 function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationCardProps) {
   const meta = getStatusMeta(a.status);
-  const rejected = !!a.rejected;
   const [savingReminder, setSavingReminder] = useState(false);
   const [savingRoadmap, setSavingRoadmap] = useState(false);
 
@@ -138,47 +137,41 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
 
       <ProgressBar pct={progressPct} />
 
-      {rejected ? (
-        <div style={{ background: 'var(--danger-soft)', color: 'var(--danger)', borderRadius: 12, padding: '14px 16px', fontSize: 13.5, fontWeight: 500, marginTop: 16 }}>
-          This application was not approved. Contact the team for more details.
-        </div>
-      ) : (
-        <div
-          className="app-roadmap-track"
-          style={{ '--rm-cols': Math.max(1, Math.ceil(roadmapItems.length / 2)) } as React.CSSProperties}
-        >
-          {roadmapItems.map((step, i) => (
-            <div key={step.id} className="app-roadmap-step">
-              <button
-                type="button"
-                className="app-roadmap-step-btn"
-                onClick={() => toggleStep(step)}
-                disabled={savingRoadmap}
-                title={step.done ? 'Mark as not yet' : 'Mark as done'}
+      <div
+        className="app-roadmap-track"
+        style={{ '--rm-cols': Math.max(1, Math.ceil(roadmapItems.length / 2)) } as React.CSSProperties}
+      >
+        {roadmapItems.map((step, i) => (
+          <div key={step.id} className="app-roadmap-step">
+            <button
+              type="button"
+              className="app-roadmap-step-btn"
+              onClick={() => toggleStep(step)}
+              disabled={savingRoadmap}
+              title={step.done ? 'Mark as not yet' : 'Mark as done'}
+            >
+              <div
+                className="app-roadmap-circle"
+                style={{
+                  background: step.done ? 'var(--success)' : 'var(--neutral-soft)',
+                  color: step.done ? '#fff' : 'var(--muted-2)',
+                }}
               >
-                <div
-                  className="app-roadmap-circle"
-                  style={{
-                    background: step.done ? 'var(--success)' : 'var(--neutral-soft)',
-                    color: step.done ? '#fff' : 'var(--muted-2)',
-                  }}
-                >
-                  {step.done ? <Check size={13} /> : i + 1}
-                </div>
-                <div
-                  className="app-roadmap-label"
-                  style={{ color: step.done ? 'var(--ink)' : 'var(--muted-2)', fontWeight: step.done ? 600 : 500 }}
-                >
-                  {step.label}
-                </div>
-              </button>
-              {i < roadmapItems.length - 1 && (
-                <div className="app-roadmap-connector" style={{ background: step.done ? 'var(--success)' : 'var(--border)' }} />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                {step.done ? <Check size={13} /> : i + 1}
+              </div>
+              <div
+                className="app-roadmap-label"
+                style={{ color: step.done ? 'var(--ink)' : 'var(--muted-2)', fontWeight: step.done ? 600 : 500 }}
+              >
+                {step.label}
+              </div>
+            </button>
+            {i < roadmapItems.length - 1 && (
+              <div className="app-roadmap-connector" style={{ background: step.done ? 'var(--success)' : 'var(--border)' }} />
+            )}
+          </div>
+        ))}
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
         <Field label="Applied on" value={fmtDate(a.created)} />
@@ -192,6 +185,11 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
           value={a.remaining === null ? 'Not submitted yet' : a.remaining > 0 ? `${a.remaining} days (est.)` : `${Math.abs(a.remaining)}d past target`}
           color={a.urg.color}
           tooltip="A rough estimate based on a 365-day target window, not a guarantee from the embassy."
+        />
+        <Field
+          label="Last updated"
+          value={fmtDate(a.lastUpdated)}
+          tooltip="Your 30-day reminder countdown below resets from this date — it updates automatically whenever you change your status, submitted date, or reminder."
         />
       </div>
 

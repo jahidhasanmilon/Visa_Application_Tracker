@@ -24,10 +24,6 @@ export interface Applicant {
   // Never set by the client — Firestore rules only allow admin/applicant to
   // touch reminderMailSent.
   reminderEmailSentAt?: string;
-  // Admin-only override for the one outcome the roadmap can't express on its
-  // own (rejection isn't a forward step). When set, deriveStatus() reports
-  // 'Rejected' regardless of roadmap progress.
-  rejected?: boolean;
   // Admin-managed per-applicant to-do list. Toggleable by both admin and applicant.
   checklist?: ChecklistItem[];
   // Admin-managed per-applicant progress stepper, shown at the top of the
@@ -43,12 +39,12 @@ export interface ChecklistItem {
 }
 
 export interface EnrichedApplicant extends Applicant {
-  // Derived, never stored: 'Rejected' if a.rejected, else 'Not started' if
-  // no roadmap step is done yet, else the label of the furthest-along
-  // completed roadmap step. See deriveStatus() in utils/dateHelpers.ts.
+  // Derived, never stored: 'Not started' if no roadmap step is done yet,
+  // else the label of the furthest-along completed roadmap step.
+  // See deriveStatus() in utils/dateHelpers.ts.
   status: StatusOption;
-  // True once every roadmap step is marked done (and not rejected) —
-  // used where the app previously checked status === 'Approved'.
+  // True once every roadmap step is marked done — used where the app
+  // previously checked status === 'Approved'.
   isComplete: boolean;
   // null when `submitted` isn't set yet (self-service applicants who
   // haven't submitted their application) — nothing to count from yet.
@@ -71,7 +67,6 @@ export interface ApplicantFormData {
   notes: string;
   lastUpdated: string;
   reminderMailSent: ReminderStatus;
-  rejected: boolean;
 }
 
 export interface StatCounts {

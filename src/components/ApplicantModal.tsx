@@ -63,16 +63,6 @@ export default function ApplicantModal({
           </select>
         </div>
 
-        <div className="app-field">
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <input type="checkbox" checked={form.rejected} onChange={e => setForm({ ...form, rejected: e.target.checked })} />
-            Mark as rejected
-          </label>
-          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 4 }}>
-            Status is otherwise derived from the applicant's roadmap progress — this is the one outcome the roadmap can't express on its own.
-          </div>
-        </div>
-
         <div className="app-modal-actions">
           <button className="app-btn app-btn-ghost" onClick={onClose}>Cancel</button>
           <button className="app-btn app-btn-primary" onClick={onSave}>{isEditing ? 'Save changes' : 'Add applicant'}</button>

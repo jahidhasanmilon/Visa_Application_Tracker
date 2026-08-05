@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, FileText, ExternalLink } from 'lucide-react';
+import { ArrowLeft, FileText } from 'lucide-react';
 import { subscribeGuideBySlug } from '../services/guidesService';
 import type { Guide } from '../types';
 
@@ -16,7 +16,10 @@ export default function GuideDetail() {
 
   return (
     <div>
-      <Link to="/guides" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: 'var(--muted)', textDecoration: 'none', marginBottom: 22 }}>
+      {/* Relative "up one level" link — resolves to /app/guides inside the
+          app shell, or /guides on the public route, whichever this page is
+          currently mounted under. */}
+      <Link to=".." style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: 'var(--muted)', textDecoration: 'none', marginBottom: 22 }}>
         <ArrowLeft size={14} /> All guides
       </Link>
 
@@ -43,9 +46,6 @@ export default function GuideDetail() {
                   <div className="app-card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <FileText size={16} /> {guide.attachmentName || 'Attachment'}
                   </div>
-                  <a href={guide.attachmentUrl} target="_blank" rel="noreferrer" className="app-card-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    Open in new tab <ExternalLink size={13} />
-                  </a>
                 </div>
                 <iframe
                   src={guide.attachmentUrl}

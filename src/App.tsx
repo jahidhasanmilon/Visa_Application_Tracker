@@ -31,7 +31,7 @@ import './styles/theme.css';
 function LoadingScreen() {
   return (
     <div className="app-loading-screen">
-      <PlaneTakeoff className="app-spin" size={28} />
+      <PlaneTakeoff className="app-takeoff" size={28} />
     </div>
   );
 }
@@ -95,7 +95,8 @@ export default function App() {
         <Route path="roadmap" element={role === 'admin' ? <AdminRoadmap /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="reminder-email" element={role === 'admin' ? <AdminReminderEmail /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="analytics" element={role === 'admin' ? <AdminAnalytics /> : <Navigate to="/app/dashboard" replace />} />
-        <Route path="guides" element={role === 'admin' ? <AdminGuides /> : <Navigate to="/app/dashboard" replace />} />
+        <Route path="guides" element={role === 'admin' ? <AdminGuides /> : <Guides />} />
+        <Route path="guides/:slug" element={<GuideDetail />} />
         <Route path="admins" element={role === 'admin' ? <AdminAdmins /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="help" element={<Help role={role} />} />
         <Route path="viva-questions" element={role === 'admin' ? <AdminVivaQuestions /> : <ApplicantVivaQuestions />} />

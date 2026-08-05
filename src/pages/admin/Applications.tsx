@@ -47,7 +47,6 @@ export default function AdminApplications() {
       serialNo: a.serialNo, name: a.name, email: a.email,
       created: a.created, submitted: a.submitted, notes: a.notes,
       lastUpdated: a.lastUpdated, reminderMailSent: a.reminderMailSent,
-      rejected: !!a.rejected,
     });
     setEditingApplicant(a);
     setModalOpen(true);

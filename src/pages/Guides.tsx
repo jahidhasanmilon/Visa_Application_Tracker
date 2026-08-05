@@ -49,7 +49,7 @@ export default function Guides() {
                 {items.map(g => (
                   <Link
                     key={g.id}
-                    to={`/guides/${g.slug}`}
+                    to={g.slug}
                     className="app-card app-card-pad"
                     style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none', color: 'inherit' }}
                   >

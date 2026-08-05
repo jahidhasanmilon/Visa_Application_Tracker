@@ -7,8 +7,15 @@ export function daysBetween(a: string, b: string): number {
   return Math.round((B.getTime() - A.getTime()) / 86400000);
 }
 
+// Bangladesh's calendar date (Asia/Dhaka, UTC+6) — not the visitor's own
+// browser timezone or raw UTC. Using UTC (the old `toISOString()` approach)
+// could be off by a day for hours when Dhaka has already rolled over to a
+// new date but UTC hasn't yet (or vice versa), throwing off every
+// day-based countdown by up to a day right around midnight.
 export function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date());
 }
 
 export function fmtDate(d?: string): string {
@@ -31,16 +38,15 @@ export function serialNumberValue(serialNo: string): number {
   return match ? parseInt(match[1], 10) : Number.MAX_SAFE_INTEGER;
 }
 
-// status is never stored — always derived from roadmap progress (or the
-// admin-only `rejected` override). `roadmapTemplate` is the shared default;
-// an applicant's own `roadmap` array (if non-empty) takes precedence, same
-// fallback rule used everywhere else the roadmap is rendered.
+// status is never stored — always derived from roadmap progress.
+// `roadmapTemplate` is the shared default; an applicant's own `roadmap`
+// array (if non-empty) takes precedence, same fallback rule used
+// everywhere else the roadmap is rendered.
 export function effectiveRoadmap(a: Applicant, roadmapTemplate: ChecklistItem[]): ChecklistItem[] {
   return a.roadmap && a.roadmap.length > 0 ? a.roadmap : roadmapTemplate;
 }
 
 export function deriveStatus(a: Applicant, roadmapTemplate: ChecklistItem[]): string {
-  if (a.rejected) return 'Rejected';
   const done = effectiveRoadmap(a, roadmapTemplate).filter(s => s.done);
   return done.length > 0 ? done[done.length - 1].label : 'Not started';
 }
@@ -55,7 +61,7 @@ export function deriveStatus(a: Applicant, roadmapTemplate: ChecklistItem[]): st
 export function enrichApplicant(a: Applicant, today: string, roadmapTemplate: ChecklistItem[]): EnrichedApplicant {
   const roadmap = effectiveRoadmap(a, roadmapTemplate);
   const status = deriveStatus(a, roadmapTemplate);
-  const isComplete = !a.rejected && roadmap.length > 0 && roadmap.every(s => s.done);
+  const isComplete = roadmap.length > 0 && roadmap.every(s => s.done);
   const waiting = a.submitted ? daysBetween(a.submitted, today) : null;
   const remaining = waiting === null ? null : TARGET_DAYS - waiting;
   const reminderDaysLeft = REMINDER_WINDOW_DAYS - daysBetween(a.lastUpdated, today);
