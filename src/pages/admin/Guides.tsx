@@ -21,6 +21,7 @@ export default function AdminGuides() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => subscribeGuides(setGuides), []);
@@ -29,6 +30,7 @@ export default function AdminGuides() {
     setForm({ ...EMPTY_FORM, order: (guides?.length ?? 0) + 1 });
     setEditingId(null);
     setPendingFiles([]);
+    setSaveError('');
     setModalOpen(true);
   }
 
@@ -40,6 +42,7 @@ export default function AdminGuides() {
     });
     setEditingId(g.id);
     setPendingFiles([]);
+    setSaveError('');
     setModalOpen(true);
   }
 
@@ -62,6 +65,7 @@ export default function AdminGuides() {
     if (!form.title.trim()) return;
     const cleanSections = form.sections.filter(s => s.heading.trim() || s.body.trim());
 
+    setSaveError('');
     setUploading(true);
     try {
       let id = editingId;
@@ -77,6 +81,9 @@ export default function AdminGuides() {
       };
       await updateGuide(id, payload);
       setModalOpen(false);
+    } catch (err) {
+      console.error('Guide save failed', err);
+      setSaveError(err instanceof Error ? err.message : 'Something went wrong while saving — check the browser console for details.');
     } finally {
       setUploading(false);
     }
@@ -113,10 +120,16 @@ export default function AdminGuides() {
                   <div className="app-card-title">{g.title}</div>
                   <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3 }}>
                     {g.category || 'General'} · /guides/{g.slug} · {g.sections.length} section{g.sections.length === 1 ? '' : 's'} · order {g.order}
-                    {g.attachments && g.attachments.length > 0 && (
-                      <> · <FileText size={11} style={{ verticalAlign: -1 }} /> {g.attachments.length} file{g.attachments.length === 1 ? '' : 's'}</>
-                    )}
                   </div>
+                  {g.attachments && g.attachments.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>
+                      {g.attachments.map(a => (
+                        <a key={a.url} href={a.url} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--violet)', fontWeight: 600 }}>
+                          <FileText size={12} /> {a.name}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => openEdit(g)}><Pencil size={14} /></button>
                 {confirmDeleteId === g.id ? (
@@ -234,6 +247,10 @@ export default function AdminGuides() {
               </button>
               <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} style={{ display: 'none' }} />
             </div>
+
+            {saveError && (
+              <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{saveError}</div>
+            )}
 
             <div className="app-modal-actions">
               <button className="app-btn app-btn-ghost" onClick={() => setModalOpen(false)} disabled={uploading}>Cancel</button>
