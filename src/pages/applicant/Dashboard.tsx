@@ -128,17 +128,14 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
           </span>
         </div>
 
-        <div style={{
-          textAlign: 'center', minWidth: 96, padding: '10px 14px', borderRadius: 14,
-          background: countdown.bg, color: countdown.color, flexShrink: 0,
-        }}>
-          <div className="app-brand-font" style={{ fontWeight: 800, fontSize: 30, lineHeight: 1 }}>
+        <div className="app-status-countdown" style={{ background: countdown.bg, color: countdown.color }}>
+          <div className="app-brand-font app-status-countdown-num">
             {Math.abs(a.reminderDaysLeft)}
           </div>
-          <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 3 }}>
+          <div className="app-status-countdown-label">
             {a.reminderDaysLeft > 0 ? t('status.daysLeft') : a.reminderDaysLeft === 0 ? t('status.dueToday') : t('status.daysOverdue')}
           </div>
-          <div style={{ fontSize: 9.5, opacity: 0.8, marginTop: 2 }}>{t('status.reminderTitle')}</div>
+          <div className="app-status-countdown-sub">{t('status.reminderTitle')}</div>
         </div>
       </div>
 
