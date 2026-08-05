@@ -45,9 +45,8 @@ export default function AuthLayout({ eyebrow, headline, sub, stats, children }: 
           <ThemeToggle />
         </div>
         <div className="app-auth-form-wrap">{children}</div>
+        <div className="app-auth-footer"><Footer /></div>
       </div>
-
-      <Footer />
     </div>
   );
 }

@@ -481,7 +481,6 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr;
   background: var(--surface);
 }
-.app-auth-screen .app-footer { grid-column: 1 / -1; }
 .app-auth-art {
   background: linear-gradient(160deg, var(--sidebar) 0%, #322A5C 55%, var(--violet) 130%);
   color: #fff;
@@ -515,6 +514,8 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .app-auth-form-wrap { width: 100%; max-width: 380px; }
 .app-auth-theme-toggle { position: absolute; top: 18px; right: 18px; }
 .app-auth-mobile-brand { display: none; }
+.app-auth-footer { position: absolute; bottom: 0; left: 0; right: 0; }
+.app-auth-footer .app-footer { padding: 12px 20px; }
 
 .app-role-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; }
 .app-role-card {
