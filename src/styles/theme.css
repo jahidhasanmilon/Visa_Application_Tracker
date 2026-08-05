@@ -560,14 +560,8 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   button.app-sidebar-close { display: inline-flex; }
 
   .app-auth-screen { grid-template-columns: 1fr; }
+  .app-auth-art { display: none; }
   .app-kanban { grid-template-columns: minmax(210px, 1fr); }
-
-  /* Auth art panel collapses to just a small logo/brand strip on
-     mobile/tablet — the full headline/copy/stats block (too tall to stack
-     above the form nicely) is hidden, not the branding itself. */
-  .app-auth-art { padding: 16px 20px; }
-  .app-auth-art::before, .app-auth-art::after { display: none; }
-  .app-auth-copy, .app-auth-stats { display: none; }
 
   .app-topbar { padding: 20px 18px 14px; }
   .app-content { padding: 0 18px 36px; }
