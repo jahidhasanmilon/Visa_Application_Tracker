@@ -481,7 +481,6 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr;
   background: var(--surface);
 }
-.app-auth-screen .app-footer { grid-column: 1 / -1; }
 .app-auth-art {
   background: linear-gradient(160deg, var(--sidebar) 0%, #322A5C 55%, var(--violet) 130%);
   color: #fff;
