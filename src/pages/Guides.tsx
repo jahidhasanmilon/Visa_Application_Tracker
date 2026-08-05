@@ -37,7 +37,7 @@ export default function Guides() {
           <div className="app-empty">Loading…</div>
         ) : guides.length === 0 ? (
           <div className="app-card app-card-pad">
-            <div className="app-empty">No guides published yet — check back soon.</div>
+            <div className="app-empty">No resources published yet — check back soon.</div>
           </div>
         ) : (
           grouped.map(([category, items]) => (

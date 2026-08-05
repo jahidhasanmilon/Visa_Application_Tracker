@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { PlaneTakeoff } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
+import Footer from '../components/Footer';
 
 interface AuthLayoutProps {
   eyebrow: string;
@@ -45,6 +46,8 @@ export default function AuthLayout({ eyebrow, headline, sub, stats, children }: 
         </div>
         <div className="app-auth-form-wrap">{children}</div>
       </div>
+
+      <Footer />
     </div>
   );
 }

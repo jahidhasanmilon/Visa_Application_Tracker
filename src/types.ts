@@ -91,6 +91,11 @@ export interface GuideSection {
   body: string;
 }
 
+export interface GuideAttachment {
+  url: string;
+  name: string;
+}
+
 export interface Guide {
   id: string;
   title: string;
@@ -98,8 +103,7 @@ export interface Guide {
   category: string;
   order: number;
   sections: GuideSection[];
-  attachmentUrl?: string;
-  attachmentName?: string;
+  attachments?: GuideAttachment[];
   updatedAt?: string;
 }
 

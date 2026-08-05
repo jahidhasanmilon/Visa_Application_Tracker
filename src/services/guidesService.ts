@@ -4,7 +4,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../firebase';
-import type { Guide, GuideSection } from '../types';
+import type { Guide, GuideAttachment, GuideSection } from '../types';
 
 const GUIDES_COL = 'guides';
 
@@ -33,8 +33,7 @@ export interface GuideFormData {
   category: string;
   order: number;
   sections: GuideSection[];
-  attachmentUrl?: string;
-  attachmentName?: string;
+  attachments?: GuideAttachment[];
 }
 
 export async function addGuide(form: GuideFormData): Promise<string> {
@@ -50,18 +49,20 @@ export async function deleteGuide(id: string): Promise<void> {
   await deleteDoc(doc(db, GUIDES_COL, id));
 }
 
-// Uploaded to guides/{guideId}/{fileName} — see storage.rules. Only PDFs,
-// rendered in-app via a plain <iframe> (no library needed, browsers already
-// know how to display a PDF at a URL).
-export async function uploadGuideAttachment(guideId: string, file: File): Promise<{ url: string; name: string }> {
-  const fileRef = ref(storage, `guides/${guideId}/${file.name}`);
-  await uploadBytes(fileRef, file, { contentType: file.type });
+// Uploaded to guides/{guideId}/{storagePath} — see storage.rules. Any file
+// type; PDFs get rendered in-app, other formats get an open/download link
+// (see GuideDetail.tsx). Storage path is timestamp-prefixed so multiple
+// files with the same original name don't collide.
+export async function uploadGuideAttachment(guideId: string, file: File): Promise<GuideAttachment> {
+  const storagePath = `guides/${guideId}/${Date.now()}-${file.name}`;
+  const fileRef = ref(storage, storagePath);
+  await uploadBytes(fileRef, file, { contentType: file.type || 'application/octet-stream' });
   const url = await getDownloadURL(fileRef);
   return { url, name: file.name };
 }
 
-export async function deleteGuideAttachment(guideId: string, fileName: string): Promise<void> {
-  await deleteObject(ref(storage, `guides/${guideId}/${fileName}`)).catch(() => {});
+export async function deleteGuideAttachment(url: string): Promise<void> {
+  await deleteObject(ref(storage, url)).catch(() => {});
 }
 
 export function slugify(title: string): string {

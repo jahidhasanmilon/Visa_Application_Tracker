@@ -5,12 +5,12 @@ import {
   subscribeGuides, addGuide, updateGuide, deleteGuide, slugify,
   uploadGuideAttachment, deleteGuideAttachment,
 } from '../../services/guidesService';
-import type { Guide, GuideSection } from '../../types';
+import type { Guide, GuideAttachment, GuideSection } from '../../types';
 
 const EMPTY_FORM = {
   title: '', slug: '', category: '', order: 0,
   sections: [{ heading: '', body: '' }] as GuideSection[],
-  attachmentUrl: '', attachmentName: '',
+  attachments: [] as GuideAttachment[],
 };
 
 export default function AdminGuides() {
@@ -19,7 +19,7 @@ export default function AdminGuides() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -28,7 +28,7 @@ export default function AdminGuides() {
   function openAdd() {
     setForm({ ...EMPTY_FORM, order: (guides?.length ?? 0) + 1 });
     setEditingId(null);
-    setPendingFile(null);
+    setPendingFiles([]);
     setModalOpen(true);
   }
 
@@ -36,38 +36,45 @@ export default function AdminGuides() {
     setForm({
       title: g.title, slug: g.slug, category: g.category || '', order: g.order,
       sections: g.sections.length > 0 ? g.sections : [{ heading: '', body: '' }],
-      attachmentUrl: g.attachmentUrl || '', attachmentName: g.attachmentName || '',
+      attachments: g.attachments || [],
     });
     setEditingId(g.id);
-    setPendingFile(null);
+    setPendingFiles([]);
     setModalOpen(true);
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files || []);
     e.target.value = '';
-    if (!file) return;
-    if (file.type !== 'application/pdf') { alert('Only PDF files are supported.'); return; }
-    setPendingFile(file);
+    if (files.length > 0) setPendingFiles(f => [...f, ...files]);
+  }
+
+  function removePendingFile(index: number) {
+    setPendingFiles(f => f.filter((_, i) => i !== index));
+  }
+
+  async function removeExistingAttachment(a: GuideAttachment) {
+    await deleteGuideAttachment(a.url);
+    setForm(f => ({ ...f, attachments: f.attachments.filter(x => x.url !== a.url) }));
   }
 
   async function save() {
     if (!form.title.trim()) return;
     const cleanSections = form.sections.filter(s => s.heading.trim() || s.body.trim());
-    const payload = { ...form, slug: form.slug.trim() || slugify(form.title), sections: cleanSections };
 
     setUploading(true);
     try {
       let id = editingId;
       if (!id) {
-        id = await addGuide(payload);
+        id = await addGuide({ ...form, slug: form.slug.trim() || slugify(form.title), sections: cleanSections });
       }
-      if (pendingFile) {
-        if (editingId && form.attachmentName) await deleteGuideAttachment(id, form.attachmentName);
-        const { url, name } = await uploadGuideAttachment(id, pendingFile);
-        payload.attachmentUrl = url;
-        payload.attachmentName = name;
-      }
+      const uploaded = await Promise.all(pendingFiles.map(file => uploadGuideAttachment(id!, file)));
+      const payload = {
+        ...form,
+        slug: form.slug.trim() || slugify(form.title),
+        sections: cleanSections,
+        attachments: [...form.attachments, ...uploaded],
+      };
       await updateGuide(id, payload);
       setModalOpen(false);
     } finally {
@@ -89,14 +96,14 @@ export default function AdminGuides() {
       <PageHeader
         title="Guides & Resources"
         subtitle="Curated content everyone in the group can read, signed in or not."
-        actions={<button className="app-btn app-btn-primary" onClick={openAdd}><Plus size={16} /> New guide</button>}
+        actions={<button className="app-btn app-btn-primary" onClick={openAdd}><Plus size={16} /> New resource</button>}
       />
       <div className="app-content">
         {guides === null ? (
           <div className="app-empty">Loading…</div>
         ) : guides.length === 0 ? (
           <div className="app-card app-card-pad">
-            <div className="app-empty">No guides yet — add your first one.</div>
+            <div className="app-empty">No resources yet — add your first one.</div>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -106,12 +113,8 @@ export default function AdminGuides() {
                   <div className="app-card-title">{g.title}</div>
                   <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3 }}>
                     {g.category || 'General'} · /guides/{g.slug} · {g.sections.length} section{g.sections.length === 1 ? '' : 's'} · order {g.order}
-                    {g.attachmentName && (
-                      <>
-                        {' · '}<FileText size={11} style={{ verticalAlign: -1 }} /> {g.attachmentName}
-                        {' '}
-                        <a href={g.attachmentUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--violet)', fontWeight: 600 }}>View</a>
-                      </>
+                    {g.attachments && g.attachments.length > 0 && (
+                      <> · <FileText size={11} style={{ verticalAlign: -1 }} /> {g.attachments.length} file{g.attachments.length === 1 ? '' : 's'}</>
                     )}
                   </div>
                 </div>
@@ -133,7 +136,7 @@ export default function AdminGuides() {
       {modalOpen && (
         <div className="app-modal-backdrop" onClick={() => setModalOpen(false)}>
           <div className="app-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 560 }}>
-            <h3>{editingId ? 'Edit guide' : 'New guide'}</h3>
+            <h3>{editingId ? 'Edit resource' : 'New resource'}</h3>
 
             <div className="app-field">
               <label>Title</label>
@@ -200,25 +203,42 @@ export default function AdminGuides() {
             </div>
 
             <div className="app-field">
-              <label>PDF attachment <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional)</span></label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={() => fileInputRef.current?.click()}>
-                  <Paperclip size={14} /> {pendingFile ? 'Change file' : 'Choose PDF'}
-                </button>
-                <span style={{ fontSize: 12.5, color: 'var(--muted)' }}>
-                  {pendingFile ? pendingFile.name : form.attachmentName || 'No file attached'}
-                </span>
-                {!pendingFile && form.attachmentUrl && (
-                  <a href={form.attachmentUrl} target="_blank" rel="noreferrer" className="app-card-link">View</a>
-                )}
-                <input ref={fileInputRef} type="file" accept="application/pdf" onChange={handleFileChange} style={{ display: 'none' }} />
-              </div>
+              <label>Attachments <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional — any file type, PDFs preview in-app)</span></label>
+
+              {(form.attachments.length > 0 || pendingFiles.length > 0) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+                  {form.attachments.map(a => (
+                    <div key={a.url} style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
+                      <FileText size={13} color="var(--muted-2)" />
+                      <span style={{ flex: 1, fontSize: 12.5 }}>{a.name}</span>
+                      <a href={a.url} target="_blank" rel="noreferrer" className="app-card-link" style={{ fontSize: 12 }}>View</a>
+                      <button type="button" className="app-icon-btn" onClick={() => removeExistingAttachment(a)} aria-label="Remove file">
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+                  {pendingFiles.map((f, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px dashed var(--border)', borderRadius: 8, padding: '6px 10px' }}>
+                      <FileText size={13} color="var(--muted-2)" />
+                      <span style={{ flex: 1, fontSize: 12.5 }}>{f.name} <span style={{ color: 'var(--muted)' }}>(will upload on save)</span></span>
+                      <button type="button" className="app-icon-btn" onClick={() => removePendingFile(i)} aria-label="Remove file">
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={() => fileInputRef.current?.click()}>
+                <Paperclip size={14} /> Add file(s)
+              </button>
+              <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} style={{ display: 'none' }} />
             </div>
 
             <div className="app-modal-actions">
               <button className="app-btn app-btn-ghost" onClick={() => setModalOpen(false)} disabled={uploading}>Cancel</button>
               <button className="app-btn app-btn-primary" onClick={save} disabled={uploading}>
-                {uploading ? 'Saving…' : editingId ? 'Save changes' : 'Add guide'}
+                {uploading ? 'Saving…' : editingId ? 'Save changes' : 'Add resource'}
               </button>
             </div>
           </div>
