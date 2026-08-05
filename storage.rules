@@ -11,5 +11,19 @@ service firebase.storage {
         && request.resource.size < 3 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }
+
+    // Guide attachments (PDFs). Public read, matching the guides Firestore
+    // collection. Storage rules can't read the Firestore `admins`
+    // collection (different service, no cross-service exists()), so write
+    // access here is limited to the owner email only — additional admins
+    // can still edit guide text via Firestore, just not upload attachments,
+    // until this is wired up with custom auth claims.
+    match /guides/{guideId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && request.auth.token.email == 'jahidhasanmilon999@gmail.com'
+        && request.resource.size < 15 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf';
+    }
   }
 }

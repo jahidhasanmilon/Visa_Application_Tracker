@@ -16,7 +16,7 @@ export default function AdminDashboard() {
     .slice(0, 5);
 
   const attention = enriched
-    .filter(a => a.remaining !== null && a.remaining <= 30 && a.status !== 'Approved' && a.status !== 'Rejected')
+    .filter(a => a.remaining !== null && a.remaining <= 30 && !a.isComplete && !a.rejected)
     .sort((a, b) => a.remaining! - b.remaining!)
     .slice(0, 6);
 

@@ -7,8 +7,16 @@ import nodemailer from 'nodemailer';
 
 initializeApp();
 
-// Keep this list in sync with ADMIN_EMAILS in src/constants/roles.ts.
-const ADMIN_EMAILS = ['jahidhasanmilon999@gmail.com'];
+// Keep in sync with OWNER_EMAIL in src/constants/roles.ts. Additional admins
+// come from the `admins` Firestore collection (managed from
+// src/pages/admin/Admins.tsx) — read dynamically below via the Admin SDK,
+// which bypasses firestore.rules.
+const OWNER_EMAIL = 'jahidhasanmilon999@gmail.com';
+
+async function getAdminEmails(db: FirebaseFirestore.Firestore): Promise<string[]> {
+  const snap = await db.collection('admins').get();
+  return [OWNER_EMAIL, ...snap.docs.map(d => d.id)];
+}
 
 // Must match TARGET_DAYS-style logic in src/constants/status.ts (REMINDER_WINDOW_DAYS)
 // and src/utils/dateHelpers.ts (enrichApplicant) — the 30-day countdown is measured
@@ -47,14 +55,30 @@ function renderTemplate(template: string, vars: Record<string, string>): string 
   return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => vars[key] ?? '');
 }
 
+interface RoadmapItem {
+  id: string;
+  label: string;
+  done: boolean;
+}
+
 interface ApplicantDoc {
   name?: string;
   serialNo?: string;
   email?: string;
-  status?: string;
   lastUpdated?: string;
   reminderMailSent?: 'Not yet' | 'Urgent' | 'Done';
   reminderEmailSentAt?: string;
+  roadmap?: RoadmapItem[];
+  rejected?: boolean;
+}
+
+// Mirrors deriveStatus() in src/utils/dateHelpers.ts — status is never
+// stored, only ever derived from roadmap progress (or the rejected flag).
+function deriveStatus(a: ApplicantDoc, roadmapTemplate: RoadmapItem[]): string {
+  if (a.rejected) return 'Rejected';
+  const roadmap = a.roadmap && a.roadmap.length > 0 ? a.roadmap : roadmapTemplate;
+  const done = roadmap.filter(s => s.done);
+  return done.length > 0 ? done[done.length - 1].label : 'Not started';
 }
 
 interface EmailTemplateDoc {
@@ -72,6 +96,9 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
     subject: templateDoc?.subject || DEFAULT_TEMPLATE.subject,
     body: templateDoc?.body || DEFAULT_TEMPLATE.body,
   };
+
+  const roadmapSnap = await db.doc('meta/roadmapTemplate').get();
+  const roadmapTemplate = ((roadmapSnap.data() as { items?: RoadmapItem[] } | undefined)?.items) || [];
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -101,7 +128,7 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
     const vars = {
       name: a.name ?? 'Applicant',
       serialNo: a.serialNo ?? '',
-      status: a.status ?? '',
+      status: deriveStatus(a, roadmapTemplate),
       lastUpdated: a.lastUpdated,
       daysOverdue: String(Math.abs(reminderDaysLeft)),
     };
@@ -125,9 +152,10 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
 
   if (sent > 0) {
     try {
+      const adminEmails = await getAdminEmails(db);
       await transporter.sendMail({
         from: `VisaTrack <${GMAIL_USER.value()}>`,
-        to: ADMIN_EMAILS.join(', '),
+        to: adminEmails.join(', '),
         subject: `Reminder sweep: ${sent} email(s) sent`,
         text: `The daily 30-day reminder sweep sent ${sent} email(s) out of ${snapshot.size} applicant record(s) checked.`,
       });

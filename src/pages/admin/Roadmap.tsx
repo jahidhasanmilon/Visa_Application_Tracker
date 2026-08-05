@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react';
 import { Search, Plus, X, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
+import TemplateListEditor from '../../components/TemplateListEditor';
 import { useApplicants } from '../../hooks/useApplicants';
+import { useRoadmapTemplate } from '../../hooks/useTemplates';
 import { updateRoadmap } from '../../services/applicantsService';
-import { DEFAULT_ROADMAP_LABELS } from '../../constants/roadmap';
+import { saveRoadmapTemplate } from '../../services/templatesService';
 import { ListDetailSkeleton } from '../../components/Skeleton';
 import type { ChecklistItem, EnrichedApplicant } from '../../types';
 
 export default function AdminRoadmap() {
   const { enriched, loading } = useApplicants();
+  const template = useRoadmapTemplate();
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resettingAll, setResettingAll] = useState(false);
@@ -22,7 +25,7 @@ export default function AdminRoadmap() {
   const customizedCount = enriched.filter(a => a.roadmap && a.roadmap.length > 0).length;
 
   async function resetAllToDefault() {
-    if (!confirm(`Reset all ${customizedCount} customized applicant(s) back to the default ${DEFAULT_ROADMAP_LABELS.length}-step roadmap? This removes their custom steps.`)) return;
+    if (!confirm(`Reset all ${customizedCount} customized applicant(s) back to the shared default roadmap? This removes their custom steps.`)) return;
     setResettingAll(true);
     try {
       await Promise.all(
@@ -33,10 +36,10 @@ export default function AdminRoadmap() {
     }
   }
 
-  if (loading) {
+  if (loading || template === null) {
     return (
       <>
-        <PageHeader title="Road to Success" subtitle="Customize each applicant's progress stepper." />
+        <PageHeader title="Road to Success" subtitle="The shared default, plus per-applicant customization. Also drives everyone's status." />
         <ListDetailSkeleton />
       </>
     );
@@ -44,15 +47,23 @@ export default function AdminRoadmap() {
 
   return (
     <>
-      <PageHeader title="Road to Success" subtitle="Customize each applicant's progress stepper." />
+      <PageHeader title="Road to Success" subtitle="The shared default, plus per-applicant customization. Also drives everyone's status." />
       <div className="app-content">
+        <TemplateListEditor
+          title="Shared default roadmap"
+          subtitle="What every applicant sees unless you've customized their individual copy below. Each applicant's status is the label of the furthest step they've marked done."
+          items={template}
+          onSave={saveRoadmapTemplate}
+          addPlaceholder="New default step name"
+        />
+
         {customizedCount > 0 && (
           <div className="app-card app-card-pad" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ fontSize: 13, color: 'var(--muted)' }}>
               {customizedCount} applicant{customizedCount > 1 ? 's have' : ' has'} a customized roadmap.
             </div>
             <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={resetAllToDefault} disabled={resettingAll}>
-              <RotateCcw size={14} /> Reset all to default
+              <RotateCcw size={14} /> Reset all to shared default
             </button>
           </div>
         )}
@@ -87,9 +98,9 @@ export default function AdminRoadmap() {
 
           <div className="app-card app-card-pad">
             {!selected ? (
-              <div className="app-empty">Select an applicant to edit their roadmap.</div>
+              <div className="app-empty">Select an applicant to customize their roadmap.</div>
             ) : (
-              <RoadmapEditor applicant={selected} />
+              <RoadmapEditor applicant={selected} template={template} />
             )}
           </div>
         </div>
@@ -98,12 +109,12 @@ export default function AdminRoadmap() {
   );
 }
 
-function RoadmapEditor({ applicant }: { applicant: EnrichedApplicant }) {
+function RoadmapEditor({ applicant, template }: { applicant: EnrichedApplicant; template: ChecklistItem[] }) {
   const steps = useMemo(() => (
     applicant.roadmap && applicant.roadmap.length > 0
       ? applicant.roadmap
-      : DEFAULT_ROADMAP_LABELS.map(label => ({ id: crypto.randomUUID(), label, done: false }))
-  ), [applicant.roadmap]);
+      : template.map(t => ({ id: crypto.randomUUID(), label: t.label, done: false }))
+  ), [applicant.roadmap, template]);
 
   const [newLabel, setNewLabel] = useState('');
   const [saving, setSaving] = useState(false);
@@ -143,7 +154,7 @@ function RoadmapEditor({ applicant }: { applicant: EnrichedApplicant }) {
   const isCustomized = !!(applicant.roadmap && applicant.roadmap.length > 0);
 
   function resetToDefault() {
-    if (!confirm(`Reset ${applicant.name}'s roadmap back to the default ${DEFAULT_ROADMAP_LABELS.length} steps? This removes their custom steps.`)) return;
+    if (!confirm(`Reset ${applicant.name}'s roadmap back to the shared default? This removes their custom steps.`)) return;
     save([]);
   }
 
@@ -156,7 +167,7 @@ function RoadmapEditor({ applicant }: { applicant: EnrichedApplicant }) {
         </div>
         {isCustomized && (
           <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={resetToDefault} disabled={saving}>
-            <RotateCcw size={14} /> Reset to default
+            <RotateCcw size={14} /> Reset to shared default
           </button>
         )}
       </div>

@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { auth } from '../firebase';
-import { roleForEmail, type AppRole } from '../constants/roles';
+import { isOwnerEmail, type AppRole } from '../constants/roles';
+import { subscribeIsAdmin } from '../services/adminsService';
 
-export function useAuth(): { user: User | null; role: AppRole | null; authLoading: boolean; refreshUser: () => void } {
+interface UseAuthResult {
+  user: User | null;
+  role: AppRole | null;
+  authLoading: boolean;
+  // True once `user` is known but the admin-doc check hasn't resolved yet
+  // (role is unreliable — null, not "confirmed applicant" — while this is true).
+  roleLoading: boolean;
+  refreshUser: () => void;
+}
+
+export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -15,6 +27,13 @@ export function useAuth(): { user: User | null; role: AppRole | null; authLoadin
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    if (!user?.email) { setIsAdmin(null); return; }
+    if (isOwnerEmail(user.email)) { setIsAdmin(true); return; }
+    setIsAdmin(null);
+    return subscribeIsAdmin(user.email, setIsAdmin);
+  }, [user?.email]);
+
   // Firebase mutates `auth.currentUser` in place on updateProfile(), so it
   // won't trigger onAuthStateChanged — clone it to force a re-render.
   function refreshUser() {
@@ -23,5 +42,8 @@ export function useAuth(): { user: User | null; role: AppRole | null; authLoadin
     }
   }
 
-  return { user, role: user ? roleForEmail(user.email) : null, authLoading, refreshUser };
+  const role: AppRole | null = !user ? null : isAdmin === null ? null : isAdmin ? 'admin' : 'applicant';
+  const roleLoading = !!user && isAdmin === null;
+
+  return { user, role, authLoading, roleLoading, refreshUser };
 }

@@ -1,10 +1,10 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { PlaneTakeoff } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useMyApplicant } from './hooks/useMyApplicant';
-import LoginGate from './pages/auth/LoginGate';
-import AdminLogin from './pages/auth/AdminLogin';
-import ApplicantLogin from './pages/auth/ApplicantLogin';
+import { createOwnApplicant } from './services/applicantsService';
+import Login from './pages/auth/Login';
 import AppShell from './layouts/AppShell';
 import PublicLayout from './layouts/PublicLayout';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -15,11 +15,16 @@ import AdminAnalytics from './pages/admin/Analytics';
 import AdminReminderEmail from './pages/admin/ReminderEmail';
 import AdminChecklist from './pages/admin/Checklist';
 import AdminGuides from './pages/admin/Guides';
+import AdminAdmins from './pages/admin/Admins';
+import AdminVivaQuestions from './pages/admin/VivaQuestions';
+import AdminHelp from './pages/admin/Help';
 import ApplicantDashboard from './pages/applicant/Dashboard';
 import ApplicantChecklist from './pages/applicant/Checklist';
-import Onboarding from './pages/applicant/Onboarding';
+import ApplicantVivaQuestions from './pages/applicant/VivaQuestions';
+import HowToUse from './pages/applicant/HowToUse';
 import Guides from './pages/Guides';
 import GuideDetail from './pages/GuideDetail';
+import About from './pages/About';
 import Profile from './pages/Profile';
 import './styles/theme.css';
 
@@ -41,41 +46,42 @@ const publicRoutes = (
 );
 
 export default function App() {
-  const { user, role, authLoading, refreshUser } = useAuth();
+  const { user, role, authLoading, roleLoading, refreshUser } = useAuth();
   // Only applicants own a self-service applicants/{uid} doc — admin has none.
   const { myApplicant } = useMyApplicant(role === 'applicant' ? user?.uid : undefined);
+
+  // Silently create a blank record the first time an applicant is seen with
+  // none — no blocking onboarding screen. The "fill in your details" prompt
+  // (ApplicantDetailsModal) is dismissible and shown once the record exists.
+  useEffect(() => {
+    if (role === 'applicant' && user && myApplicant === null) {
+      createOwnApplicant(user.uid, user.email || '', user.displayName || '');
+    }
+  }, [role, user, myApplicant]);
 
   if (authLoading) {
     return <LoadingScreen />;
   }
 
-  if (!user || !role) {
+  if (!user) {
     return (
       <Routes>
         {publicRoutes}
-        <Route path="/login" element={<LoginGate />} />
-        <Route path="/login/staff" element={<AdminLogin />} />
-        <Route path="/login/apply" element={<ApplicantLogin />} />
+        <Route path="/login" element={<Login />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
 
-  // Still checking whether this applicant already has a record.
-  if (role === 'applicant' && myApplicant === undefined) {
+  // Still resolving whether this account is an admin.
+  if (roleLoading || !role) {
     return <LoadingScreen />;
   }
 
-  // Signed up but hasn't created their own record yet — nothing else in
-  // /app/* has data to show them until they do.
-  if (role === 'applicant' && myApplicant === null) {
-    return (
-      <Routes>
-        {publicRoutes}
-        <Route path="/app/onboarding" element={<Onboarding uid={user.uid} email={user.email!} />} />
-        <Route path="*" element={<Navigate to="/app/onboarding" replace />} />
-      </Routes>
-    );
+  // Applicant record doesn't exist yet — the effect above is creating it;
+  // wait for the snapshot to reflect it rather than showing anything stale.
+  if (role === 'applicant' && !myApplicant) {
+    return <LoadingScreen />;
   }
 
   return (
@@ -89,8 +95,16 @@ export default function App() {
         <Route path="reminder-email" element={role === 'admin' ? <AdminReminderEmail /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="analytics" element={role === 'admin' ? <AdminAnalytics /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="guides" element={role === 'admin' ? <AdminGuides /> : <Navigate to="/app/dashboard" replace />} />
+        <Route path="admins" element={role === 'admin' ? <AdminAdmins /> : <Navigate to="/app/dashboard" replace />} />
+        <Route path="help" element={role === 'admin' ? <AdminHelp /> : <Navigate to="/app/dashboard" replace />} />
+        <Route path="viva-questions" element={role === 'admin' ? <AdminVivaQuestions /> : <ApplicantVivaQuestions />} />
+        <Route path="how-to-use" element={role === 'admin' ? <Navigate to="/app/dashboard" replace /> : <HowToUse />} />
+        <Route path="about" element={<About role={role} />} />
         <Route path="checklist" element={role === 'admin' ? <AdminChecklist /> : <ApplicantChecklist applicant={myApplicant!} />} />
-        <Route path="profile" element={<Profile user={user} role={role} onUserUpdate={refreshUser} />} />
+        <Route
+          path="profile"
+          element={<Profile user={user} role={role} applicant={role === 'applicant' ? myApplicant : undefined} onUserUpdate={refreshUser} />}
+        />
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>
       <Route path="*" element={<Navigate to="/app/dashboard" replace />} />

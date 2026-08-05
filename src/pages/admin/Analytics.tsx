@@ -3,13 +3,14 @@ import PageHeader from '../../components/PageHeader';
 import SummaryStat from '../../components/SummaryStat';
 import FunnelChart from '../../components/FunnelChart';
 import { DashboardSkeleton } from '../../components/Skeleton';
-import { useApplicants } from '../../hooks/useApplicants';
-import { useStatusOptions } from '../../hooks/useStatusOptions';
+import { useApplicants, statusOptionsFromRoadmap } from '../../hooks/useApplicants';
+import { useRoadmapTemplate } from '../../hooks/useTemplates';
 import { getStatusMeta } from '../../constants/status';
 
 export default function AdminAnalytics() {
   const { enriched, stats, loading } = useApplicants();
-  const { statusOptions } = useStatusOptions();
+  const roadmapTemplate = useRoadmapTemplate();
+  const statusOptions = useMemo(() => statusOptionsFromRoadmap(roadmapTemplate || []), [roadmapTemplate]);
 
   const funnelData = useMemo(() => statusOptions.map(status => ({
     name: status,
@@ -39,7 +40,7 @@ export default function AdminAnalytics() {
         <div className="app-card app-card-pad">
           <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
             <SummaryStat label="Total applicants" value={stats.total} />
-            <SummaryStat label="Approval rate" value={`${conversionRate}%`} />
+            <SummaryStat label="Completion rate" value={`${conversionRate}%`} />
             <SummaryStat label="Avg. waiting time" value={`${avgWaiting}d`} />
             <SummaryStat label="Overdue" value={stats.overdue} />
           </div>

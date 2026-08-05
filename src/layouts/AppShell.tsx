@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import {
-  LayoutDashboard, Briefcase, KanbanSquare, UserCircle, LogOut, PlaneTakeoff,
-  Menu, X, PanelLeftClose, PanelLeftOpen, CheckSquare, Milestone, Mail, BarChart3, BookOpen,
-} from 'lucide-react';
+import { LogOut, PlaneTakeoff, Menu, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import type { AppRole } from '../constants/roles';
+import { ADMIN_NAV, APPLICANT_NAV } from '../constants/nav';
 import { signOut } from '../services/authService';
+import { useApplicantNavOrder } from '../hooks/useNavOrder';
 import ThemeToggle from '../components/ThemeToggle';
 import UserAvatar from '../components/UserAvatar';
 import NotificationBell from '../components/NotificationBell';
+import ApplicantNotificationBell from '../components/ApplicantNotificationBell';
+import WhatsAppFab from '../components/WhatsAppFab';
+import Footer from '../components/Footer';
 import ProfileToggleButton from '../components/ProfileToggleButton';
 import { displayNameFor } from '../utils/userDisplay';
 
@@ -20,27 +22,9 @@ interface AppShellProps {
 
 const COLLAPSE_KEY = 'visa-tracker-sidebar-collapsed';
 
-const ADMIN_NAV = [
-  { to: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/app/applications', label: 'Applications', icon: Briefcase },
-  { to: '/app/tracker', label: 'Tracker', icon: KanbanSquare },
-  { to: '/app/checklist', label: 'Checklist', icon: CheckSquare },
-  { to: '/app/roadmap', label: 'Road to Success', icon: Milestone },
-  { to: '/app/reminder-email', label: 'Reminder Email', icon: Mail },
-  { to: '/app/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/app/guides', label: 'Guides', icon: BookOpen },
-  { to: '/app/profile', label: 'Profile', icon: UserCircle },
-];
-
-const APPLICANT_NAV = [
-  { to: '/app/dashboard', label: 'My Status', icon: LayoutDashboard },
-  { to: '/app/checklist', label: 'Checklist', icon: CheckSquare },
-  { to: '/guides', label: 'Guides', icon: BookOpen },
-  { to: '/app/profile', label: 'Profile', icon: UserCircle },
-];
-
 export default function AppShell({ user, role }: AppShellProps) {
-  const navItems = role === 'admin' ? ADMIN_NAV : APPLICANT_NAV;
+  const applicantOrder = useApplicantNavOrder();
+  const navItems = role === 'admin' ? ADMIN_NAV : orderNavItems(APPLICANT_NAV, applicantOrder);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
 
@@ -119,7 +103,7 @@ export default function AppShell({ user, role }: AppShellProps) {
             <div className="app-logo-text" style={{ color: 'var(--ink)' }}>VisaTrack</div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
-            {role === 'admin' && <NotificationBell />}
+            {role === 'admin' ? <NotificationBell /> : <ApplicantNotificationBell uid={user.uid} />}
             <ProfileToggleButton user={user} />
             <ThemeToggle />
             <button className="app-icon-btn app-topbar-hamburger" onClick={() => setMobileNavOpen(true)} aria-label="Open menu">
@@ -128,7 +112,18 @@ export default function AppShell({ user, role }: AppShellProps) {
           </div>
         </div>
         <Outlet />
+        <Footer />
       </main>
+
+      <WhatsAppFab />
     </div>
   );
+}
+
+function orderNavItems<T extends { to: string }>(items: T[], order: string[] | null): T[] {
+  if (!order || order.length === 0) return items;
+  const byTo = new Map(items.map(i => [i.to, i]));
+  const ordered = order.map(to => byTo.get(to)).filter((i): i is T => !!i);
+  const remaining = items.filter(i => !order.includes(i.to));
+  return [...ordered, ...remaining];
 }

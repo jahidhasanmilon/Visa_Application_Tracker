@@ -4,18 +4,21 @@ import type { User } from 'firebase/auth';
 import PageHeader from '../components/PageHeader';
 import UserAvatar from '../components/UserAvatar';
 import SummaryStat from '../components/SummaryStat';
+import ApplicantDetailsModal from '../components/ApplicantDetailsModal';
 import { useApplicants } from '../hooks/useApplicants';
 import type { AppRole } from '../constants/roles';
+import type { Applicant } from '../types';
 import { signOut, uploadProfilePhoto, updateDisplayName } from '../services/authService';
 import { displayNameFor } from '../utils/userDisplay';
 
 interface ProfileProps {
   user: User;
   role: AppRole;
+  applicant?: Applicant | null;
   onUserUpdate: () => void;
 }
 
-export default function Profile({ user, role, onUserUpdate }: ProfileProps) {
+export default function Profile({ user, role, applicant, onUserUpdate }: ProfileProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -152,7 +155,7 @@ export default function Profile({ user, role, onUserUpdate }: ProfileProps) {
           </button>
         </div>
 
-        {role === 'admin' ? <AdminSummary /> : <ApplicantSummary email={user.email} />}
+        {role === 'admin' ? <AdminSummary /> : <ApplicantSummary email={user.email} applicant={applicant} />}
       </div>
     </>
   );
@@ -168,23 +171,33 @@ function AdminSummary() {
       </div>
       <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
         <SummaryStat label="Applicants managed" value={stats.total} />
-        <SummaryStat label="Approved" value={stats.approved} />
+        <SummaryStat label="Roadmap complete" value={stats.approved} />
         <SummaryStat label="Overdue" value={stats.overdue} />
       </div>
     </div>
   );
 }
 
-function ApplicantSummary({ email }: { email: string | null }) {
+function ApplicantSummary({ email, applicant }: { email: string | null; applicant?: Applicant | null }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   return (
     <div className="app-card app-card-pad">
       <div className="app-card-head">
         <div className="app-card-title">How this works</div>
+        {applicant && (
+          <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}>
+            <Pencil size={14} /> Edit my details
+          </button>
+        )}
       </div>
       <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.7, margin: 0 }}>
-        Your dashboard shows the applicant record on file with the email address <strong style={{ color: 'var(--ink)' }}>{email}</strong>.
-        If your status looks out of date, reach out to the team that filed your application — only admin can make changes here.
+        This is your own tracking record, tied to <strong style={{ color: 'var(--ink)' }}>{email}</strong>.
+        You control it — toggle your roadmap/checklist to update your status, and use "Edit my details" to keep
+        your name, applied date, and submitted date current.
       </p>
+      {applicant && (
+        <ApplicantDetailsModal open={detailsOpen} applicant={applicant} onClose={() => setDetailsOpen(false)} />
+      )}
     </div>
   );
 }

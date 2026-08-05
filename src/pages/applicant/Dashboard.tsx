@@ -1,26 +1,60 @@
-import { useMemo, useState } from 'react';
-import { Check } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Check, Pencil } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
-import { updateReminderStatus, updateRoadmap, updateMyStatus, updateMySubmitted } from '../../services/applicantsService';
+import ApplicantDetailsModal from '../../components/ApplicantDetailsModal';
+import InfoTooltip from '../../components/InfoTooltip';
+import { updateReminderStatus, updateRoadmap } from '../../services/applicantsService';
 import { enrichApplicant, fmtDate, todayStr } from '../../utils/dateHelpers';
-import { getStatusMeta, STATUS_OPTIONS, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
-import { DEFAULT_ROADMAP_LABELS } from '../../constants/roadmap';
-import { DEFAULT_CHECKLIST_LABELS } from '../../constants/checklist';
-import type { Applicant, ChecklistItem, EnrichedApplicant, ReminderStatus, StatusOption } from '../../types';
+import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
+import { useRoadmapTemplate, useChecklistTemplate } from '../../hooks/useTemplates';
+import type { Applicant, ChecklistItem, EnrichedApplicant, ReminderStatus } from '../../types';
+
+const DISMISS_KEY_PREFIX = 'visa-tracker-details-prompt-dismissed-';
+
+function detailsIncomplete(a: Applicant): boolean {
+  return !a.name.trim() || !a.created || !a.submitted;
+}
 
 interface ApplicantDashboardProps {
   applicant: Applicant;
 }
 
 export default function ApplicantDashboard({ applicant }: ApplicantDashboardProps) {
-  const enriched = useMemo(() => enrichApplicant(applicant, todayStr()), [applicant]);
+  const roadmapTemplate = useRoadmapTemplate();
+  const checklistTemplate = useChecklistTemplate();
+  const [detailsOpen, setDetailsOpen] = useState(false);
+
+  useEffect(() => {
+    if (detailsIncomplete(applicant) && !localStorage.getItem(DISMISS_KEY_PREFIX + applicant.id)) {
+      setDetailsOpen(true);
+    }
+  }, [applicant]);
+
+  function closeDetails() {
+    localStorage.setItem(DISMISS_KEY_PREFIX + applicant.id, '1');
+    setDetailsOpen(false);
+  }
+
+  const enriched = useMemo(() => (
+    roadmapTemplate === null ? null : enrichApplicant(applicant, todayStr(), roadmapTemplate)
+  ), [applicant, roadmapTemplate]);
 
   return (
     <>
-      <PageHeader title="My Status" subtitle="Track your own progress — you're in control of this record." />
+      <PageHeader
+        title="My Status"
+        subtitle="Track your own progress — you're in control of this record."
+        actions={<button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}><Pencil size={14} /> Edit my details</button>}
+      />
       <div className="app-content">
-        <ApplicationCard a={enriched} />
+        {enriched === null || checklistTemplate === null || roadmapTemplate === null ? (
+          <div className="app-empty">Loading…</div>
+        ) : (
+          <ApplicationCard a={enriched} checklistTemplate={checklistTemplate} roadmapTemplate={roadmapTemplate} />
+        )}
       </div>
+
+      <ApplicantDetailsModal open={detailsOpen} applicant={applicant} onClose={closeDetails} />
     </>
   );
 }
@@ -31,28 +65,28 @@ function countdownColors(days: number): { bg: string; color: string } {
   return { bg: 'var(--success-soft)', color: 'var(--success)' };
 }
 
-function ApplicationCard({ a }: { a: EnrichedApplicant }) {
+interface ApplicationCardProps {
+  a: EnrichedApplicant;
+  checklistTemplate: ChecklistItem[];
+  roadmapTemplate: ChecklistItem[];
+}
+
+function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationCardProps) {
   const meta = getStatusMeta(a.status);
-  const rejected = a.status === 'Rejected';
+  const rejected = !!a.rejected;
   const [savingReminder, setSavingReminder] = useState(false);
   const [savingRoadmap, setSavingRoadmap] = useState(false);
-  const [savingStatus, setSavingStatus] = useState(false);
-  const [savingSubmitted, setSavingSubmitted] = useState(false);
 
-  const roadmap = useMemo(() => (
-    a.roadmap && a.roadmap.length > 0
-      ? a.roadmap
-      : DEFAULT_ROADMAP_LABELS.map(label => ({ id: label, label, done: false }))
-  ), [a.roadmap]);
+  const roadmapItems = useMemo(() => (
+    a.roadmap && a.roadmap.length > 0 ? a.roadmap : roadmapTemplate
+  ), [a.roadmap, roadmapTemplate]);
 
   const checklist = useMemo(() => (
-    a.checklist && a.checklist.length > 0
-      ? a.checklist
-      : DEFAULT_CHECKLIST_LABELS.map(label => ({ id: label, label, done: false }))
-  ), [a.checklist]);
+    a.checklist && a.checklist.length > 0 ? a.checklist : checklistTemplate
+  ), [a.checklist, checklistTemplate]);
 
-  const totalDone = roadmap.filter(s => s.done).length + checklist.filter(i => i.done).length;
-  const totalItems = roadmap.length + checklist.length;
+  const totalDone = roadmapItems.filter(s => s.done).length + checklist.filter(i => i.done).length;
+  const totalItems = roadmapItems.length + checklist.length;
   const progressPct = totalItems > 0 ? Math.round((totalDone / totalItems) * 100) : 0;
 
   async function handleReminderChange(value: ReminderStatus) {
@@ -64,28 +98,10 @@ function ApplicationCard({ a }: { a: EnrichedApplicant }) {
     }
   }
 
-  async function handleStatusChange(value: StatusOption) {
-    setSavingStatus(true);
-    try {
-      await updateMyStatus(a.id, value);
-    } finally {
-      setSavingStatus(false);
-    }
-  }
-
-  async function handleSubmittedChange(value: string) {
-    setSavingSubmitted(true);
-    try {
-      await updateMySubmitted(a.id, value);
-    } finally {
-      setSavingSubmitted(false);
-    }
-  }
-
   async function toggleStep(step: ChecklistItem) {
     setSavingRoadmap(true);
     try {
-      const next = roadmap.map(s => s.id === step.id ? { ...s, done: !s.done } : s);
+      const next = roadmapItems.map(s => s.id === step.id ? { ...s, done: !s.done } : s);
       await updateRoadmap(a.id, next);
     } finally {
       setSavingRoadmap(false);
@@ -98,10 +114,11 @@ function ApplicationCard({ a }: { a: EnrichedApplicant }) {
     <div className="app-card app-card-pad">
       <div className="app-card-head" style={{ alignItems: 'flex-start' }}>
         <div>
-          <div className="app-card-title">{a.name}</div>
+          <div className="app-card-title">{a.name || 'Your application'}</div>
           {a.serialNo && <div className="app-mono" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>{a.serialNo}</div>}
-          <span className="app-badge" style={{ background: meta.bg, color: meta.color, fontSize: 13, padding: '6px 14px', marginTop: 10, display: 'inline-flex' }}>
+          <span className="app-badge" style={{ background: meta.bg, color: meta.color, fontSize: 13, padding: '6px 14px', marginTop: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <meta.icon size={14} /> {a.status}
+            <InfoTooltip text="Automatic — this matches whichever roadmap step you've completed furthest, not something you set directly." />
           </span>
         </div>
 
@@ -123,14 +140,14 @@ function ApplicationCard({ a }: { a: EnrichedApplicant }) {
 
       {rejected ? (
         <div style={{ background: 'var(--danger-soft)', color: 'var(--danger)', borderRadius: 12, padding: '14px 16px', fontSize: 13.5, fontWeight: 500, marginTop: 16 }}>
-          This application was not approved.
+          This application was not approved. Contact the team for more details.
         </div>
       ) : (
         <div
           className="app-roadmap-track"
-          style={{ '--rm-cols': Math.max(1, Math.ceil(roadmap.length / 2)) } as React.CSSProperties}
+          style={{ '--rm-cols': Math.max(1, Math.ceil(roadmapItems.length / 2)) } as React.CSSProperties}
         >
-          {roadmap.map((step, i) => (
+          {roadmapItems.map((step, i) => (
             <div key={step.id} className="app-roadmap-step">
               <button
                 type="button"
@@ -155,7 +172,7 @@ function ApplicationCard({ a }: { a: EnrichedApplicant }) {
                   {step.label}
                 </div>
               </button>
-              {i < roadmap.length - 1 && (
+              {i < roadmapItems.length - 1 && (
                 <div className="app-roadmap-connector" style={{ background: step.done ? 'var(--success)' : 'var(--border)' }} />
               )}
             </div>
@@ -165,6 +182,7 @@ function ApplicationCard({ a }: { a: EnrichedApplicant }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
         <Field label="Applied on" value={fmtDate(a.created)} />
+        <Field label="Submitted on" value={fmtDate(a.submitted)} />
         <Field
           label="Waiting"
           value={a.waiting === null ? '—' : `${a.waiting} days`}
@@ -173,31 +191,8 @@ function ApplicationCard({ a }: { a: EnrichedApplicant }) {
           label={a.remaining === null ? 'Estimated remaining' : a.remaining > 0 ? 'Estimated remaining' : 'Status'}
           value={a.remaining === null ? 'Not submitted yet' : a.remaining > 0 ? `${a.remaining} days (est.)` : `${Math.abs(a.remaining)}d past target`}
           color={a.urg.color}
+          tooltip="A rough estimate based on a 365-day target window, not a guarantee from the embassy."
         />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, paddingTop: 14, marginTop: 14, borderTop: '1px solid var(--border)' }}>
-        <div className="app-field" style={{ margin: 0 }}>
-          <label>Status <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(self-reported)</span></label>
-          <select
-            className="app-select"
-            value={a.status}
-            disabled={savingStatus}
-            onChange={e => handleStatusChange(e.target.value)}
-          >
-            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        <div className="app-field" style={{ margin: 0 }}>
-          <label>Submitted on <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(self-reported)</span></label>
-          <input
-            className="app-input"
-            type="date"
-            value={a.submitted}
-            disabled={savingSubmitted}
-            onChange={e => handleSubmittedChange(e.target.value)}
-          />
-        </div>
       </div>
 
       <div style={{ paddingTop: 14, marginTop: 14, borderTop: '1px solid var(--border)' }}>
@@ -223,7 +218,11 @@ function ApplicationCard({ a }: { a: EnrichedApplicant }) {
             {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
           <div style={{ fontSize: 11.5, color: a.reminderDaysLeft > 0 ? 'var(--muted)' : 'var(--danger)', marginTop: 6 }}>
-            {a.reminderDaysLeft > 0 ? `${a.reminderDaysLeft} days left in this window` : a.reminderDaysLeft === 0 ? 'Due today' : `${Math.abs(a.reminderDaysLeft)} days overdue`}
+            {a.reminderDaysLeft > 0
+              ? `${a.reminderDaysLeft} days left until you should expect an embassy email`
+              : a.reminderDaysLeft === 0
+                ? 'An embassy email is expected today'
+                : `${Math.abs(a.reminderDaysLeft)} days past when an embassy email was expected`}
           </div>
         </div>
       </div>
@@ -245,10 +244,13 @@ function ProgressBar({ pct }: { pct: number }) {
   );
 }
 
-function Field({ label, value, color }: { label: string; value: string; color?: string }) {
+function Field({ label, value, color, tooltip }: { label: string; value: string; color?: string; tooltip?: string }) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 0.4 }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: 0.4 }}>
+        {label}
+        {tooltip && <InfoTooltip text={tooltip} />}
+      </div>
       <div style={{ fontSize: 14, fontWeight: 600, marginTop: 3, color: color || 'var(--ink)' }}>{value}</div>
     </div>
   );

@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { PlaneTakeoff } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
+import WhatsAppFab from '../components/WhatsAppFab';
+import Footer from '../components/Footer';
 
 // Auth-agnostic wrapper for pages reachable whether or not anyone is signed
 // in (currently just the Guides area) — App.tsx hoists these routes above
@@ -22,6 +24,8 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <div style={{ maxWidth: 760, margin: '0 auto', padding: '32px 20px 60px' }}>
         {children}
       </div>
+      <Footer />
+      <WhatsAppFab />
     </div>
   );
 }

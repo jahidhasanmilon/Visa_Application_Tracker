@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import {
   signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, resetPassword, friendlyAuthError,
 } from '../../services/authService';
@@ -8,7 +8,7 @@ import {
 interface AuthFormProps {
   title: string;
   subtitle: string;
-  switchTo: { to: string; label: string };
+  switchTo?: { to: string; label: string };
   allowSignUp?: boolean;
   /** Return an error message to reject this account right after sign-in (and sign it back out). */
   guard?: (email: string | null) => string | null;
@@ -78,10 +78,6 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
 
   return (
     <div>
-      <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: 'var(--muted)', textDecoration: 'none', marginBottom: 22 }}>
-        <ArrowLeft size={14} /> Choose a different portal
-      </Link>
-
       <div className="app-page-title" style={{ marginBottom: 4 }}>
         {mode === 'reset' ? 'Reset your password' : title}
       </div>
@@ -158,9 +154,11 @@ export default function AuthForm({ title, subtitle, switchTo, allowSignUp = true
         </>
       )}
 
-      <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12.5 }}>
-        <Link to={switchTo.to} style={{ color: 'var(--violet)', fontWeight: 600, textDecoration: 'none' }}>{switchTo.label}</Link>
-      </div>
+      {switchTo && (
+        <div style={{ textAlign: 'center', marginTop: 10, fontSize: 12.5 }}>
+          <Link to={switchTo.to} style={{ color: 'var(--violet)', fontWeight: 600, textDecoration: 'none' }}>{switchTo.label}</Link>
+        </div>
+      )}
     </div>
   );
 }

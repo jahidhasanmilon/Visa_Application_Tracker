@@ -4,7 +4,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { todayStr } from '../utils/dateHelpers';
-import type { Applicant, ApplicantFormData, ReminderStatus, ChecklistItem, StatusOption } from '../types';
+import type { Applicant, ApplicantFormData, ReminderStatus, ChecklistItem } from '../types';
 
 const APPLICANTS_COL = 'applicants';
 
@@ -29,15 +29,16 @@ export function subscribeMyApplicant(uid: string, onData: (applicant: Applicant 
 }
 
 // Called once, right after sign-up (or first sign-in with no record yet), to
-// create the applicant's own uid-keyed record. See firestore.rules — a user
-// may only create the doc at applicants/{their own uid}.
+// silently create the applicant's own uid-keyed record — blank besides
+// name/email, no blocking onboarding step (see pages/applicant/Onboarding
+// having been replaced by the dismissible ApplicantDetailsModal). See
+// firestore.rules — a user may only create the doc at applicants/{their own uid}.
 export async function createOwnApplicant(uid: string, email: string, name: string): Promise<void> {
   const today = todayStr();
   const applicant: Omit<Applicant, 'id'> = {
     uid, email, name,
     serialNo: '',
-    status: 'Preparing',
-    created: today,
+    created: '',
     submitted: '',
     notes: '',
     lastUpdated: today,
@@ -69,12 +70,17 @@ export async function updateReminderStatus(id: string, reminderMailSent: Reminde
   await updateDoc(doc(db, APPLICANTS_COL, id), { reminderMailSent, lastUpdated: todayStr() });
 }
 
-export async function updateMyStatus(id: string, status: StatusOption): Promise<void> {
-  await updateDoc(doc(db, APPLICANTS_COL, id), { status, lastUpdated: todayStr() });
+// Used by ApplicantDetailsModal ("Add your details" / "Edit my details") —
+// the only place name/serialNo/created/submitted get self-edited.
+export interface MyDetails {
+  name: string;
+  serialNo: string;
+  created: string;
+  submitted: string;
 }
 
-export async function updateMySubmitted(id: string, submitted: string): Promise<void> {
-  await updateDoc(doc(db, APPLICANTS_COL, id), { submitted, lastUpdated: todayStr() });
+export async function updateMyDetails(id: string, details: MyDetails): Promise<void> {
+  await updateDoc(doc(db, APPLICANTS_COL, id), { ...details, lastUpdated: todayStr() });
 }
 
 // Whole-array replace — callers compute the new array (add/remove/toggle)

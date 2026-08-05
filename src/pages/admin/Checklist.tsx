@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Search, Plus, X, ArrowUp, ArrowDown, RotateCcw } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
+import TemplateListEditor from '../../components/TemplateListEditor';
 import { useApplicants } from '../../hooks/useApplicants';
+import { useChecklistTemplate } from '../../hooks/useTemplates';
 import { updateChecklist } from '../../services/applicantsService';
-import { DEFAULT_CHECKLIST_LABELS } from '../../constants/checklist';
+import { saveChecklistTemplate } from '../../services/templatesService';
 import { ListDetailSkeleton } from '../../components/Skeleton';
 import type { ChecklistItem, EnrichedApplicant } from '../../types';
 
 export default function AdminChecklist() {
   const { enriched, loading } = useApplicants();
+  const template = useChecklistTemplate();
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [resettingAll, setResettingAll] = useState(false);
@@ -22,7 +25,7 @@ export default function AdminChecklist() {
   const customizedCount = enriched.filter(a => a.checklist && a.checklist.length > 0).length;
 
   async function resetAllToDefault() {
-    if (!confirm(`Reset all ${customizedCount} customized applicant(s) back to the default ${DEFAULT_CHECKLIST_LABELS.length}-item checklist? This removes their custom items.`)) return;
+    if (!confirm(`Reset all ${customizedCount} customized applicant(s) back to the shared default checklist? This removes their custom items.`)) return;
     setResettingAll(true);
     try {
       await Promise.all(
@@ -33,10 +36,10 @@ export default function AdminChecklist() {
     }
   }
 
-  if (loading) {
+  if (loading || template === null) {
     return (
       <>
-        <PageHeader title="Checklist" subtitle="Customize each applicant's task checklist." />
+        <PageHeader title="Checklist" subtitle="The shared default, plus per-applicant customization." />
         <ListDetailSkeleton />
       </>
     );
@@ -44,15 +47,23 @@ export default function AdminChecklist() {
 
   return (
     <>
-      <PageHeader title="Checklist" subtitle="Customize each applicant's task checklist." />
+      <PageHeader title="Checklist" subtitle="The shared default, plus per-applicant customization." />
       <div className="app-content">
+        <TemplateListEditor
+          title="Shared default checklist"
+          subtitle="What every applicant sees unless you've customized their individual copy below."
+          items={template}
+          onSave={saveChecklistTemplate}
+          addPlaceholder="New default checklist item"
+        />
+
         {customizedCount > 0 && (
           <div className="app-card app-card-pad" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ fontSize: 13, color: 'var(--muted)' }}>
               {customizedCount} applicant{customizedCount > 1 ? 's have' : ' has'} a customized checklist.
             </div>
             <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={resetAllToDefault} disabled={resettingAll}>
-              <RotateCcw size={14} /> Reset all to default
+              <RotateCcw size={14} /> Reset all to shared default
             </button>
           </div>
         )}
@@ -87,9 +98,9 @@ export default function AdminChecklist() {
 
           <div className="app-card app-card-pad">
             {!selected ? (
-              <div className="app-empty">Select an applicant to edit their checklist.</div>
+              <div className="app-empty">Select an applicant to customize their checklist.</div>
             ) : (
-              <ChecklistEditor applicant={selected} />
+              <ChecklistEditor applicant={selected} template={template} />
             )}
           </div>
         </div>
@@ -98,11 +109,11 @@ export default function AdminChecklist() {
   );
 }
 
-function ChecklistEditor({ applicant }: { applicant: EnrichedApplicant }) {
+function ChecklistEditor({ applicant, template }: { applicant: EnrichedApplicant; template: ChecklistItem[] }) {
   const isCustomized = !!(applicant.checklist && applicant.checklist.length > 0);
   const items = isCustomized
     ? applicant.checklist!
-    : DEFAULT_CHECKLIST_LABELS.map(label => ({ id: crypto.randomUUID(), label, done: false }));
+    : template.map(t => ({ id: crypto.randomUUID(), label: t.label, done: false }));
   const [newLabel, setNewLabel] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -116,7 +127,7 @@ function ChecklistEditor({ applicant }: { applicant: EnrichedApplicant }) {
   }
 
   function resetToDefault() {
-    if (!confirm(`Reset ${applicant.name}'s checklist back to the default ${DEFAULT_CHECKLIST_LABELS.length} items? This removes their custom items.`)) return;
+    if (!confirm(`Reset ${applicant.name}'s checklist back to the shared default? This removes their custom items.`)) return;
     save([]);
   }
 
@@ -152,7 +163,7 @@ function ChecklistEditor({ applicant }: { applicant: EnrichedApplicant }) {
         </div>
         {isCustomized && (
           <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={resetToDefault} disabled={saving}>
-            <RotateCcw size={14} /> Reset to default
+            <RotateCcw size={14} /> Reset to shared default
           </button>
         )}
       </div>

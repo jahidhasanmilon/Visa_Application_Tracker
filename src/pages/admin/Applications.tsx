@@ -4,8 +4,8 @@ import Toolbar from '../../components/Toolbar';
 import ApplicantTable from '../../components/ApplicantTable';
 import ApplicantModal from '../../components/ApplicantModal';
 import { TableSkeleton } from '../../components/Skeleton';
-import { useApplicants } from '../../hooks/useApplicants';
-import { useStatusOptions } from '../../hooks/useStatusOptions';
+import { useApplicants, statusOptionsFromRoadmap } from '../../hooks/useApplicants';
+import { useRoadmapTemplate } from '../../hooks/useTemplates';
 import { todayStr } from '../../utils/dateHelpers';
 import { addApplicant, updateApplicant, deleteApplicant } from '../../services/applicantsService';
 import { EMPTY_FORM } from '../../data/seedData';
@@ -13,7 +13,8 @@ import type { Applicant, ApplicantFormData, StatusOption, EnrichedApplicant } fr
 
 export default function AdminApplications() {
   const { enriched, loading } = useApplicants();
-  const { statusOptions, addStatus } = useStatusOptions();
+  const roadmapTemplate = useRoadmapTemplate();
+  const statusOptions = useMemo(() => statusOptionsFromRoadmap(roadmapTemplate || []), [roadmapTemplate]);
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusOption | 'All'>('All');
@@ -43,9 +44,10 @@ export default function AdminApplications() {
 
   function openEdit(a: EnrichedApplicant) {
     setForm({
-      serialNo: a.serialNo, name: a.name, email: a.email, status: a.status,
+      serialNo: a.serialNo, name: a.name, email: a.email,
       created: a.created, submitted: a.submitted, notes: a.notes,
       lastUpdated: a.lastUpdated, reminderMailSent: a.reminderMailSent,
+      rejected: !!a.rejected,
     });
     setEditingApplicant(a);
     setModalOpen(true);
@@ -106,8 +108,6 @@ export default function AdminApplications() {
         setForm={setForm}
         onSave={saveForm}
         onClose={() => setModalOpen(false)}
-        statusOptions={statusOptions}
-        onAddStatus={addStatus}
       />
     </>
   );

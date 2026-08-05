@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check, Circle } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import { updateChecklist } from '../../services/applicantsService';
-import { DEFAULT_CHECKLIST_LABELS } from '../../constants/checklist';
+import { useChecklistTemplate } from '../../hooks/useTemplates';
 import type { Applicant, ChecklistItem } from '../../types';
 
 interface ApplicantChecklistProps {
@@ -10,20 +10,25 @@ interface ApplicantChecklistProps {
 }
 
 export default function ApplicantChecklist({ applicant }: ApplicantChecklistProps) {
+  const template = useChecklistTemplate();
   return (
     <>
       <PageHeader title="Checklist" subtitle="Your own to-do list — check things off as you complete them." />
       <div className="app-content">
-        <ChecklistCard applicant={applicant} />
+        {template === null ? (
+          <div className="app-empty">Loading…</div>
+        ) : (
+          <ChecklistCard applicant={applicant} template={template} />
+        )}
       </div>
     </>
   );
 }
 
-function ChecklistCard({ applicant }: { applicant: Applicant }) {
+function ChecklistCard({ applicant, template }: { applicant: Applicant; template: ChecklistItem[] }) {
   const items = applicant.checklist && applicant.checklist.length > 0
     ? applicant.checklist
-    : DEFAULT_CHECKLIST_LABELS.map(label => ({ id: label, label, done: false }));
+    : template;
   const [saving, setSaving] = useState<string | null>(null);
 
   async function toggle(item: ChecklistItem) {

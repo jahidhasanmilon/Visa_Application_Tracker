@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, FileText, ExternalLink } from 'lucide-react';
 import { subscribeGuideBySlug } from '../services/guidesService';
 import type { Guide } from '../types';
 
@@ -36,6 +36,24 @@ export default function GuideDetail() {
                 <div style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>{s.body}</div>
               </div>
             ))}
+
+            {guide.attachmentUrl && (
+              <div className="app-card app-card-pad">
+                <div className="app-card-head">
+                  <div className="app-card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <FileText size={16} /> {guide.attachmentName || 'Attachment'}
+                  </div>
+                  <a href={guide.attachmentUrl} target="_blank" rel="noreferrer" className="app-card-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    Open in new tab <ExternalLink size={13} />
+                  </a>
+                </div>
+                <iframe
+                  src={guide.attachmentUrl}
+                  title={guide.attachmentName || 'Guide attachment'}
+                  style={{ width: '100%', height: 600, border: '1px solid var(--border)', borderRadius: 10 }}
+                />
+              </div>
+            )}
           </div>
         </>
       )}

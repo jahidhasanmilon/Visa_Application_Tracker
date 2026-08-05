@@ -2,11 +2,24 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Keep this list in sync with ADMIN_EMAILS in src/constants/roles.ts.
+    // The owner email is a permanent fallback admin — hardcoded here and in
+    // src/constants/roles.ts — so the app can never be locked out even if
+    // the admins collection is empty or misconfigured. Everyone else is
+    // granted admin via a doc in the admins/ collection (see below),
+    // managed from src/pages/admin/Admins.tsx.
     function isAdminEmail() {
-      return request.auth != null && request.auth.token.email in [
-        'jahidhasanmilon999@gmail.com'
-      ];
+      return request.auth != null && (
+        request.auth.token.email == 'jahidhasanmilon999@gmail.com'
+        || exists(/databases/$(database)/documents/admins/$(request.auth.token.email))
+      );
+    }
+
+    // Dynamic admin list. Doc id = lowercase email; content is just a
+    // marker. Only admins can read/manage this (exists() checks above
+    // don't require read permission on the path being checked, so this
+    // doesn't create a bootstrapping problem for isAdminEmail() itself).
+    match /admins/{email} {
+      allow read, write: if isAdminEmail();
     }
 
     // Self-service applicant records are keyed BY the owner's Firebase Auth
@@ -36,25 +49,36 @@ service cloud.firestore {
       allow delete: if isAdminEmail();
 
       // Admin can edit anything. An applicant may only update fields that
-      // are meant to be self-reported on their own record: reminder
-      // status, checklist/roadmap toggle-state, and — since the admin has
-      // no way to know a stranger's real visa status or submission date —
-      // their own status and submitted date. lastUpdated is included so
-      // the applicant's own 30-day reminder countdown can reset when they
-      // touch status/submitted/reminderMailSent (never for a mere
+      // are meant to be self-reported/self-entered on their own record:
+      // their own name/serialNo/applied-date/submitted-date (the "Add your
+      // details" form), reminder status, and checklist/roadmap
+      // toggle-state. `status` is deliberately NOT here — it's derived
+      // from the roadmap (see deriveStatus() in src/utils/dateHelpers.ts),
+      // never written directly. lastUpdated is included so the
+      // applicant's own 30-day reminder countdown can reset when they
+      // touch submitted/reminderMailSent (never for a mere
       // checklist/roadmap toggle — see applicantsService.ts).
       allow update: if isAdminEmail()
         || (
           request.auth != null
           && request.auth.uid == applicantId
           && request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['reminderMailSent', 'checklist', 'roadmap', 'status', 'submitted', 'lastUpdated'])
+               .hasOnly(['reminderMailSent', 'checklist', 'roadmap', 'submitted', 'created', 'lastUpdated', 'name', 'serialNo'])
         );
     }
 
-    // Custom status options an admin has added beyond the built-in defaults.
-    match /meta/statusOptions {
-      allow read, write: if isAdminEmail();
+    // Shared checklist/roadmap templates — the default every applicant sees
+    // unless admin has customized their individual record (see the
+    // applicants/{applicantId} checklist/roadmap fields above). Any
+    // signed-in user can read (both admin and applicant pages render off
+    // these), only admin can edit.
+    match /meta/checklistTemplate {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+    match /meta/roadmapTemplate {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
     }
 
     // Editable subject/body for the 30-day reminder email (read by the
@@ -68,6 +92,31 @@ service cloud.firestore {
     // signed-out visitors), only the admin can write it.
     match /guides/{guideId} {
       allow read: if true;
+      allow write: if isAdminEmail();
+    }
+
+    // Interview-prep questions — signed-in read only (unlike guides, this
+    // isn't meant to be public marketing content), admin-authored.
+    match /vivaQuestions/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+
+    // Admin-editable Help / About content — public read (the WhatsApp
+    // floating button and About page need to work for signed-out visitors
+    // browsing Guides too), admin-only write.
+    match /meta/help {
+      allow read: if true;
+      allow write: if isAdminEmail();
+    }
+    match /meta/about {
+      allow read: if true;
+      allow write: if isAdminEmail();
+    }
+
+    // Admin-configurable ordering for the applicant sidebar.
+    match /meta/navOrder {
+      allow read: if request.auth != null;
       allow write: if isAdminEmail();
     }
   }

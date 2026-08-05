@@ -1,16 +1,17 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import ApplicantModal from '../../components/ApplicantModal';
 import { KanbanSkeleton } from '../../components/Skeleton';
-import { useApplicants } from '../../hooks/useApplicants';
-import { useStatusOptions } from '../../hooks/useStatusOptions';
+import { useApplicants, statusOptionsFromRoadmap } from '../../hooks/useApplicants';
+import { useRoadmapTemplate } from '../../hooks/useTemplates';
 import { getStatusMeta } from '../../constants/status';
 import { updateApplicant } from '../../services/applicantsService';
 import type { Applicant, ApplicantFormData, EnrichedApplicant } from '../../types';
 
 export default function AdminTracker() {
   const { enriched, loading } = useApplicants();
-  const { statusOptions, addStatus } = useStatusOptions();
+  const roadmapTemplate = useRoadmapTemplate();
+  const statusOptions = useMemo(() => statusOptionsFromRoadmap(roadmapTemplate || []), [roadmapTemplate]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
@@ -18,9 +19,10 @@ export default function AdminTracker() {
 
   function openCard(a: EnrichedApplicant) {
     setForm({
-      serialNo: a.serialNo, name: a.name, email: a.email, status: a.status,
+      serialNo: a.serialNo, name: a.name, email: a.email,
       created: a.created, submitted: a.submitted, notes: a.notes,
       lastUpdated: a.lastUpdated, reminderMailSent: a.reminderMailSent,
+      rejected: !!a.rejected,
     });
     setEditingApplicant(a);
     setModalOpen(true);
@@ -36,7 +38,7 @@ export default function AdminTracker() {
   if (loading) {
     return (
       <>
-        <PageHeader title="Tracker" subtitle="Every applicant, grouped by stage. Click a card to update it." />
+        <PageHeader title="Tracker" subtitle="Every applicant, grouped by roadmap stage. Click a card to update it." />
         <KanbanSkeleton />
       </>
     );
@@ -44,7 +46,7 @@ export default function AdminTracker() {
 
   return (
     <>
-      <PageHeader title="Tracker" subtitle="Every applicant, grouped by stage. Click a card to update it." />
+      <PageHeader title="Tracker" subtitle="Every applicant, grouped by roadmap stage. Click a card to update it." />
       <div className="app-content">
         <div className="app-kanban">
           {statusOptions.map(status => {
@@ -87,8 +89,6 @@ export default function AdminTracker() {
           setForm={setForm}
           onSave={saveForm}
           onClose={() => setModalOpen(false)}
-          statusOptions={statusOptions}
-          onAddStatus={addStatus}
         />
       )}
     </>

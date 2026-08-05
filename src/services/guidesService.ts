@@ -2,7 +2,8 @@ import {
   collection, doc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, where, limit,
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { db, storage } from '../firebase';
 import type { Guide, GuideSection } from '../types';
 
 const GUIDES_COL = 'guides';
@@ -29,12 +30,16 @@ export function subscribeGuideBySlug(slug: string, onData: (guide: Guide | null)
 export interface GuideFormData {
   title: string;
   slug: string;
+  category: string;
   order: number;
   sections: GuideSection[];
+  attachmentUrl?: string;
+  attachmentName?: string;
 }
 
-export async function addGuide(form: GuideFormData): Promise<void> {
-  await addDoc(collection(db, GUIDES_COL), { ...form, updatedAt: new Date().toISOString().slice(0, 10) });
+export async function addGuide(form: GuideFormData): Promise<string> {
+  const ref = await addDoc(collection(db, GUIDES_COL), { ...form, updatedAt: new Date().toISOString().slice(0, 10) });
+  return ref.id;
 }
 
 export async function updateGuide(id: string, form: GuideFormData): Promise<void> {
@@ -43,6 +48,20 @@ export async function updateGuide(id: string, form: GuideFormData): Promise<void
 
 export async function deleteGuide(id: string): Promise<void> {
   await deleteDoc(doc(db, GUIDES_COL, id));
+}
+
+// Uploaded to guides/{guideId}/{fileName} — see storage.rules. Only PDFs,
+// rendered in-app via a plain <iframe> (no library needed, browsers already
+// know how to display a PDF at a URL).
+export async function uploadGuideAttachment(guideId: string, file: File): Promise<{ url: string; name: string }> {
+  const fileRef = ref(storage, `guides/${guideId}/${file.name}`);
+  await uploadBytes(fileRef, file, { contentType: file.type });
+  const url = await getDownloadURL(fileRef);
+  return { url, name: file.name };
+}
+
+export async function deleteGuideAttachment(guideId: string, fileName: string): Promise<void> {
+  await deleteObject(ref(storage, `guides/${guideId}/${fileName}`)).catch(() => {});
 }
 
 export function slugify(title: string): string {

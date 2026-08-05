@@ -1,8 +1,5 @@
-import { useState } from 'react';
 import { REMINDER_OPTIONS } from '../constants/status';
-import type { ApplicantFormData, ReminderStatus, StatusOption } from '../types';
-
-const ADD_NEW_VALUE = '__add_new__';
+import type { ApplicantFormData, ReminderStatus } from '../types';
 
 interface ApplicantModalProps {
   open: boolean;
@@ -11,34 +8,12 @@ interface ApplicantModalProps {
   setForm: (f: ApplicantFormData) => void;
   onSave: () => void;
   onClose: () => void;
-  statusOptions: string[];
-  onAddStatus: (name: string) => Promise<void>;
 }
 
 export default function ApplicantModal({
-  open, isEditing, form, setForm, onSave, onClose, statusOptions, onAddStatus,
+  open, isEditing, form, setForm, onSave, onClose,
 }: ApplicantModalProps) {
-  const [addingStatus, setAddingStatus] = useState(false);
-  const [newStatus, setNewStatus] = useState('');
-
   if (!open) return null;
-
-  function handleStatusChange(value: string) {
-    if (value === ADD_NEW_VALUE) {
-      setAddingStatus(true);
-      return;
-    }
-    setForm({ ...form, status: value as StatusOption });
-  }
-
-  async function confirmNewStatus() {
-    const name = newStatus.trim();
-    if (!name) return;
-    if (!statusOptions.includes(name)) await onAddStatus(name);
-    setForm({ ...form, status: name as StatusOption });
-    setNewStatus('');
-    setAddingStatus(false);
-  }
 
   return (
     <div className="app-modal-backdrop" onClick={onClose}>
@@ -47,7 +22,7 @@ export default function ApplicantModal({
 
         <div className="app-field">
           <label>Serial No</label>
-          <input className="app-input" value={form.serialNo} onChange={e => setForm({ ...form, serialNo: e.target.value })} placeholder="e.g. AP/260/051125/000000525" />
+          <input className="app-input" value={form.serialNo} onChange={e => setForm({ ...form, serialNo: e.target.value })} placeholder="e.g. AP/260/051125/000001183" />
         </div>
 
         <div className="app-field">
@@ -58,29 +33,6 @@ export default function ApplicantModal({
         <div className="app-field">
           <label>Email</label>
           <input className="app-input" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="name@example.com" />
-        </div>
-
-        <div className="app-field">
-          <label>Status</label>
-          {addingStatus ? (
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                className="app-input"
-                autoFocus
-                value={newStatus}
-                onChange={e => setNewStatus(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); confirmNewStatus(); } }}
-                placeholder="New status name"
-              />
-              <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={confirmNewStatus}>Add</button>
-              <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={() => { setAddingStatus(false); setNewStatus(''); }}>Cancel</button>
-            </div>
-          ) : (
-            <select className="app-select" value={form.status} onChange={e => handleStatusChange(e.target.value)}>
-              {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-              <option value={ADD_NEW_VALUE}>+ Add new status…</option>
-            </select>
-          )}
         </div>
 
         <div style={{ display: 'flex', gap: 12 }}>
@@ -109,6 +61,16 @@ export default function ApplicantModal({
           <select className="app-select" value={form.reminderMailSent} onChange={e => setForm({ ...form, reminderMailSent: e.target.value as ReminderStatus })}>
             {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
+        </div>
+
+        <div className="app-field">
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <input type="checkbox" checked={form.rejected} onChange={e => setForm({ ...form, rejected: e.target.checked })} />
+            Mark as rejected
+          </label>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 4 }}>
+            Status is otherwise derived from the applicant's roadmap progress — this is the one outcome the roadmap can't express on its own.
+          </div>
         </div>
 
         <div className="app-modal-actions">

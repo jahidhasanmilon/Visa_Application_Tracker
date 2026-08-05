@@ -12,7 +12,8 @@ export interface Applicant {
   serialNo: string;
   name: string;
   email: string;
-  status: StatusOption;
+  // No `status` field here — status is derived from roadmap progress, see
+  // deriveStatus() in utils/dateHelpers.ts and EnrichedApplicant.status below.
   created: string;      // ISO date string, e.g. "2026-07-05" — application created date
   submitted: string;    // ISO date string — application submitted date (waiting time is measured from here)
   notes: string;
@@ -23,6 +24,10 @@ export interface Applicant {
   // Never set by the client — Firestore rules only allow admin/applicant to
   // touch reminderMailSent.
   reminderEmailSentAt?: string;
+  // Admin-only override for the one outcome the roadmap can't express on its
+  // own (rejection isn't a forward step). When set, deriveStatus() reports
+  // 'Rejected' regardless of roadmap progress.
+  rejected?: boolean;
   // Admin-managed per-applicant to-do list. Toggleable by both admin and applicant.
   checklist?: ChecklistItem[];
   // Admin-managed per-applicant progress stepper, shown at the top of the
@@ -38,6 +43,13 @@ export interface ChecklistItem {
 }
 
 export interface EnrichedApplicant extends Applicant {
+  // Derived, never stored: 'Rejected' if a.rejected, else 'Not started' if
+  // no roadmap step is done yet, else the label of the furthest-along
+  // completed roadmap step. See deriveStatus() in utils/dateHelpers.ts.
+  status: StatusOption;
+  // True once every roadmap step is marked done (and not rejected) —
+  // used where the app previously checked status === 'Approved'.
+  isComplete: boolean;
   // null when `submitted` isn't set yet (self-service applicants who
   // haven't submitted their application) — nothing to count from yet.
   waiting: number | null;
@@ -54,12 +66,12 @@ export interface ApplicantFormData {
   serialNo: string;
   name: string;
   email: string;
-  status: StatusOption;
   created: string;
   submitted: string;
   notes: string;
   lastUpdated: string;
   reminderMailSent: ReminderStatus;
+  rejected: boolean;
 }
 
 export interface StatCounts {
@@ -88,7 +100,23 @@ export interface Guide {
   id: string;
   title: string;
   slug: string;
+  category: string;
   order: number;
   sections: GuideSection[];
+  attachmentUrl?: string;
+  attachmentName?: string;
   updatedAt?: string;
+}
+
+export interface VivaQuestion {
+  id: string;
+  question: string;
+  note: string;
+  order: number;
+}
+
+export interface HelpInfo {
+  whatsappLink: string;
+  email: string;
+  notes: string;
 }
