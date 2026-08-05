@@ -60,7 +60,7 @@ export default function AdminVivaQuestions() {
   return (
     <>
       <PageHeader
-        title="Viva Questions"
+        title="Interview Questions"
         subtitle="Interview-prep questions every applicant sees, with your notes underneath."
         actions={<button className="app-btn app-btn-primary" onClick={openAdd}><Plus size={16} /> New question</button>}
       />

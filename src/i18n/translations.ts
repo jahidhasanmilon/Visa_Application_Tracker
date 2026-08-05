@@ -13,7 +13,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.tracker': 'Tracker',
     'nav.checklist': 'Checklist',
     'nav.roadmap': 'Road to Success',
-    'nav.vivaQuestions': 'Viva Questions',
+    'nav.vivaQuestions': 'Interview Questions',
     'nav.reminderEmail': 'Reminder Email',
     'nav.analytics': 'Analytics',
     'nav.guides': 'Guides & Resources',
@@ -126,14 +126,14 @@ export const translations: Record<Lang, Record<string, string>> = {
     'status.daysPastEmbassy': '{{n}} days past when an embassy email was expected',
 
     // Checklist
-    'checklist.title': 'Checklist',
+    'checklist.title': 'Personal Checklist',
     'checklist.subtitle': 'Your own to-do list — check things off as you complete them.',
     'checklist.empty': 'No checklist items yet.',
     'checklist.done': 'Done',
-    'checklist.notYet': 'Not yet',
+    'checklist.notYet': 'Pending',
 
     // Viva Questions
-    'vivaQuestions.title': 'Viva Questions',
+    'vivaQuestions.title': 'Interview Questions',
     'vivaQuestions.subtitle': 'Common interview questions — practice these before your appointment.',
     'vivaQuestions.empty': 'No questions published yet.',
 
@@ -150,7 +150,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'howToUse.s4.body': 'A simple nudge so you don\'t forget to follow up with the embassy. Mark it "Done" after you\'ve checked in — it resets automatically, counting down again from today.',
     'howToUse.s5.heading': '5. Guides & Resources',
     'howToUse.s5.body': 'Step-by-step write-ups on applying for the visa, understanding the checklist, and applying for jobs — organized by category. No login needed to browse them.',
-    'howToUse.s6.heading': '6. Viva Questions',
+    'howToUse.s6.heading': '6. Interview Questions',
     'howToUse.s6.body': 'Common interview questions with notes on how to approach them — worth reviewing before your embassy appointment.',
 
     // Profile
@@ -238,7 +238,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'nav.tracker': 'ট্র্যাকার',
     'nav.checklist': 'চেকলিস্ট',
     'nav.roadmap': 'সফলতার পথ',
-    'nav.vivaQuestions': 'ভাইভা প্রশ্ন',
+    'nav.vivaQuestions': 'ইন্টারভিউ প্রশ্ন',
     'nav.reminderEmail': 'রিমাইন্ডার Email',
     'nav.analytics': 'অ্যানালিটিক্স',
     'nav.guides': 'গাইড ও রিসোর্স',
@@ -351,14 +351,14 @@ export const translations: Record<Lang, Record<string, string>> = {
     'status.daysPastEmbassy': 'দূতাবাসের Email আশা করার সময় {{n}} দিন পেরিয়ে গেছে',
 
     // Checklist
-    'checklist.title': 'চেকলিস্ট',
+    'checklist.title': 'ব্যক্তিগত চেকলিস্ট',
     'checklist.subtitle': 'আপনার নিজের to-do list — কাজ শেষ হলে টিক দিয়ে দিন।',
     'checklist.empty': 'এখনো কোনো checklist item নেই।',
     'checklist.done': 'হয়ে গেছে',
-    'checklist.notYet': 'এখনো হয়নি',
+    'checklist.notYet': 'বাকি',
 
     // Viva Questions
-    'vivaQuestions.title': 'ভাইভা প্রশ্ন',
+    'vivaQuestions.title': 'ইন্টারভিউ প্রশ্ন',
     'vivaQuestions.subtitle': 'সাধারণ ইন্টারভিউ প্রশ্ন — আপনার অ্যাপয়েন্টমেন্টের আগে অনুশীলন করুন।',
     'vivaQuestions.empty': 'এখনো কোনো প্রশ্ন প্রকাশ করা হয়নি।',
 
@@ -375,7 +375,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'howToUse.s4.body': 'দূতাবাসের সাথে follow up করতে ভুলে না যাওয়ার জন্য একটা সাধারণ reminder। খোঁজ নেওয়ার পর এটা "হয়ে গেছে" মার্ক করুন — এটা স্বয়ংক্রিয়ভাবে reset হয়ে আজ থেকে আবার countdown শুরু করে।',
     'howToUse.s5.heading': '৫. গাইড ও রিসোর্স',
     'howToUse.s5.body': 'ভিসার জন্য আবেদন, checklist বোঝা, আর চাকরির জন্য আবেদন করা নিয়ে ধাপে ধাপে লেখা — category অনুযায়ী সাজানো। এগুলো দেখতে login লাগবে না।',
-    'howToUse.s6.heading': '৬. ভাইভা প্রশ্ন',
+    'howToUse.s6.heading': '৬. ইন্টারভিউ প্রশ্ন',
     'howToUse.s6.body': 'সাধারণ ইন্টারভিউ প্রশ্ন, কীভাবে সেগুলোর উত্তর দেবেন তার নোটসহ — দূতাবাসের অ্যাপয়েন্টমেন্টের আগে দেখে নেওয়া ভালো।',
 
     // Profile
