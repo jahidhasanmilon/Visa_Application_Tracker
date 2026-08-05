@@ -9,7 +9,7 @@ interface PageHeaderProps {
 export default function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   return (
     <div className="app-topbar">
-      <div>
+      <div className="app-topbar-title">
         <div className="app-page-title">{title}</div>
         {subtitle && <div className="app-page-subtitle">{subtitle}</div>}
       </div>

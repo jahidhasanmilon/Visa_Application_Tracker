@@ -38,11 +38,13 @@ export default function AppShell({ user, role }: AppShellProps) {
 
       <aside className={`app-sidebar${mobileNavOpen ? ' mobile-open' : ''}${collapsed ? ' collapsed' : ''}`}>
         <div className="app-logo">
-          <div className="app-logo-mark"><PlaneTakeoff size={18} /></div>
-          <div style={{ flex: 1 }}>
-            <div className="app-logo-text">VisaTrack</div>
-            {role === 'admin' && <div className="app-logo-sub">Admin console</div>}
-          </div>
+          <Link to="/app/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, textDecoration: 'none' }} onClick={() => setMobileNavOpen(false)}>
+            <div className="app-logo-mark"><PlaneTakeoff size={18} /></div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="app-logo-text">VisaTrack</div>
+              {role === 'admin' && <div className="app-logo-sub">Admin console</div>}
+            </div>
+          </Link>
           <button className="app-icon-btn app-sidebar-close" style={{ color: 'var(--sidebar-text)' }} onClick={() => setMobileNavOpen(false)} aria-label="Close menu">
             <X size={18} />
           </button>
@@ -100,10 +102,10 @@ export default function AppShell({ user, role }: AppShellProps) {
 
       <main className="app-main">
         <div className="app-mobile-topbar">
-          <div className="app-topbar-logo app-logo" style={{ padding: 0 }}>
+          <Link to="/app/dashboard" className="app-topbar-logo app-logo" style={{ padding: 0, textDecoration: 'none' }}>
             <div className="app-logo-mark"><PlaneTakeoff size={16} /></div>
             <div className="app-logo-text" style={{ color: 'var(--ink)' }}>VisaTrack</div>
-          </div>
+          </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
             {role === 'admin' ? <NotificationBell /> : <ApplicantNotificationBell uid={user.uid} />}
             <ProfileToggleButton user={user} />

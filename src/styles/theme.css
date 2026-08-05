@@ -247,11 +247,13 @@ button.app-sidebar-close { display: none; }
 .app-topbar {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
   padding: 30px 34px 22px;
-  flex-wrap: wrap;
 }
+/* Title/subtitle shrink and wrap their own text; actions stay pinned on
+   the same row (top-right) instead of dropping to a new line below. */
+.app-topbar-title { min-width: 0; flex: 1 1 auto; }
 .app-page-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 25px; color: var(--ink); line-height: 1.2; }
 .app-page-subtitle { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
-.app-topbar-actions { display: flex; align-items: center; gap: 10px; }
+.app-topbar-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .app-content { padding: 0 34px 44px; display: flex; flex-direction: column; gap: 20px; }
 
 .app-pdf-frame { width: 100%; height: 75vh; min-height: 320px; max-height: 700px; border: 1px solid var(--border); border-radius: 10px; }
@@ -588,6 +590,10 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   }
   .app-sidebar.mobile-open { transform: translateX(0); }
   button.app-sidebar-close { display: inline-flex; }
+
+  /* Icon-only on mobile/tablet — keeps page-header action buttons from
+     forcing a wrap onto their own row below a long title/subtitle. */
+  .app-btn-label-responsive { display: none; }
 
   .app-auth-screen { grid-template-columns: 1fr; }
   .app-auth-art { display: none; }

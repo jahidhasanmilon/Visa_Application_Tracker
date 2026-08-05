@@ -44,7 +44,11 @@ export default function ApplicantDashboard({ applicant }: ApplicantDashboardProp
       <PageHeader
         title="My Status"
         subtitle="Track your own progress — you're in control of this record."
-        actions={<button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}><Pencil size={14} /> Edit my details</button>}
+        actions={
+          <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}>
+            <Pencil size={14} /> <span className="app-btn-label-responsive">Edit my details</span>
+          </button>
+        }
       />
       <div className="app-content">
         {enriched === null || checklistTemplate === null || roadmapTemplate === null ? (
