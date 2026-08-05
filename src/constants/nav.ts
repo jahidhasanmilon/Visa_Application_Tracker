@@ -15,7 +15,7 @@ export const ADMIN_NAV = [
   { to: '/app/reminder-email', label: 'Reminder Email', icon: Mail },
   { to: '/app/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/app/guides', label: 'Guides & Resources', icon: BookOpen },
-  { to: '/app/help', label: 'Help', icon: LifeBuoy },
+  { to: '/app/help', label: 'Help & Supports', icon: LifeBuoy },
   { to: '/app/about', label: 'About', icon: Info },
   { to: '/app/admins', label: 'Admins', icon: ShieldCheck },
   { to: '/app/profile', label: 'Profile', icon: UserCircle },
@@ -33,7 +33,7 @@ export const APPLICANT_NAV = [
   { to: '/app/profile', label: 'Profile', icon: UserCircle, section: 'account' as NavSection },
   { to: '/app/about', label: 'About', icon: Info, section: 'support' as NavSection },
   { to: '/app/how-to-use', label: 'How to Use', icon: Compass, section: 'support' as NavSection },
-  { to: '/app/help', label: 'Help', icon: LifeBuoy, section: 'support' as NavSection },
+  { to: '/app/help', label: 'Help & Supports', icon: LifeBuoy, section: 'support' as NavSection },
 ];
 
 // Maps each nav item's route to its i18n key, since ADMIN_NAV/APPLICANT_NAV
