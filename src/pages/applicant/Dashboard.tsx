@@ -186,8 +186,8 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-        <Field label={t('status.appliedOn')} value={fmtDate(a.created)} />
-        <Field label={t('status.submittedOn')} value={fmtDate(a.submitted)} />
+        <Field label={t('status.appliedOn')} value={fmtDate(a.created)} tooltip={t('status.appliedOnTooltip')} />
+        <Field label={t('status.submittedOn')} value={fmtDate(a.submitted)} tooltip={t('status.submittedOnTooltip')} />
         <Field
           label={t('status.waiting')}
           value={a.waiting === null ? '—' : `${a.waiting} ${t('status.daysSuffix')}`}
@@ -209,6 +209,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
         <div className="app-field" style={{ margin: 0, maxWidth: 240 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {t('status.reminderFullTitle')}
+            <InfoTooltip text={t('status.reminderFullTooltip')} />
             {a.effectiveReminderStatus !== a.reminderMailSent && (
               <span className="app-badge" style={{
                 background: REMINDER_META[a.effectiveReminderStatus].bg,
