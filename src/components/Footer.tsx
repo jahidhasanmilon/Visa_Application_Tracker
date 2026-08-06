@@ -7,7 +7,8 @@ export default function Footer() {
   const { t } = useLanguage();
   return (
     <div className="app-footer">
-      {t('footer.text')} {t('footer.createdBy')} <a href={CREATOR_LINKEDIN} target="_blank" rel="noreferrer">{CREATOR_NAME}</a>.
+      <div>{t('footer.text')}</div>
+      <div>{t('footer.createdBy')} <a href={CREATOR_LINKEDIN} target="_blank" rel="noreferrer">{CREATOR_NAME}</a>.</div>
     </div>
   );
 }
