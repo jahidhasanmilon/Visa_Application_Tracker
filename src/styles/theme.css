@@ -120,9 +120,8 @@ html, body { background: var(--bg); }
 .app-footer {
   padding: 16px 34px; font-size: 11px; color: var(--muted); text-align: center; line-height: 1.5;
 }
-.app-footer-credit { margin-top: 3px; font-size: 10.5px; }
-.app-footer-credit a { color: var(--muted); text-decoration: underline; }
-.app-footer-credit a:hover { color: var(--ink); }
+.app-footer a { color: var(--muted); text-decoration: underline; }
+.app-footer a:hover { color: var(--ink); }
 
 .app-sidebar {
   background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
