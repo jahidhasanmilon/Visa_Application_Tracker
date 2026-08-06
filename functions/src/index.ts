@@ -47,13 +47,10 @@ function daysBetween(a: string, b: string): number {
   return Math.round((B.getTime() - A.getTime()) / 86400000);
 }
 
-// Mirrors src/utils/dateHelpers.ts — Bangladesh's calendar date
-// (Asia/Dhaka), not raw UTC, so the server-side overdue check agrees with
-// what applicants see client-side.
+// Mirrors src/utils/dateHelpers.ts — UTC calendar date, so the server-side
+// overdue check agrees with what applicants see client-side.
 function todayStr(): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(new Date());
+  return new Date().toISOString().slice(0, 10);
 }
 
 function renderTemplate(template: string, vars: Record<string, string>): string {

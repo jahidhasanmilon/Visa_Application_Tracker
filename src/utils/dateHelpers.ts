@@ -7,15 +7,12 @@ export function daysBetween(a: string, b: string): number {
   return Math.round((B.getTime() - A.getTime()) / 86400000);
 }
 
-// Bangladesh's calendar date (Asia/Dhaka, UTC+6) — not the visitor's own
-// browser timezone or raw UTC. Using UTC (the old `toISOString()` approach)
-// could be off by a day for hours when Dhaka has already rolled over to a
-// new date but UTC hasn't yet (or vice versa), throwing off every
-// day-based countdown by up to a day right around midnight.
+// UTC calendar date — deliberately not the visitor's own browser timezone,
+// so every applicant and admin (wherever they are) computes the same
+// day-based countdowns off the same clock. Must match todayStr() in
+// functions/src/index.ts.
 export function todayStr(): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Dhaka', year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(new Date());
+  return new Date().toISOString().slice(0, 10);
 }
 
 export function fmtDate(d?: string): string {

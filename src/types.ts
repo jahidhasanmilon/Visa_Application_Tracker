@@ -132,6 +132,9 @@ export interface HelpInfo {
   subtitle: string;
   email: string;
   emailDescription: string;
+  embassyEmail: string;
+  embassyAddress: string;
+  embassyDescription: string;
   removingEntryTitle: string;
   removingEntryBody: string;
   communityDescription: string;

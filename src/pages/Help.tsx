@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pencil, Mail, ArrowRight, Plus, X } from 'lucide-react';
+import { Pencil, Mail, Landmark, ArrowRight, Plus, X } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import RichTextToolbar from '../components/RichTextToolbar';
 import { subscribeHelp, saveHelp, DEFAULT_HELP } from '../services/siteContentService';
@@ -81,6 +81,19 @@ export default function Help({ role }: HelpProps) {
             </div>
 
             <div className="app-field">
+              <label>Germany Embassy support email</label>
+              <input className="app-input" type="email" value={draft.embassyEmail} onChange={e => setDraft({ ...draft, embassyEmail: e.target.value })} placeholder="info@dhaka.diplo.de" />
+            </div>
+            <div className="app-field">
+              <label>Germany Embassy address</label>
+              <textarea className="app-textarea" value={draft.embassyAddress} onChange={e => setDraft({ ...draft, embassyAddress: e.target.value })} style={{ minHeight: 60 }} placeholder="Address of the German Embassy" />
+            </div>
+            <div className="app-field">
+              <label>Embassy card description</label>
+              <textarea className="app-textarea" value={draft.embassyDescription} onChange={e => setDraft({ ...draft, embassyDescription: e.target.value })} style={{ minHeight: 60 }} />
+            </div>
+
+            <div className="app-field">
               <label>Section title</label>
               <input className="app-input" value={draft.removingEntryTitle} onChange={e => setDraft({ ...draft, removingEntryTitle: e.target.value })} placeholder="Removing an entry" />
             </div>
@@ -151,6 +164,24 @@ export default function Help({ role }: HelpProps) {
               </div>
             )}
 
+            {(help.embassyEmail || help.embassyAddress) && (
+              <div className="app-card app-card-pad">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                  <Landmark size={16} color="var(--violet)" />
+                  <div className="app-card-title">Germany Embassy</div>
+                </div>
+                {help.embassyDescription && (
+                  <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>{help.embassyDescription}</p>
+                )}
+                {help.embassyAddress && (
+                  <p style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.6, margin: '0 0 14px', whiteSpace: 'pre-line' }}>{help.embassyAddress}</p>
+                )}
+                {help.embassyEmail && (
+                  <a href={`mailto:${help.embassyEmail}`} className="app-btn app-btn-primary app-btn-block">{help.embassyEmail}</a>
+                )}
+              </div>
+            )}
+
             {help.removingEntryBody && (
               <div>
                 <div className="app-card-title" style={{ marginBottom: 8 }}>{help.removingEntryTitle}</div>
@@ -186,7 +217,7 @@ export default function Help({ role }: HelpProps) {
               </div>
             )}
 
-            {!help.email && !help.removingEntryBody && help.communityLinks.length === 0 && (
+            {!help.email && !help.embassyEmail && !help.embassyAddress && !help.removingEntryBody && help.communityLinks.length === 0 && (
               <div className="app-card app-card-pad">
                 <div className="app-empty">{isAdmin ? t('help.emptyAdmin') : t('help.emptyApplicant')}</div>
               </div>
