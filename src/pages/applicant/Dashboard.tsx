@@ -153,7 +153,10 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
           <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 3 }}>
             {a.reminderDaysLeft > 0 ? t('status.daysLeft') : a.reminderDaysLeft === 0 ? t('status.dueToday') : t('status.daysOverdue')}
           </div>
-          <div style={{ fontSize: 9.5, opacity: 0.8, marginTop: 2 }}>{t('status.reminderTitle')}</div>
+          <div style={{ fontSize: 9.5, opacity: 0.8, marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+            {t('status.reminderTitle')}
+            <InfoTooltip text={t('status.countdownTooltip')} />
+          </div>
         </div>
       </div>
 
