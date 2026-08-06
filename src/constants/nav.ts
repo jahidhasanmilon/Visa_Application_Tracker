@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Briefcase, KanbanSquare, UserCircle, CheckSquare, Milestone, Mail, BarChart3,
-  BookOpen, ShieldCheck, HelpCircle, LifeBuoy, Info, Compass,
+  BookOpen, ShieldCheck, HelpCircle, LifeBuoy, Info, Compass, MessageCircleQuestion,
 } from 'lucide-react';
 
 export type NavSection = 'main' | 'account' | 'support';
@@ -15,6 +15,7 @@ export const ADMIN_NAV = [
   { to: '/app/reminder-email', label: 'Reminder Email', icon: Mail },
   { to: '/app/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/app/guides', label: 'Guides & Resources', icon: BookOpen },
+  { to: '/app/faq', label: 'FAQ', icon: MessageCircleQuestion },
   { to: '/app/help', label: 'Help & Supports', icon: LifeBuoy },
   { to: '/app/about', label: 'About', icon: Info },
   { to: '/app/admins', label: 'Admins', icon: ShieldCheck },
@@ -31,6 +32,7 @@ export const APPLICANT_NAV = [
   { to: '/app/guides', label: 'Guides & Resources', icon: BookOpen, section: 'main' as NavSection },
   { to: '/app/viva-questions', label: 'Interview Questions', icon: HelpCircle, section: 'main' as NavSection },
   { to: '/app/profile', label: 'Profile', icon: UserCircle, section: 'account' as NavSection },
+  { to: '/app/faq', label: 'FAQ', icon: MessageCircleQuestion, section: 'support' as NavSection },
   { to: '/app/about', label: 'About', icon: Info, section: 'support' as NavSection },
   { to: '/app/how-to-use', label: 'How to Use', icon: Compass, section: 'support' as NavSection },
   { to: '/app/help', label: 'Help & Supports', icon: LifeBuoy, section: 'support' as NavSection },
@@ -48,6 +50,7 @@ export const NAV_LABEL_KEYS: Record<string, string> = {
   '/app/reminder-email': 'nav.reminderEmail',
   '/app/analytics': 'nav.analytics',
   '/app/guides': 'nav.guides',
+  '/app/faq': 'nav.faq',
   '/app/help': 'nav.help',
   '/app/about': 'nav.about',
   '/app/admins': 'nav.admins',
