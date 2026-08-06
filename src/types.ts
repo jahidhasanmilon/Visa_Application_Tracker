@@ -36,11 +36,11 @@ export interface ChecklistItem {
   id: string;
   label: string;
   done: boolean;
-  // Roadmap-only: a short plain-language explainer shown under the status
+  // Admin-set on the shared template. Roadmap: also shown under the status
   // badge on the applicant's My Status page when this is their furthest
   // completed step — e.g. "Submitted — next you'll be contacted for
-  // review." Admin-set on the shared template; meaningless for checklist
-  // items, which don't have a "current status" concept.
+  // review." Checklist: shown in italics under the item on the applicant's
+  // Checklist page.
   note?: string;
 }
 

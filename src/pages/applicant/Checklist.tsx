@@ -82,8 +82,15 @@ function ChecklistCard({ applicant, template }: { applicant: Applicant; template
               }}>
                 {item.done ? <Check size={13} /> : <Circle size={9} fill="currentColor" />}
               </span>
-              <span style={{ flex: 1, fontSize: 14, fontWeight: 500, textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--muted)' : 'var(--ink)' }}>
-                {item.label}
+              <span style={{ flex: 1 }}>
+                <span style={{ display: 'block', fontSize: 14, fontWeight: 500, textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--muted)' : 'var(--ink)' }}>
+                  {item.label}
+                </span>
+                {item.note && (
+                  <span style={{ display: 'block', fontSize: 12, fontStyle: 'italic', color: 'var(--muted)', marginTop: 2 }}>
+                    {item.note}
+                  </span>
+                )}
               </span>
               <span className="app-badge" style={{
                 background: item.done ? 'var(--success-soft)' : 'var(--neutral-soft)',

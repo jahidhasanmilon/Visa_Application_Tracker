@@ -56,6 +56,7 @@ export default function AdminChecklist() {
           items={template}
           onSave={saveChecklistTemplate}
           addPlaceholder="New default checklist item"
+          showNoteField
         />
 
         {customizedCount > 0 && (
