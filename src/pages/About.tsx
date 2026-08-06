@@ -201,9 +201,8 @@ export default function About({ role }: AboutProps) {
       ]
     : DEFAULT_ABOUT_SECTION_ORDER;
 
-  const storySection: ReactNode = (
+  const storySection: ReactNode = editingStory ? (
         <div className="app-card app-card-pad">
-          {editingStory ? (
             <>
               <div className="app-field">
                 <label>Subtitle</label>
@@ -254,8 +253,9 @@ export default function About({ role }: AboutProps) {
                 <button className="app-btn app-btn-primary app-btn-sm" onClick={saveStory} disabled={savingStory}>{savingStory ? t('common.saving') : t('common.save')}</button>
               </div>
             </>
-          ) : (
-            <>
+        </div>
+  ) : (
+        <div className="app-about-story">
               <div className="app-about-section-head">
                 <div className="app-about-section-icon" style={{ background: 'var(--violet-soft)', color: 'var(--violet)' }}>
                   <Sparkles size={16} />
@@ -277,8 +277,6 @@ export default function About({ role }: AboutProps) {
                   ))}
                 </div>
               )}
-            </>
-          )}
         </div>
   );
 
