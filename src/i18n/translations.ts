@@ -91,6 +91,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Footer
     'footer.text': 'This is an unofficial app with no affiliation to the German Embassy — © {{year}} VisaTrack. All rights reserved.',
+    'footer.createdBy': 'Created and developed by:',
 
     // My Status (applicant dashboard)
     'status.title': 'My Status',
@@ -316,6 +317,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Footer
     'footer.text': 'এটি একটি অনানুষ্ঠানিক অ্যাপ, জার্মান দূতাবাসের সাথে কোনো সম্পর্ক নেই — © {{year}} VisaTrack। সর্বস্বত্ব সংরক্ষিত।',
+    'footer.createdBy': 'তৈরি ও ডেভেলপ করেছেন:',
 
     // My Status (applicant dashboard)
     'status.title': 'আমার স্ট্যাটাস',
