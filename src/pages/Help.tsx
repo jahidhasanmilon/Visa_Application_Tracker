@@ -81,7 +81,11 @@ export default function Help({ role }: HelpProps) {
             </div>
 
             <div className="app-field">
-              <label>Removing an entry</label>
+              <label>Section title</label>
+              <input className="app-input" value={draft.removingEntryTitle} onChange={e => setDraft({ ...draft, removingEntryTitle: e.target.value })} placeholder="Removing an entry" />
+            </div>
+            <div className="app-field">
+              <label>Section content</label>
               <RichTextToolbar textareaRef={removingEntryRef} onChange={removingEntryBody => setDraft({ ...draft, removingEntryBody })} />
               <textarea
                 ref={removingEntryRef}
@@ -149,7 +153,7 @@ export default function Help({ role }: HelpProps) {
 
             {help.removingEntryBody && (
               <div>
-                <div className="app-card-title" style={{ marginBottom: 8 }}>Removing an entry</div>
+                <div className="app-card-title" style={{ marginBottom: 8 }}>{help.removingEntryTitle}</div>
                 <div
                   className="app-section-body"
                   style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}

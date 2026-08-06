@@ -132,6 +132,7 @@ export interface HelpInfo {
   subtitle: string;
   email: string;
   emailDescription: string;
+  removingEntryTitle: string;
   removingEntryBody: string;
   communityDescription: string;
   communityLinks: HelpLink[];
