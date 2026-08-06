@@ -30,17 +30,28 @@ import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
 import './styles/theme.css';
 
-const FLIGHT_PATH = 'M6,50 Q60,3 114,50';
+const FLIGHT_PATH = 'M14,150 C10,92 52,68 66,14';
 
 function LoadingScreen() {
   return (
     <div className="app-loading-screen">
       <div className="app-flight">
-        <svg className="app-flight-svg" viewBox="0 0 120 56" width="120" height="56" aria-hidden="true">
+        <svg className="app-flight-svg" viewBox="0 0 80 160" width="80" height="160" aria-hidden="true">
           <path className="app-flight-route" d={FLIGHT_PATH} />
           <path className="app-flight-trail" d={FLIGHT_PATH} pathLength={100} />
-          <circle className="app-flight-dot" cx="6" cy="50" r="2.5" />
-          <circle className="app-flight-dot" cx="114" cy="50" r="2.5" />
+
+          {/* Bangladesh — departure */}
+          <g transform="translate(2, 141)">
+            <rect width="24" height="16" fill="#006a4e" />
+            <circle cx="10.5" cy="8" r="5.4" fill="#f42a41" />
+          </g>
+
+          {/* Germany — destination */}
+          <g transform="translate(54, 3)">
+            <rect width="24" height="16" fill="#000000" />
+            <rect y="5.33" width="24" height="5.34" fill="#dd0000" />
+            <rect y="10.67" width="24" height="5.33" fill="#ffce00" />
+          </g>
         </svg>
         <Plane className="app-flight-plane" size={16} />
       </div>

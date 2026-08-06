@@ -330,9 +330,10 @@ button.app-sidebar-close { display: none; }
 .app-spin { animation: app-spin 0.8s linear infinite; }
 @keyframes app-spin { to { transform: rotate(360deg); } }
 
-/* Loading-screen flight — a plane arcs from departure to arrival along a
-   curved route, its trail drawing in as it flies, then fades out and loops. */
-.app-flight { position: relative; width: 120px; height: 56px; }
+/* Loading-screen flight — a plane climbs from Bangladesh to Germany along a
+   takeoff-style curve, its trail drawing in as it flies, then fades out and
+   loops. */
+.app-flight { position: relative; width: 80px; height: 160px; }
 .app-flight-svg { position: absolute; inset: 0; overflow: visible; }
 .app-flight-route {
   fill: none; stroke: var(--border); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1 7;
@@ -340,15 +341,14 @@ button.app-sidebar-close { display: none; }
 .app-flight-trail {
   fill: none; stroke: var(--violet); stroke-width: 2; stroke-linecap: round;
   stroke-dasharray: 100; stroke-dashoffset: 100;
-  animation: app-flight-trail 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: app-flight-trail 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
-.app-flight-dot { fill: var(--muted-2); }
 .app-flight-plane {
   position: absolute; top: 0; left: 0; color: var(--violet);
-  offset-path: path('M6,50 Q60,3 114,50');
+  offset-path: path('M14,150 C10,92 52,68 66,14');
   offset-rotate: auto;
   transform: rotate(-45deg);
-  animation: app-flight-move 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: app-flight-move 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 @keyframes app-flight-trail {
   0%   { stroke-dashoffset: 100; opacity: 0; }
