@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pencil, Plus, X, Trash2, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
+import { Pencil, Plus, X, Trash2, ArrowUp, ArrowDown, ArrowRight, Sparkles, Handshake, HelpCircle, Users } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { subscribeAbout, saveAbout, DEFAULT_ABOUT } from '../services/siteContentService';
 import { subscribeFaqs, addFaq, updateFaq, deleteFaq, type FaqFormData } from '../services/faqService';
@@ -256,7 +256,12 @@ export default function About({ role }: AboutProps) {
             </>
           ) : (
             <>
-              {content.storyHeading && <div className="app-card-title" style={{ marginBottom: 10 }}>{content.storyHeading}</div>}
+              <div className="app-about-section-head">
+                <div className="app-about-section-icon" style={{ background: 'var(--violet-soft)', color: 'var(--violet)' }}>
+                  <Sparkles size={16} />
+                </div>
+                <div className="app-about-section-title">{content.storyHeading || 'Our story'}</div>
+              </div>
               {content.storyIntro && (
                 <p style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink)', whiteSpace: 'pre-wrap', margin: 0 }}>{content.storyIntro}</p>
               )}
@@ -326,10 +331,13 @@ export default function About({ role }: AboutProps) {
               </>
             ) : (
               <>
-                <span className="app-badge" style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)', marginBottom: 12, display: 'inline-block' }}>
-                  Official partner
-                </span>
-                <div className="app-card-title" style={{ marginBottom: 8 }}>{content.partnerName}</div>
+                <div className="app-about-section-head" style={{ marginBottom: 8 }}>
+                  <div className="app-about-section-icon" style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)' }}>
+                    <Handshake size={16} />
+                  </div>
+                  <div className="app-about-section-title">Official partner</div>
+                </div>
+                <div className="app-card-title" style={{ marginBottom: 8, marginLeft: 42 }}>{content.partnerName}</div>
                 {content.partnerDescription && (
                   <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>{content.partnerDescription}</p>
                 )}
@@ -359,8 +367,13 @@ export default function About({ role }: AboutProps) {
         )}
 
         <div>
-          <div className="app-card-head" style={{ marginBottom: 12 }}>
-            <div className="app-page-title" style={{ fontSize: 18 }}>Frequently asked questions</div>
+          <div className="app-card-head" style={{ marginBottom: 14 }}>
+            <div className="app-about-section-head" style={{ marginBottom: 0 }}>
+              <div className="app-about-section-icon" style={{ background: 'var(--info-soft)', color: 'var(--info)' }}>
+                <HelpCircle size={16} />
+              </div>
+              <div className="app-about-section-title">Frequently asked questions</div>
+            </div>
             {isAdmin && (
               <button className="app-btn app-btn-ghost app-btn-sm" onClick={openAddFaq}><Plus size={14} /> Add FAQ</button>
             )}
@@ -403,8 +416,13 @@ export default function About({ role }: AboutProps) {
         </div>
 
         <div>
-          <div className="app-card-head" style={{ marginBottom: 12 }}>
-            <div className="app-page-title" style={{ fontSize: 18 }}>The people behind the platform</div>
+          <div className="app-card-head" style={{ marginBottom: 14 }}>
+            <div className="app-about-section-head" style={{ marginBottom: 0 }}>
+              <div className="app-about-section-icon" style={{ background: 'var(--success-soft)', color: 'var(--success)' }}>
+                <Users size={16} />
+              </div>
+              <div className="app-about-section-title">The people behind the platform</div>
+            </div>
             {isAdmin && (
               <button className="app-btn app-btn-ghost app-btn-sm" onClick={openAddMember}><Plus size={14} /> Add member</button>
             )}

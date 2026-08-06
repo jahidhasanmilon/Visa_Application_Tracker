@@ -284,6 +284,13 @@ button.app-sidebar-close { display: none; }
 .app-section-body .app-section-list li { margin-bottom: 4px; }
 
 /* ---------- About page: story timeline + team avatars ---------- */
+.app-about-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.app-about-section-icon {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.app-about-section-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 16.5px; color: var(--ink); }
+
 .app-about-timeline { position: relative; margin-top: 20px; padding-left: 22px; }
 .app-about-timeline-item { position: relative; padding-bottom: 22px; }
 .app-about-timeline-item:last-child { padding-bottom: 0; }
