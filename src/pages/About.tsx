@@ -184,6 +184,7 @@ export default function About({ role }: AboutProps) {
   return (
     <>
       <PageHeader
+        eyebrow="About"
         title={t('about.title')}
         subtitle={content.subtitle}
         actions={isAdmin && !editingStory ? (

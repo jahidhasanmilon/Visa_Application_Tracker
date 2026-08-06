@@ -58,6 +58,7 @@ export default function Privacy() {
   return (
     <>
       <PageHeader
+        eyebrow="Legal"
         title={t('privacy.title')}
         subtitle={t('privacy.subtitle')}
         actions={isAdmin && !editing ? (

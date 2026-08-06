@@ -267,6 +267,7 @@ button.app-sidebar-close { display: none; }
 /* Title/subtitle shrink and wrap their own text; actions stay pinned on
    the same row (top-right) instead of dropping to a new line below. */
 .app-topbar-title { min-width: 0; flex: 1 1 auto; }
+.app-page-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 6px; }
 .app-page-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 25px; color: var(--ink); line-height: 1.2; }
 .app-page-subtitle { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
 .app-topbar-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
