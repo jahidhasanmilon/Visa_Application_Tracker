@@ -63,7 +63,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
             <input className="app-input" type="date" value={created} onChange={e => setCreated(e.target.value)} />
           </div>
           <div className="app-field" style={{ flex: 1 }}>
-            <label>Waiting List Joined Date *</label>
+            <label>List Joined Date *</label>
             <input className="app-input" type="date" value={submitted} onChange={e => setSubmitted(e.target.value)} />
           </div>
         </div>
