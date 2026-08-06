@@ -144,5 +144,10 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if isAdminEmail();
     }
+    // Admin-configurable ordering for the About page's section cards.
+    match /meta/aboutSectionOrder {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
   }
 }

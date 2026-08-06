@@ -5,6 +5,7 @@ import type { AboutContent, HelpInfo, PrivacyContent } from '../types';
 const HELP_DOC = doc(db, 'meta', 'help');
 const ABOUT_DOC = doc(db, 'meta', 'about');
 const PRIVACY_DOC = doc(db, 'meta', 'privacy');
+const ABOUT_SECTION_ORDER_DOC = doc(db, 'meta', 'aboutSectionOrder');
 
 const DEFAULT_HELP: HelpInfo = { whatsappLink: '', email: '', notes: '' };
 
@@ -57,4 +58,16 @@ export function subscribePrivacy(onData: (content: PrivacyContent) => void): () 
 
 export async function savePrivacy(content: PrivacyContent): Promise<void> {
   await setDoc(PRIVACY_DOC, content);
+}
+
+// Array of About-page section keys, in the order admin wants them shown.
+// null = no customization saved yet, use DEFAULT_ABOUT_SECTION_ORDER.
+export function subscribeAboutSectionOrder(onData: (order: string[] | null) => void): () => void {
+  return onSnapshot(ABOUT_SECTION_ORDER_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { order?: string[] }).order || null) : null);
+  });
+}
+
+export async function saveAboutSectionOrder(order: string[]): Promise<void> {
+  await setDoc(ABOUT_SECTION_ORDER_DOC, { order });
 }

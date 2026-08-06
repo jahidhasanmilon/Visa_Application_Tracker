@@ -3,8 +3,11 @@ import { ShieldCheck, Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
 import { saveApplicantNavOrder } from '../../services/navOrderService';
+import { saveAboutSectionOrder } from '../../services/siteContentService';
 import { useApplicantNavOrder } from '../../hooks/useNavOrder';
+import { useAboutSectionOrder } from '../../hooks/useAboutSectionOrder';
 import { APPLICANT_NAV, NAV_LABEL_KEYS } from '../../constants/nav';
+import { ABOUT_SECTION_LABELS, DEFAULT_ABOUT_SECTION_ORDER, type AboutSectionKey } from '../../constants/aboutSections';
 import { OWNER_EMAIL } from '../../constants/roles';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -99,6 +102,7 @@ export default function AdminAdmins() {
         </div>
 
         <ApplicantNavOrderCard />
+        <AboutSectionOrderCard />
       </div>
     </>
   );
@@ -154,6 +158,54 @@ function ApplicantNavOrderCard() {
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function AboutSectionOrderCard() {
+  const savedOrder = useAboutSectionOrder();
+  const order: AboutSectionKey[] = savedOrder && savedOrder.length > 0
+    ? [
+        ...savedOrder.filter((k): k is AboutSectionKey => (DEFAULT_ABOUT_SECTION_ORDER as string[]).includes(k)),
+        ...DEFAULT_ABOUT_SECTION_ORDER.filter(k => !savedOrder.includes(k)),
+      ]
+    : DEFAULT_ABOUT_SECTION_ORDER;
+  const [saving, setSaving] = useState(false);
+
+  async function move(index: number, dir: -1 | 1) {
+    const target = index + dir;
+    if (target < 0 || target >= order.length) return;
+    const next = [...order];
+    [next[index], next[target]] = [next[target], next[index]];
+    setSaving(true);
+    try {
+      await saveAboutSectionOrder(next);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="app-card app-card-pad">
+      <div className="app-card-head">
+        <div className="app-card-title">About page section order</div>
+      </div>
+      <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: -8, marginBottom: 14 }}>
+        The order the section cards appear in on the About page.
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {order.map((key, i) => (
+          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+            <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{ABOUT_SECTION_LABELS[key]}</span>
+            <button type="button" className="app-icon-btn" disabled={saving || i === 0} onClick={() => move(i, -1)} aria-label="Move up">
+              <ArrowUp size={14} />
+            </button>
+            <button type="button" className="app-icon-btn" disabled={saving || i === order.length - 1} onClick={() => move(i, 1)} aria-label="Move down">
+              <ArrowDown size={14} />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

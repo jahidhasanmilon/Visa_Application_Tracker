@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Pencil, Plus, X, Trash2, ArrowUp, ArrowDown, ArrowRight, Sparkles, Handshake, HelpCircle, Users } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { subscribeAbout, saveAbout, DEFAULT_ABOUT } from '../services/siteContentService';
 import { subscribeFaqs, addFaq, updateFaq, deleteFaq, type FaqFormData } from '../services/faqService';
 import { subscribeTeam, addTeamMember, updateTeamMember, deleteTeamMember, type TeamMemberFormData } from '../services/teamService';
+import { useAboutSectionOrder } from '../hooks/useAboutSectionOrder';
+import { DEFAULT_ABOUT_SECTION_ORDER, type AboutSectionKey } from '../constants/aboutSections';
 import type { AppRole } from '../constants/roles';
 import type { AboutContent, AboutPartnerLink, FaqItem, TeamMember } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -191,17 +193,15 @@ export default function About({ role }: AboutProps) {
     }
   }
 
-  return (
-    <>
-      <PageHeader
-        title={t('about.title')}
-        subtitle={content.subtitle}
-        actions={isAdmin && !editingStory ? (
-          <button className="app-btn app-btn-ghost app-btn-sm" onClick={startEditStory}><Pencil size={14} /> {t('common.edit')}</button>
-        ) : undefined}
-      />
-      <div className="app-content">
+  const savedSectionOrder = useAboutSectionOrder();
+  const sectionOrder: AboutSectionKey[] = savedSectionOrder && savedSectionOrder.length > 0
+    ? [
+        ...savedSectionOrder.filter((k): k is AboutSectionKey => (DEFAULT_ABOUT_SECTION_ORDER as string[]).includes(k)),
+        ...DEFAULT_ABOUT_SECTION_ORDER.filter(k => !savedSectionOrder.includes(k)),
+      ]
+    : DEFAULT_ABOUT_SECTION_ORDER;
 
+  const storySection: ReactNode = (
         <div className="app-card app-card-pad">
           {editingStory ? (
             <>
@@ -280,8 +280,9 @@ export default function About({ role }: AboutProps) {
             </>
           )}
         </div>
+  );
 
-        {(editingStory || content.partnerName) && (
+  const partnerSection: ReactNode = (editingStory || content.partnerName) ? (
           <div className="app-card app-card-pad">
             {editingStory ? (
               <>
@@ -364,8 +365,9 @@ export default function About({ role }: AboutProps) {
               </>
             )}
           </div>
-        )}
+  ) : null;
 
+  const faqSection: ReactNode = (
         <div>
           <div className="app-card-head" style={{ marginBottom: 14 }}>
             <div className="app-about-section-head" style={{ marginBottom: 0 }}>
@@ -414,7 +416,9 @@ export default function About({ role }: AboutProps) {
             </div>
           )}
         </div>
+  );
 
+  const teamSection: ReactNode = (
         <div>
           <div className="app-card-head" style={{ marginBottom: 14 }}>
             <div className="app-about-section-head" style={{ marginBottom: 0 }}>
@@ -470,7 +474,23 @@ export default function About({ role }: AboutProps) {
             </div>
           )}
         </div>
+  );
 
+  const sectionsByKey: Record<AboutSectionKey, ReactNode> = {
+    story: storySection, partner: partnerSection, faq: faqSection, team: teamSection,
+  };
+
+  return (
+    <>
+      <PageHeader
+        title={t('about.title')}
+        subtitle={content.subtitle}
+        actions={isAdmin && !editingStory ? (
+          <button className="app-btn app-btn-ghost app-btn-sm" onClick={startEditStory}><Pencil size={14} /> {t('common.edit')}</button>
+        ) : undefined}
+      />
+      <div className="app-content">
+        {sectionOrder.map(key => <Fragment key={key}>{sectionsByKey[key]}</Fragment>)}
       </div>
 
       {faqModalOpen && (

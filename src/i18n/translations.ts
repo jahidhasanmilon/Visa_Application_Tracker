@@ -90,7 +90,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.createAccountInstead': 'Create an account',
 
     // Footer
-    'footer.text': 'This is an unofficial app, not affiliated with any embassy.',
+    'footer.text': 'This is an unofficial app and is not affiliated with any embassy.',
     'footer.createdBy': 'Created and developed by',
 
     // My Status (applicant dashboard)
