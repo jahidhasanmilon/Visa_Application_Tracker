@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, ExternalLink } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import { subscribeGuideBySlug } from '../services/guidesService';
 import { useLanguage } from '../i18n/LanguageContext';
+import { renderSectionBody } from '../utils/richText';
 import type { Guide } from '../types';
 
 export default function GuideDetail() {
@@ -59,7 +60,11 @@ export default function GuideDetail() {
         {guide.sections.map((s, i) => (
           <div key={i} className="app-card app-card-pad">
             <div className="app-card-title" style={{ marginBottom: 8 }}>{s.heading}</div>
-            <div style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>{s.body}</div>
+            <div
+              className="app-section-body"
+              style={{ fontSize: 14, lineHeight: 1.7, color: 'var(--ink)' }}
+              dangerouslySetInnerHTML={{ __html: renderSectionBody(s.body) }}
+            />
           </div>
         ))}
 

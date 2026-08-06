@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Paperclip, FileText } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Paperclip, FileText, Bold, Italic, Underline, List, Heading } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import {
   subscribeGuides, addGuide, updateGuide, deleteGuide, slugify,
   uploadGuideAttachment, deleteGuideAttachment,
 } from '../../services/guidesService';
+import { wrapSelection, prefixLines } from '../../utils/richText';
 import type { Guide, GuideAttachment, GuideSection } from '../../types';
 
 const EMPTY_FORM = {
@@ -23,6 +24,7 @@ export default function AdminGuides() {
   const [uploading, setUploading] = useState(false);
   const [saveError, setSaveError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bodyRefs = useRef<Map<number, HTMLTextAreaElement>>(new Map());
 
   useEffect(() => subscribeGuides(setGuides), []);
 
@@ -96,6 +98,20 @@ export default function AdminGuides() {
 
   function updateSection(i: number, patch: Partial<GuideSection>) {
     setForm(f => ({ ...f, sections: f.sections.map((s, idx) => idx === i ? { ...s, ...patch } : s) }));
+  }
+
+  // Applies a toolbar formatting action to section `i`'s textarea — the
+  // action wraps/prefixes the current selection, we save the result and
+  // restore focus + selection so typing can continue right after.
+  function applyFormat(i: number, action: (ta: HTMLTextAreaElement) => { value: string; selectionStart: number; selectionEnd: number }) {
+    const ta = bodyRefs.current.get(i);
+    if (!ta) return;
+    const result = action(ta);
+    updateSection(i, { body: result.value });
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.setSelectionRange(result.selectionStart, result.selectionEnd);
+    });
   }
 
   return (
@@ -195,11 +211,29 @@ export default function AdminGuides() {
                       placeholder="Section heading"
                       style={{ marginBottom: 8, fontWeight: 600 }}
                     />
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 6 }}>
+                      <button type="button" className="app-icon-btn" title="Bold" aria-label="Bold" onClick={() => applyFormat(i, ta => wrapSelection(ta, '**'))}>
+                        <Bold size={14} />
+                      </button>
+                      <button type="button" className="app-icon-btn" title="Italic" aria-label="Italic" onClick={() => applyFormat(i, ta => wrapSelection(ta, '*'))}>
+                        <Italic size={14} />
+                      </button>
+                      <button type="button" className="app-icon-btn" title="Underline" aria-label="Underline" onClick={() => applyFormat(i, ta => wrapSelection(ta, '__'))}>
+                        <Underline size={14} />
+                      </button>
+                      <button type="button" className="app-icon-btn" title="Bullet list" aria-label="Bullet list" onClick={() => applyFormat(i, ta => prefixLines(ta, '- '))}>
+                        <List size={14} />
+                      </button>
+                      <button type="button" className="app-icon-btn" title="Sub-heading" aria-label="Sub-heading" onClick={() => applyFormat(i, ta => prefixLines(ta, '## '))}>
+                        <Heading size={14} />
+                      </button>
+                    </div>
                     <textarea
+                      ref={el => { if (el) bodyRefs.current.set(i, el); else bodyRefs.current.delete(i); }}
                       className="app-textarea"
                       value={s.body}
                       onChange={e => updateSection(i, { body: e.target.value })}
-                      placeholder="Section content (plain text)"
+                      placeholder="Section content — select text and use the buttons above to format"
                       style={{ minHeight: 100 }}
                     />
                   </div>
