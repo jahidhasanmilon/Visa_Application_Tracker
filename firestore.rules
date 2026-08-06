@@ -124,6 +124,16 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdminEmail();
     }
+    // FAQ and team member entries shown on the About page — same public
+    // read / admin-only write as the About doc itself.
+    match /aboutFaqs/{faqId} {
+      allow read: if true;
+      allow write: if isAdminEmail();
+    }
+    match /teamMembers/{memberId} {
+      allow read: if true;
+      allow write: if isAdminEmail();
+    }
     match /meta/privacy {
       allow read: if true;
       allow write: if isAdminEmail();

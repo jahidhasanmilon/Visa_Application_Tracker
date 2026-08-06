@@ -128,3 +128,31 @@ export interface HelpInfo {
   email: string;
   notes: string;
 }
+
+export interface AboutTimelineItem {
+  heading: string;
+  body: string;
+}
+
+export interface AboutContent {
+  subtitle: string;
+  storyHeading: string;
+  storyIntro: string;
+  timeline: AboutTimelineItem[];
+}
+
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+  order: number;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  linkedinUrl: string;
+  order: number;
+}

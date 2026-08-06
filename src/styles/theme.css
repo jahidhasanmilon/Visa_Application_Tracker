@@ -281,6 +281,27 @@ button.app-sidebar-close { display: none; }
 .app-section-body .app-section-list:last-child { margin-bottom: 0; }
 .app-section-body .app-section-list li { margin-bottom: 4px; }
 
+/* ---------- About page: story timeline + team avatars ---------- */
+.app-about-timeline { position: relative; margin-top: 20px; padding-left: 22px; }
+.app-about-timeline-item { position: relative; padding-bottom: 22px; }
+.app-about-timeline-item:last-child { padding-bottom: 0; }
+.app-about-timeline-item::before {
+  content: ''; position: absolute; left: -19px; top: 16px; bottom: -6px; width: 1px; background: var(--border);
+}
+.app-about-timeline-item:last-child::before { display: none; }
+.app-about-timeline-dot {
+  position: absolute; left: -23px; top: 3px; width: 8px; height: 8px; border-radius: 50%; background: var(--violet);
+}
+.app-about-timeline-num { font-size: 11px; font-weight: 700; color: var(--muted-2); font-variant-numeric: tabular-nums; margin-bottom: 3px; }
+.app-about-timeline-heading { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14.5px; margin-bottom: 4px; }
+.app-about-timeline-body { font-size: 13.5px; color: var(--muted); line-height: 1.65; white-space: pre-wrap; }
+
+.app-about-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--violet); color: #fff; font-weight: 700; font-size: 15px;
+}
+
 .app-pdf-frame { width: 100%; height: 75vh; min-height: 320px; max-height: 700px; border: 1px solid var(--border); border-radius: 10px; }
 @media (max-width: 560px) {
   .app-pdf-frame { height: 60vh; min-height: 260px; }

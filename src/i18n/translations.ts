@@ -176,7 +176,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'profile.errNameSave': 'Could not save name. Please try again.',
 
     // About / Help / Privacy
-    'about.title': 'About',
+    'about.title': 'About VisaTrack',
     'about.subtitle': "What VisaTrack is, and who it's for.",
     'help.title': 'Help & Supports',
     'help.subtitle': 'How to reach the community and get support.',
@@ -401,7 +401,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'profile.errNameSave': 'নাম সেভ করা যায়নি। আবার চেষ্টা করুন।',
 
     // About / Help / Privacy
-    'about.title': 'সম্পর্কে',
+    'about.title': 'VisaTrack সম্পর্কে',
     'about.subtitle': 'VisaTrack আসলে কী, আর এটা কাদের জন্য।',
     'help.title': 'সহায়তা ও সাপোর্ট',
     'help.subtitle': 'কমিউনিটির সাথে যোগাযোগ ও সহায়তা পাওয়ার উপায়।',
