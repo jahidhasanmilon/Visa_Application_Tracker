@@ -66,12 +66,19 @@ export async function deleteApplicant(id: string): Promise<void> {
 }
 
 // Narrow updates usable by an applicant on their own record (see
-// firestore.rules). These are all self-reported, so each one also stamps
-// lastUpdated — that's what resets the applicant's own 30-day reminder
-// countdown. Checklist/roadmap toggles deliberately do NOT stamp it (see
-// updateChecklist/updateRoadmap below) — ticking a box isn't "an update."
+// firestore.rules). Only marking the reminder as "Done" stamps lastUpdated
+// — that's the action that actually resets the 30-day countdown. Setting it
+// back to "Not yet" must NOT touch lastUpdated, otherwise the countdown
+// would restart every time without the applicant actually having done
+// anything. Checklist/roadmap toggles also deliberately do NOT stamp it
+// (see updateChecklist/updateRoadmap below) — ticking a box isn't "an
+// update" either.
 export async function updateReminderStatus(id: string, reminderMailSent: ReminderStatus): Promise<void> {
-  await updateDoc(doc(db, APPLICANTS_COL, id), { reminderMailSent, lastUpdated: todayStr() });
+  const patch: Record<string, unknown> = { reminderMailSent };
+  if (reminderMailSent === 'Done') {
+    patch.lastUpdated = todayStr();
+  }
+  await updateDoc(doc(db, APPLICANTS_COL, id), patch);
 }
 
 // Used by ApplicantDetailsModal ("Add your details" / "Edit my details") —
