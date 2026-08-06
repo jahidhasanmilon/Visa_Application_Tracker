@@ -3,6 +3,7 @@ import { Check, Pencil } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import ApplicantDetailsModal from '../../components/ApplicantDetailsModal';
 import InfoTooltip from '../../components/InfoTooltip';
+import { BangladeshFlag, GermanyFlag } from '../../components/FlagIcon';
 import { updateReminderStatus, updateRoadmap } from '../../services/applicantsService';
 import { enrichApplicant, effectiveRoadmap, effectiveChecklist, fmtDate, todayStr } from '../../utils/dateHelpers';
 import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
@@ -69,6 +70,15 @@ function countdownColors(days: number): { bg: string; color: string } {
   if (days <= 0) return { bg: 'var(--danger-soft)', color: 'var(--danger)' };
   if (days <= 7) return { bg: 'var(--warning-soft)', color: 'var(--warning-ink)' };
   return { bg: 'var(--success-soft)', color: 'var(--success)' };
+}
+
+// Flags next to specific roadmap steps — SVG rather than flag emoji so they
+// render identically on mobile and desktop (see FlagIcon.tsx).
+function stepFlag(label: string): 'de' | 'bd' | null {
+  const l = label.toLowerCase();
+  if (l.includes('germany')) return 'de';
+  if (l.includes('account opening')) return 'bd';
+  return null;
 }
 
 interface ApplicationCardProps {
@@ -173,6 +183,8 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
                 style={{ color: step.done ? 'var(--ink)' : 'var(--muted-2)', fontWeight: step.done ? 600 : 500 }}
               >
                 {step.label}
+                {stepFlag(step.label) === 'de' && <GermanyFlag size={13} style={{ marginLeft: 4 }} />}
+                {stepFlag(step.label) === 'bd' && <BangladeshFlag size={13} style={{ marginLeft: 4 }} />}
               </div>
             </button>
             {i < roadmapItems.length - 1 && (
