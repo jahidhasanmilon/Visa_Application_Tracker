@@ -42,7 +42,6 @@ export default function Help({ role }: HelpProps) {
   return (
     <>
       <PageHeader
-        eyebrow="Contact"
         title={t('help.title')}
         subtitle={t('help.subtitle')}
         actions={role === 'admin' && !editing ? (

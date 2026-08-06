@@ -5,7 +5,7 @@ import { subscribeAbout, saveAbout, DEFAULT_ABOUT } from '../services/siteConten
 import { subscribeFaqs, addFaq, updateFaq, deleteFaq, type FaqFormData } from '../services/faqService';
 import { subscribeTeam, addTeamMember, updateTeamMember, deleteTeamMember, type TeamMemberFormData } from '../services/teamService';
 import type { AppRole } from '../constants/roles';
-import type { AboutContent, FaqItem, TeamMember } from '../types';
+import type { AboutContent, AboutPartnerLink, FaqItem, TeamMember } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface AboutProps {
@@ -61,6 +61,16 @@ export default function About({ role }: AboutProps) {
   }
   function removeTimelineItem(i: number) {
     setDraft(d => ({ ...d, timeline: d.timeline.filter((_, idx) => idx !== i) }));
+  }
+
+  function updatePartnerLink(i: number, patch: Partial<AboutPartnerLink>) {
+    setDraft(d => ({ ...d, partnerLinks: d.partnerLinks.map((l, idx) => idx === i ? { ...l, ...patch } : l) }));
+  }
+  function addPartnerLink() {
+    setDraft(d => ({ ...d, partnerLinks: [...d.partnerLinks, { label: '', description: '', url: '' }] }));
+  }
+  function removePartnerLink(i: number) {
+    setDraft(d => ({ ...d, partnerLinks: d.partnerLinks.filter((_, idx) => idx !== i) }));
   }
 
   // ---- FAQ CRUD (mirrors admin/VivaQuestions.tsx) ----
@@ -184,7 +194,6 @@ export default function About({ role }: AboutProps) {
   return (
     <>
       <PageHeader
-        eyebrow="About"
         title={t('about.title')}
         subtitle={content.subtitle}
         actions={isAdmin && !editingStory ? (
@@ -266,6 +275,88 @@ export default function About({ role }: AboutProps) {
             </>
           )}
         </div>
+
+        {(editingStory || content.partnerName) && (
+          <div className="app-card app-card-pad">
+            {editingStory ? (
+              <>
+                <div className="app-field">
+                  <label>Official partner — organization name <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(leave blank to hide this section)</span></label>
+                  <input className="app-input" value={draft.partnerName} onChange={e => setDraft({ ...draft, partnerName: e.target.value })} placeholder="e.g. Rubalif" />
+                </div>
+                <div className="app-field">
+                  <label>Description</label>
+                  <textarea className="app-textarea" value={draft.partnerDescription} onChange={e => setDraft({ ...draft, partnerDescription: e.target.value })} style={{ minHeight: 70 }} />
+                </div>
+                <div className="app-field">
+                  <label>Links</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {draft.partnerLinks.map((link, i) => (
+                      <div key={i} className="app-card app-card-pad" style={{ position: 'relative' }}>
+                        <button type="button" className="app-icon-btn" style={{ position: 'absolute', top: 8, right: 8 }} onClick={() => removePartnerLink(i)} aria-label="Remove link">
+                          <X size={14} />
+                        </button>
+                        <input
+                          className="app-input"
+                          value={link.label}
+                          onChange={e => updatePartnerLink(i, { label: e.target.value })}
+                          placeholder="Link title, e.g. Facebook group"
+                          style={{ marginBottom: 8, fontWeight: 600 }}
+                        />
+                        <input
+                          className="app-input"
+                          value={link.description}
+                          onChange={e => updatePartnerLink(i, { description: e.target.value })}
+                          placeholder="Short description"
+                          style={{ marginBottom: 8 }}
+                        />
+                        <input
+                          className="app-input"
+                          value={link.url}
+                          onChange={e => updatePartnerLink(i, { url: e.target.value })}
+                          placeholder="https://..."
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" className="app-btn app-btn-ghost app-btn-sm" style={{ marginTop: 10 }} onClick={addPartnerLink}>
+                    <Plus size={14} /> Add link
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="app-badge" style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)', marginBottom: 12, display: 'inline-block' }}>
+                  Official partner
+                </span>
+                <div className="app-card-title" style={{ marginBottom: 8 }}>{content.partnerName}</div>
+                {content.partnerDescription && (
+                  <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>{content.partnerDescription}</p>
+                )}
+                {content.partnerLinks.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {content.partnerLinks.map((link, i) => (
+                      <a
+                        key={i}
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="app-card app-card-pad"
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 13.5 }}>{link.label}</div>
+                          {link.description && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{link.description}</div>}
+                        </div>
+                        <ArrowRight size={16} color="var(--accent)" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         <div>
           <div className="app-card-head" style={{ marginBottom: 12 }}>

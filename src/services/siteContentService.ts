@@ -23,6 +23,9 @@ export const DEFAULT_ABOUT: AboutContent = {
   storyHeading: 'Our story',
   storyIntro: 'VisaTrack helps this community track Germany Opportunity Card applications — from preparing your documents through to the day you land. Built by and for the group, not an official service.',
   timeline: [],
+  partnerName: 'Rubalif',
+  partnerDescription: '',
+  partnerLinks: [],
 };
 
 export function subscribeAbout(onData: (content: AboutContent) => void): () => void {

@@ -140,11 +140,20 @@ export interface AboutTimelineItem {
   body: string;
 }
 
+export interface AboutPartnerLink {
+  label: string;
+  description: string;
+  url: string;
+}
+
 export interface AboutContent {
   subtitle: string;
   storyHeading: string;
   storyIntro: string;
   timeline: AboutTimelineItem[];
+  partnerName: string;
+  partnerDescription: string;
+  partnerLinks: AboutPartnerLink[];
 }
 
 export interface FaqItem {
