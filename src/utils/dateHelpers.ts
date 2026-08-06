@@ -78,9 +78,14 @@ export function effectiveChecklist(a: Applicant, checklistTemplate: ChecklistIte
   return mergeWithTemplate(a.checklist, checklistTemplate);
 }
 
-export function deriveStatus(a: Applicant, roadmapTemplate: ChecklistItem[]): string {
+// The furthest-along completed roadmap step, or null if none are done yet.
+function furthestDoneStep(a: Applicant, roadmapTemplate: ChecklistItem[]): ChecklistItem | null {
   const done = effectiveRoadmap(a, roadmapTemplate).filter(s => s.done);
-  return done.length > 0 ? done[done.length - 1].label : 'Not started';
+  return done.length > 0 ? done[done.length - 1] : null;
+}
+
+export function deriveStatus(a: Applicant, roadmapTemplate: ChecklistItem[]): string {
+  return furthestDoneStep(a, roadmapTemplate)?.label ?? 'Not started';
 }
 
 // Enrich a raw applicant record with computed fields (status, waiting/remaining
@@ -92,12 +97,14 @@ export function deriveStatus(a: Applicant, roadmapTemplate: ChecklistItem[]): st
 // nothing to count from in that case.
 export function enrichApplicant(a: Applicant, today: string, roadmapTemplate: ChecklistItem[]): EnrichedApplicant {
   const roadmap = effectiveRoadmap(a, roadmapTemplate);
-  const status = deriveStatus(a, roadmapTemplate);
+  const currentStep = furthestDoneStep(a, roadmapTemplate);
+  const status = currentStep?.label ?? 'Not started';
+  const statusNote = currentStep?.note;
   const isComplete = roadmap.length > 0 && roadmap.every(s => s.done);
   const waiting = a.submitted ? daysBetween(a.submitted, today) : null;
   const remaining = waiting === null ? null : TARGET_DAYS - waiting;
   const reminderDaysLeft = REMINDER_WINDOW_DAYS - daysBetween(a.lastUpdated, today);
   const effectiveReminderStatus = a.reminderMailSent === 'Not yet' && reminderDaysLeft <= 0 ? 'Urgent' : a.reminderMailSent;
   const urg = remaining === null ? { label: 'Not submitted', color: 'var(--muted)' } : urgency(remaining);
-  return { ...a, status, isComplete, waiting, remaining, urg, reminderDaysLeft, effectiveReminderStatus };
+  return { ...a, status, statusNote, isComplete, waiting, remaining, urg, reminderDaysLeft, effectiveReminderStatus };
 }

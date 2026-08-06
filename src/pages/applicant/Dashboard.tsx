@@ -126,6 +126,11 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
             <meta.icon size={14} /> {a.status}
             <InfoTooltip text={t('status.statusTooltip')} />
           </span>
+          {a.statusNote && (
+            <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 8, maxWidth: 360, lineHeight: 1.5 }}>
+              {a.statusNote}
+            </div>
+          )}
         </div>
 
         <div style={{

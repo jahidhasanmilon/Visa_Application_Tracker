@@ -36,6 +36,12 @@ export interface ChecklistItem {
   id: string;
   label: string;
   done: boolean;
+  // Roadmap-only: a short plain-language explainer shown under the status
+  // badge on the applicant's My Status page when this is their furthest
+  // completed step — e.g. "Submitted — next you'll be contacted for
+  // review." Admin-set on the shared template; meaningless for checklist
+  // items, which don't have a "current status" concept.
+  note?: string;
 }
 
 export interface EnrichedApplicant extends Applicant {
@@ -43,6 +49,9 @@ export interface EnrichedApplicant extends Applicant {
   // else the label of the furthest-along completed roadmap step.
   // See deriveStatus() in utils/dateHelpers.ts.
   status: StatusOption;
+  // The matching roadmap step's admin-written explainer, if one is set —
+  // see deriveStatusNote() in utils/dateHelpers.ts.
+  statusNote?: string;
   // True once every roadmap step is marked done — used where the app
   // previously checked status === 'Approved'.
   isComplete: boolean;

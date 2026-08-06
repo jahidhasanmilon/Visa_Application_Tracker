@@ -56,6 +56,7 @@ export default function AdminRoadmap() {
           items={template}
           onSave={saveRoadmapTemplate}
           addPlaceholder="New default step name"
+          showNoteField
         />
 
         {customizedCount > 0 && (
