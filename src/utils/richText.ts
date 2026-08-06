@@ -59,7 +59,7 @@ export function renderSectionBody(text: string): string {
   return blocks.join('');
 }
 
-interface TextEdit {
+export interface TextEdit {
   value: string;
   selectionStart: number;
   selectionEnd: number;

@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pencil, MessageCircle, Mail } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import RichTextToolbar from '../components/RichTextToolbar';
 import { subscribeHelp, saveHelp } from '../services/siteContentService';
+import { renderSectionBody } from '../utils/richText';
 import type { AppRole } from '../constants/roles';
 import type { HelpInfo } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -18,6 +20,7 @@ export default function Help({ role }: HelpProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<HelpInfo>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const notesRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => subscribeHelp(setHelp), []);
 
@@ -61,7 +64,15 @@ export default function Help({ role }: HelpProps) {
             </div>
             <div className="app-field">
               <label>{t('help.notes')}</label>
-              <textarea className="app-textarea" value={draft.notes} onChange={e => setDraft({ ...draft, notes: e.target.value })} placeholder={t('help.notesPlaceholder')} style={{ minHeight: 120 }} />
+              <RichTextToolbar textareaRef={notesRef} onChange={notes => setDraft({ ...draft, notes })} />
+              <textarea
+                ref={notesRef}
+                className="app-textarea"
+                value={draft.notes}
+                onChange={e => setDraft({ ...draft, notes: e.target.value })}
+                placeholder={t('help.notesPlaceholder')}
+                style={{ minHeight: 140 }}
+              />
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditing(false)} disabled={saving}>{t('common.cancel')}</button>
@@ -82,20 +93,22 @@ export default function Help({ role }: HelpProps) {
               </a>
             )}
             {help.email && (
-              <a href={`mailto:${help.email}`} className="app-card app-card-pad" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--violet-soft)', color: 'var(--violet)' }}>
-                  <Mail size={18} />
+              <div className="app-card app-card-pad">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                  <Mail size={16} color="var(--violet)" />
+                  <div className="app-card-title">{t('help.email')}</div>
                 </div>
-                <div>
-                  <div className="app-card-title">{help.email}</div>
-                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t('help.emailForSupport')}</div>
-                </div>
-              </a>
+                <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>{t('help.emailForSupport')}</p>
+                <a href={`mailto:${help.email}`} className="app-btn app-btn-primary app-btn-block">{help.email}</a>
+              </div>
             )}
             {help.notes && (
               <div className="app-card app-card-pad">
-                <div className="app-card-title" style={{ marginBottom: 8 }}>{t('help.notes')}</div>
-                <div style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)', whiteSpace: 'pre-wrap' }}>{help.notes}</div>
+                <div
+                  className="app-section-body"
+                  style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
+                  dangerouslySetInnerHTML={{ __html: renderSectionBody(help.notes) }}
+                />
               </div>
             )}
             {!help.whatsappLink && !help.email && !help.notes && (

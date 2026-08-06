@@ -68,36 +68,58 @@ export default function About({ role }: AboutProps) {
   const [editingFaqId, setEditingFaqId] = useState<string | null>(null);
   const [faqForm, setFaqForm] = useState(EMPTY_FAQ);
   const [confirmDeleteFaqId, setConfirmDeleteFaqId] = useState<string | null>(null);
+  const [faqSaving, setFaqSaving] = useState(false);
+  const [faqError, setFaqError] = useState('');
 
   function openAddFaq() {
     setFaqForm({ ...EMPTY_FAQ, order: (faqs?.length ?? 0) + 1 });
     setEditingFaqId(null);
+    setFaqError('');
     setFaqModalOpen(true);
   }
   function openEditFaq(f: FaqItem) {
     setFaqForm({ question: f.question, answer: f.answer, order: f.order });
     setEditingFaqId(f.id);
+    setFaqError('');
     setFaqModalOpen(true);
   }
   async function saveFaq() {
     if (!faqForm.question.trim()) return;
-    if (editingFaqId) await updateFaq(editingFaqId, faqForm);
-    else await addFaq(faqForm);
-    setFaqModalOpen(false);
+    setFaqSaving(true);
+    setFaqError('');
+    try {
+      if (editingFaqId) await updateFaq(editingFaqId, faqForm);
+      else await addFaq(faqForm);
+      setFaqModalOpen(false);
+    } catch (err) {
+      console.error('FAQ save failed', err);
+      setFaqError(err instanceof Error ? err.message : 'Could not save — check your connection and try again.');
+    } finally {
+      setFaqSaving(false);
+    }
   }
   async function doDeleteFaq(id: string) {
-    await deleteFaq(id);
-    setConfirmDeleteFaqId(null);
+    try {
+      await deleteFaq(id);
+    } catch (err) {
+      console.error('FAQ delete failed', err);
+    } finally {
+      setConfirmDeleteFaqId(null);
+    }
   }
   async function moveFaq(index: number, dir: -1 | 1) {
     if (!faqs) return;
     const target = index + dir;
     if (target < 0 || target >= faqs.length) return;
     const a = faqs[index], b = faqs[target];
-    await Promise.all([
-      updateFaq(a.id, { question: a.question, answer: a.answer, order: b.order }),
-      updateFaq(b.id, { question: b.question, answer: b.answer, order: a.order }),
-    ]);
+    try {
+      await Promise.all([
+        updateFaq(a.id, { question: a.question, answer: a.answer, order: b.order }),
+        updateFaq(b.id, { question: b.question, answer: b.answer, order: a.order }),
+      ]);
+    } catch (err) {
+      console.error('FAQ reorder failed', err);
+    }
   }
 
   // ---- Team CRUD ----
@@ -105,36 +127,58 @@ export default function About({ role }: AboutProps) {
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [memberForm, setMemberForm] = useState(EMPTY_MEMBER);
   const [confirmDeleteMemberId, setConfirmDeleteMemberId] = useState<string | null>(null);
+  const [memberSaving, setMemberSaving] = useState(false);
+  const [memberError, setMemberError] = useState('');
 
   function openAddMember() {
     setMemberForm({ ...EMPTY_MEMBER, order: (team?.length ?? 0) + 1 });
     setEditingMemberId(null);
+    setMemberError('');
     setMemberModalOpen(true);
   }
   function openEditMember(m: TeamMember) {
     setMemberForm({ name: m.name, role: m.role, bio: m.bio, linkedinUrl: m.linkedinUrl, order: m.order });
     setEditingMemberId(m.id);
+    setMemberError('');
     setMemberModalOpen(true);
   }
   async function saveMember() {
     if (!memberForm.name.trim()) return;
-    if (editingMemberId) await updateTeamMember(editingMemberId, memberForm);
-    else await addTeamMember(memberForm);
-    setMemberModalOpen(false);
+    setMemberSaving(true);
+    setMemberError('');
+    try {
+      if (editingMemberId) await updateTeamMember(editingMemberId, memberForm);
+      else await addTeamMember(memberForm);
+      setMemberModalOpen(false);
+    } catch (err) {
+      console.error('Team member save failed', err);
+      setMemberError(err instanceof Error ? err.message : 'Could not save — check your connection and try again.');
+    } finally {
+      setMemberSaving(false);
+    }
   }
   async function doDeleteMember(id: string) {
-    await deleteTeamMember(id);
-    setConfirmDeleteMemberId(null);
+    try {
+      await deleteTeamMember(id);
+    } catch (err) {
+      console.error('Team member delete failed', err);
+    } finally {
+      setConfirmDeleteMemberId(null);
+    }
   }
   async function moveMember(index: number, dir: -1 | 1) {
     if (!team) return;
     const target = index + dir;
     if (target < 0 || target >= team.length) return;
     const a = team[index], b = team[target];
-    await Promise.all([
-      updateTeamMember(a.id, { name: a.name, role: a.role, bio: a.bio, linkedinUrl: a.linkedinUrl, order: b.order }),
-      updateTeamMember(b.id, { name: b.name, role: b.role, bio: b.bio, linkedinUrl: b.linkedinUrl, order: a.order }),
-    ]);
+    try {
+      await Promise.all([
+        updateTeamMember(a.id, { name: a.name, role: a.role, bio: a.bio, linkedinUrl: a.linkedinUrl, order: b.order }),
+        updateTeamMember(b.id, { name: b.name, role: b.role, bio: b.bio, linkedinUrl: b.linkedinUrl, order: a.order }),
+      ]);
+    } catch (err) {
+      console.error('Team member reorder failed', err);
+    }
   }
 
   return (
@@ -331,9 +375,10 @@ export default function About({ role }: AboutProps) {
               <label>Answer</label>
               <textarea className="app-textarea" value={faqForm.answer} onChange={e => setFaqForm({ ...faqForm, answer: e.target.value })} style={{ minHeight: 90 }} />
             </div>
+            {faqError && <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{faqError}</div>}
             <div className="app-modal-actions">
-              <button className="app-btn app-btn-ghost" onClick={() => setFaqModalOpen(false)}>Cancel</button>
-              <button className="app-btn app-btn-primary" onClick={saveFaq}>{editingFaqId ? 'Save changes' : 'Add FAQ'}</button>
+              <button className="app-btn app-btn-ghost" onClick={() => setFaqModalOpen(false)} disabled={faqSaving}>Cancel</button>
+              <button className="app-btn app-btn-primary" onClick={saveFaq} disabled={faqSaving}>{faqSaving ? 'Saving…' : editingFaqId ? 'Save changes' : 'Add FAQ'}</button>
             </div>
           </div>
         </div>
@@ -359,9 +404,10 @@ export default function About({ role }: AboutProps) {
               <label>LinkedIn URL <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional)</span></label>
               <input className="app-input" value={memberForm.linkedinUrl} onChange={e => setMemberForm({ ...memberForm, linkedinUrl: e.target.value })} placeholder="https://linkedin.com/in/..." />
             </div>
+            {memberError && <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{memberError}</div>}
             <div className="app-modal-actions">
-              <button className="app-btn app-btn-ghost" onClick={() => setMemberModalOpen(false)}>Cancel</button>
-              <button className="app-btn app-btn-primary" onClick={saveMember}>{editingMemberId ? 'Save changes' : 'Add member'}</button>
+              <button className="app-btn app-btn-ghost" onClick={() => setMemberModalOpen(false)} disabled={memberSaving}>Cancel</button>
+              <button className="app-btn app-btn-primary" onClick={saveMember} disabled={memberSaving}>{memberSaving ? 'Saving…' : editingMemberId ? 'Save changes' : 'Add member'}</button>
             </div>
           </div>
         </div>

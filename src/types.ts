@@ -129,6 +129,12 @@ export interface HelpInfo {
   notes: string;
 }
 
+export interface PrivacyContent {
+  privacyBody: string;
+  termsBody: string;
+  lastUpdated: string;
+}
+
 export interface AboutTimelineItem {
   heading: string;
   body: string;

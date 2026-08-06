@@ -1,6 +1,6 @@
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import type { AboutContent, HelpInfo } from '../types';
+import type { AboutContent, HelpInfo, PrivacyContent } from '../types';
 
 const HELP_DOC = doc(db, 'meta', 'help');
 const ABOUT_DOC = doc(db, 'meta', 'about');
@@ -35,13 +35,23 @@ export async function saveAbout(content: AboutContent): Promise<void> {
   await setDoc(ABOUT_DOC, content);
 }
 
-// null means no custom text saved yet.
-export function subscribePrivacy(onData: (body: string | null) => void): () => void {
+export const DEFAULT_PRIVACY: PrivacyContent = { privacyBody: '', termsBody: '', lastUpdated: '' };
+
+// Reads the old single `body` field (from before Privacy/Terms were split
+// into tabs) into privacyBody, so nothing already written disappears —
+// saving from the new editor moves it into the proper shape for good.
+export function subscribePrivacy(onData: (content: PrivacyContent) => void): () => void {
   return onSnapshot(PRIVACY_DOC, (snap) => {
-    onData(snap.exists() ? ((snap.data() as { body?: string }).body ?? '') : null);
+    if (!snap.exists()) { onData(DEFAULT_PRIVACY); return; }
+    const data = snap.data() as Partial<PrivacyContent> & { body?: string };
+    onData({
+      privacyBody: data.privacyBody ?? data.body ?? '',
+      termsBody: data.termsBody ?? '',
+      lastUpdated: data.lastUpdated ?? '',
+    });
   });
 }
 
-export async function savePrivacy(body: string): Promise<void> {
-  await setDoc(PRIVACY_DOC, { body });
+export async function savePrivacy(content: PrivacyContent): Promise<void> {
+  await setDoc(PRIVACY_DOC, content);
 }
