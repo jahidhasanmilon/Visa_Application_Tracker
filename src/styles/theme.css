@@ -284,10 +284,6 @@ button.app-sidebar-close { display: none; }
 .app-section-body .app-section-list li { margin-bottom: 4px; }
 
 /* ---------- About page: story timeline + team avatars ---------- */
-/* Deliberately plain (no card border/shadow) and width-capped — reads as
-   an article intro rather than a dashboard widget, left-aligned so it
-   still flows naturally from the sidebar edge instead of floating centered. */
-.app-about-story { max-width: 620px; }
 .app-about-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
 .app-about-section-icon {
   width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
