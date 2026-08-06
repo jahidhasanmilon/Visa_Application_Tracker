@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Plane } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useMyApplicant } from './hooks/useMyApplicant';
 import { createOwnApplicant } from './services/applicantsService';
@@ -30,7 +29,10 @@ import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
 import './styles/theme.css';
 
-const FLIGHT_PATH = 'M22,92 C30,60 55,45 78,10';
+// Departure/arrival points sit at the center of each flag, so the plane
+// visibly takes off from the middle of the Bangladesh flag and lands in
+// the middle of the Germany flag.
+const FLIGHT_PATH = 'M12,90.5 C20,58 55,42 88,10.5';
 
 // Loading screen plays one full flight cycle before ever handing off to the
 // real app — a fast Firestore/auth resolve on a fresh tab would otherwise
@@ -88,7 +90,11 @@ function LoadingScreen() {
             <rect y="8.67" width="20" height="4.33" fill="#ffce00" />
           </g>
         </svg>
-        <Plane className="app-flight-plane" size={15} />
+        {/* Nose points along +x at rest, so offset-rotate: auto keeps it
+            facing forward — true nose-first — the whole way along the curve. */}
+        <svg className="app-flight-plane" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M15,8 L9,4.3 L9,6.8 L1,8 L9,9.2 L9,11.7 Z" fill="currentColor" />
+        </svg>
       </div>
     </div>
   );

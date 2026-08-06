@@ -351,9 +351,8 @@ button.app-sidebar-close { display: none; }
 }
 .app-flight-plane {
   position: absolute; top: 0; left: 0; color: var(--violet);
-  offset-path: path('M22,92 C30,60 55,45 78,10');
+  offset-path: path('M12,90.5 C20,58 55,42 88,10.5');
   offset-rotate: auto;
-  transform: rotate(-45deg);
   animation: app-flight-move 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 @keyframes app-flight-trail {
