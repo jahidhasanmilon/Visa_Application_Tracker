@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Plane } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
@@ -30,30 +30,65 @@ import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
 import './styles/theme.css';
 
-const FLIGHT_PATH = 'M14,150 C10,92 52,68 66,14';
+const FLIGHT_PATH = 'M22,92 C30,60 55,45 78,10';
+
+// Loading screen plays one full flight cycle before ever handing off to the
+// real app — a fast Firestore/auth resolve on a fresh tab would otherwise
+// cut the animation off mid-flight. Once shown this session, later
+// (fast) loads skip the wait since the user has already seen it land.
+const FULL_LOAD_KEY = 'visa-tracker-full-load-shown';
+const FULL_LOAD_MS = 2400;
+
+function useMinLoadingTime(isLoading: boolean): boolean {
+  const [minTimeDone, setMinTimeDone] = useState(() => sessionStorage.getItem(FULL_LOAD_KEY) === '1');
+
+  useEffect(() => {
+    if (minTimeDone) return;
+    const timer = setTimeout(() => {
+      sessionStorage.setItem(FULL_LOAD_KEY, '1');
+      setMinTimeDone(true);
+    }, FULL_LOAD_MS);
+    return () => clearTimeout(timer);
+  }, [minTimeDone]);
+
+  return isLoading || !minTimeDone;
+}
 
 function LoadingScreen() {
   return (
     <div className="app-loading-screen">
       <div className="app-flight">
-        <svg className="app-flight-svg" viewBox="0 0 80 160" width="80" height="160" aria-hidden="true">
+        <svg className="app-flight-svg" viewBox="0 0 100 110" width="100" height="110" aria-hidden="true">
+          {/* Decorative clouds along the route */}
+          <g className="app-flight-cloud" transform="translate(38, 62)">
+            <circle cx="0" cy="5" r="3.5" />
+            <circle cx="4.5" cy="2.5" r="4.5" />
+            <circle cx="10" cy="5" r="3.5" />
+          </g>
+          <g className="app-flight-cloud" transform="translate(56, 34) scale(0.8)">
+            <circle cx="0" cy="5" r="3.5" />
+            <circle cx="4.5" cy="2.5" r="4.5" />
+            <circle cx="10" cy="5" r="3.5" />
+          </g>
+
           <path className="app-flight-route" d={FLIGHT_PATH} />
           <path className="app-flight-trail" d={FLIGHT_PATH} pathLength={100} />
 
           {/* Bangladesh — departure */}
-          <g transform="translate(2, 141)">
-            <rect width="24" height="16" fill="#006a4e" />
-            <circle cx="10.5" cy="8" r="5.4" fill="#f42a41" />
+          <g transform="translate(2, 84)">
+            <rect width="20" height="13" fill="#006a4e" />
+            <circle cx="8.7" cy="6.5" r="4.4" fill="#f42a41" />
           </g>
 
-          {/* Germany — destination */}
-          <g transform="translate(54, 3)">
-            <rect width="24" height="16" fill="#000000" />
-            <rect y="5.33" width="24" height="5.34" fill="#dd0000" />
-            <rect y="10.67" width="24" height="5.33" fill="#ffce00" />
+          {/* Germany — destination, with an arrival glow timed to the plane */}
+          <circle className="app-flight-glow" cx="88" cy="10.5" r="16" />
+          <g transform="translate(78, 4)">
+            <rect width="20" height="13" fill="#000000" />
+            <rect y="4.33" width="20" height="4.34" fill="#dd0000" />
+            <rect y="8.67" width="20" height="4.33" fill="#ffce00" />
           </g>
         </svg>
-        <Plane className="app-flight-plane" size={16} />
+        <Plane className="app-flight-plane" size={15} />
       </div>
     </div>
   );
@@ -84,7 +119,12 @@ export default function App() {
     }
   }, [role, user, myApplicant]);
 
-  if (authLoading) {
+  const rawLoading = authLoading || (!!user && (
+    roleLoading || !role || (role === 'applicant' && !myApplicant)
+  ));
+  const loading = useMinLoadingTime(rawLoading);
+
+  if (loading) {
     return <LoadingScreen />;
   }
 
@@ -98,14 +138,10 @@ export default function App() {
     );
   }
 
-  // Still resolving whether this account is an admin.
-  if (roleLoading || !role) {
-    return <LoadingScreen />;
-  }
-
-  // Applicant record doesn't exist yet — the effect above is creating it;
-  // wait for the snapshot to reflect it rather than showing anything stale.
-  if (role === 'applicant' && !myApplicant) {
+  // rawLoading already covers this — `loading` only just became false, so
+  // role is guaranteed resolved by now. This is here purely to narrow the
+  // type for the routes below.
+  if (!role) {
     return <LoadingScreen />;
   }
 

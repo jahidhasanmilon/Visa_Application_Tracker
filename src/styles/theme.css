@@ -331,9 +331,10 @@ button.app-sidebar-close { display: none; }
 @keyframes app-spin { to { transform: rotate(360deg); } }
 
 /* Loading-screen flight — a plane climbs from Bangladesh to Germany along a
-   takeoff-style curve, its trail drawing in as it flies, then fades out and
-   loops. */
-.app-flight { position: relative; width: 80px; height: 160px; }
+   compact takeoff-style curve, weaving past a couple of clouds, its trail
+   drawing in as it flies. The destination flag glows as it lands, then
+   everything fades out and loops. Sized to stay fully in view. */
+.app-flight { position: relative; width: 100px; height: 110px; }
 .app-flight-svg { position: absolute; inset: 0; overflow: visible; }
 .app-flight-route {
   fill: none; stroke: var(--border); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1 7;
@@ -341,20 +342,30 @@ button.app-sidebar-close { display: none; }
 .app-flight-trail {
   fill: none; stroke: var(--violet); stroke-width: 2; stroke-linecap: round;
   stroke-dasharray: 100; stroke-dashoffset: 100;
-  animation: app-flight-trail 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: app-flight-trail 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.app-flight-cloud { fill: var(--border); opacity: 0.7; }
+.app-flight-glow {
+  fill: var(--violet); opacity: 0; filter: blur(2px);
+  animation: app-flight-glow 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 .app-flight-plane {
   position: absolute; top: 0; left: 0; color: var(--violet);
-  offset-path: path('M14,150 C10,92 52,68 66,14');
+  offset-path: path('M22,92 C30,60 55,45 78,10');
   offset-rotate: auto;
   transform: rotate(-45deg);
-  animation: app-flight-move 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: app-flight-move 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 @keyframes app-flight-trail {
   0%   { stroke-dashoffset: 100; opacity: 0; }
   8%   { opacity: 1; }
   85%  { stroke-dashoffset: 0; opacity: 1; }
   100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes app-flight-glow {
+  0%, 78% { opacity: 0; }
+  90%     { opacity: 0.4; }
+  100%    { opacity: 0; }
 }
 @keyframes app-flight-move {
   0%   { offset-distance: 0%; opacity: 0; }
