@@ -15,12 +15,16 @@ function WhatsAppIcon({ size }: { size: number }) {
 
 // Always-visible floating button linking to the community WhatsApp group —
 // mounted in both AppShell (signed in) and PublicLayout (signed out).
-// Renders nothing until admin has set a link via the Help editor.
+// Renders nothing until admin has added a community link whose label or URL
+// mentions WhatsApp via the Help editor.
 export default function WhatsAppFab() {
   const { t } = useLanguage();
   const [link, setLink] = useState('');
 
-  useEffect(() => subscribeHelp(h => setLink(h.whatsappLink)), []);
+  useEffect(() => subscribeHelp(h => {
+    const whatsappLink = h.communityLinks.find(l => /whatsapp/i.test(l.label) || /whatsapp/i.test(l.url));
+    setLink(whatsappLink?.url || '');
+  }), []);
 
   if (!link) return null;
 

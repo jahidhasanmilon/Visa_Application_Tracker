@@ -7,11 +7,31 @@ const ABOUT_DOC = doc(db, 'meta', 'about');
 const PRIVACY_DOC = doc(db, 'meta', 'privacy');
 const ABOUT_SECTION_ORDER_DOC = doc(db, 'meta', 'aboutSectionOrder');
 
-const DEFAULT_HELP: HelpInfo = { whatsappLink: '', email: '', notes: '' };
+export const DEFAULT_HELP: HelpInfo = {
+  subtitle: 'Found a bug? Have a question or feedback? Reach out.',
+  email: '',
+  emailDescription: 'For corrections, questions, or feedback — email us. We read every message.',
+  removingEntryBody: '',
+  communityDescription: 'Day-to-day discussion, questions, and feedback live in our community.',
+  communityLinks: [],
+};
 
+// Reads the old shape (whatsappLink + notes) so nothing already saved
+// disappears — communityLinks gets seeded from whatsappLink, notes becomes
+// removingEntryBody. Saving from the new editor moves it into the proper
+// shape for good.
 export function subscribeHelp(onData: (help: HelpInfo) => void): () => void {
   return onSnapshot(HELP_DOC, (snap) => {
-    onData(snap.exists() ? (snap.data() as HelpInfo) : DEFAULT_HELP);
+    if (!snap.exists()) { onData(DEFAULT_HELP); return; }
+    const data = snap.data() as Partial<HelpInfo> & { whatsappLink?: string; notes?: string };
+    onData({
+      subtitle: data.subtitle ?? DEFAULT_HELP.subtitle,
+      email: data.email ?? '',
+      emailDescription: data.emailDescription ?? DEFAULT_HELP.emailDescription,
+      removingEntryBody: data.removingEntryBody ?? data.notes ?? '',
+      communityDescription: data.communityDescription ?? DEFAULT_HELP.communityDescription,
+      communityLinks: data.communityLinks ?? (data.whatsappLink ? [{ label: 'WhatsApp group', url: data.whatsappLink }] : []),
+    });
   });
 }
 

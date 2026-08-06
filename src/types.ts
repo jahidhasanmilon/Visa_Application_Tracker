@@ -123,10 +123,18 @@ export interface VivaQuestion {
   order: number;
 }
 
+export interface HelpLink {
+  label: string;
+  url: string;
+}
+
 export interface HelpInfo {
-  whatsappLink: string;
+  subtitle: string;
   email: string;
-  notes: string;
+  emailDescription: string;
+  removingEntryBody: string;
+  communityDescription: string;
+  communityLinks: HelpLink[];
 }
 
 export interface PrivacyContent {
