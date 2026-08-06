@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pencil, MessageCircle, Mail } from 'lucide-react';
+import { Pencil, Mail, ArrowRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import RichTextToolbar from '../components/RichTextToolbar';
 import { subscribeHelp, saveHelp } from '../services/siteContentService';
@@ -80,18 +80,7 @@ export default function Help({ role }: HelpProps) {
             </div>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {help.whatsappLink && (
-              <a href={help.whatsappLink} target="_blank" rel="noreferrer" className="app-card app-card-pad" style={{ display: 'flex', alignItems: 'center', gap: 14, textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ width: 38, height: 38, borderRadius: 10, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#25D36622', color: '#25D366' }}>
-                  <MessageCircle size={18} />
-                </div>
-                <div>
-                  <div className="app-card-title">{t('help.joinWhatsapp')}</div>
-                  <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t('help.chatDirectly')}</div>
-                </div>
-              </a>
-            )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {help.email && (
               <div className="app-card app-card-pad">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
@@ -102,8 +91,10 @@ export default function Help({ role }: HelpProps) {
                 <a href={`mailto:${help.email}`} className="app-btn app-btn-primary app-btn-block">{help.email}</a>
               </div>
             )}
+
             {help.notes && (
-              <div className="app-card app-card-pad">
+              <div>
+                <div className="app-card-title" style={{ marginBottom: 8 }}>{t('help.notes')}</div>
                 <div
                   className="app-section-body"
                   style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
@@ -111,6 +102,24 @@ export default function Help({ role }: HelpProps) {
                 />
               </div>
             )}
+
+            {help.whatsappLink && (
+              <div>
+                <div className="app-card-title" style={{ marginBottom: 8 }}>{t('help.community')}</div>
+                <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 12px' }}>{t('help.chatDirectly')}</p>
+                <a
+                  href={help.whatsappLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="app-card app-card-pad"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
+                >
+                  <div style={{ fontWeight: 600, fontSize: 13.5 }}>{t('help.joinWhatsapp')}</div>
+                  <ArrowRight size={16} color="var(--violet)" />
+                </a>
+              </div>
+            )}
+
             {!help.whatsappLink && !help.email && !help.notes && (
               <div className="app-card app-card-pad">
                 <div className="app-empty">{role === 'admin' ? t('help.emptyAdmin') : t('help.emptyApplicant')}</div>
