@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { PlaneTakeoff } from 'lucide-react';
+import { Plane } from 'lucide-react';
 import { useAuth } from './hooks/useAuth';
 import { useMyApplicant } from './hooks/useMyApplicant';
 import { createOwnApplicant } from './services/applicantsService';
@@ -30,10 +30,20 @@ import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
 import './styles/theme.css';
 
+const FLIGHT_PATH = 'M6,50 Q60,3 114,50';
+
 function LoadingScreen() {
   return (
     <div className="app-loading-screen">
-      <PlaneTakeoff className="app-takeoff" size={28} />
+      <div className="app-flight">
+        <svg className="app-flight-svg" viewBox="0 0 120 56" width="120" height="56" aria-hidden="true">
+          <path className="app-flight-route" d={FLIGHT_PATH} />
+          <path className="app-flight-trail" d={FLIGHT_PATH} pathLength={100} />
+          <circle className="app-flight-dot" cx="6" cy="50" r="2.5" />
+          <circle className="app-flight-dot" cx="114" cy="50" r="2.5" />
+        </svg>
+        <Plane className="app-flight-plane" size={16} />
+      </div>
     </div>
   );
 }

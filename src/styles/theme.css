@@ -330,15 +330,37 @@ button.app-sidebar-close { display: none; }
 .app-spin { animation: app-spin 0.8s linear infinite; }
 @keyframes app-spin { to { transform: rotate(360deg); } }
 
-/* Loading-screen plane — climbs up and to the right like taking off, fading
-   in/out at the loop boundary instead of snapping back. */
-.app-takeoff { animation: app-takeoff 1.8s ease-in-out infinite; }
-@keyframes app-takeoff {
-  0%   { transform: translate(-16px, 12px) rotate(-10deg); opacity: 0; }
-  20%  { opacity: 1; }
-  55%  { transform: translate(12px, -16px) rotate(8deg); opacity: 1; }
-  85%  { opacity: 0; }
-  100% { transform: translate(-16px, 12px) rotate(-10deg); opacity: 0; }
+/* Loading-screen flight — a plane arcs from departure to arrival along a
+   curved route, its trail drawing in as it flies, then fades out and loops. */
+.app-flight { position: relative; width: 120px; height: 56px; }
+.app-flight-svg { position: absolute; inset: 0; overflow: visible; }
+.app-flight-route {
+  fill: none; stroke: var(--border); stroke-width: 2; stroke-linecap: round; stroke-dasharray: 1 7;
+}
+.app-flight-trail {
+  fill: none; stroke: var(--violet); stroke-width: 2; stroke-linecap: round;
+  stroke-dasharray: 100; stroke-dashoffset: 100;
+  animation: app-flight-trail 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+.app-flight-dot { fill: var(--muted-2); }
+.app-flight-plane {
+  position: absolute; top: 0; left: 0; color: var(--violet);
+  offset-path: path('M6,50 Q60,3 114,50');
+  offset-rotate: auto;
+  transform: rotate(-45deg);
+  animation: app-flight-move 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+@keyframes app-flight-trail {
+  0%   { stroke-dashoffset: 100; opacity: 0; }
+  8%   { opacity: 1; }
+  85%  { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes app-flight-move {
+  0%   { offset-distance: 0%; opacity: 0; }
+  8%   { opacity: 1; }
+  85%  { offset-distance: 100%; opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
 }
 
 .app-skeleton {
