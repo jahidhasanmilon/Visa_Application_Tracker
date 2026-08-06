@@ -30,11 +30,16 @@ export default function TemplateListEditor({ title, subtitle, items, onSave, add
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [editNote, setEditNote] = useState('');
+  const [saveError, setSaveError] = useState('');
 
   async function save(next: ChecklistItem[]) {
     setSaving(true);
+    setSaveError('');
     try {
       await onSave(next);
+    } catch (err) {
+      console.error('Template save failed', err);
+      setSaveError('Could not save — check your connection and try again.');
     } finally {
       setSaving(false);
     }
@@ -74,8 +79,11 @@ export default function TemplateListEditor({ title, subtitle, items, onSave, add
   async function saveEdit() {
     const label = editValue.trim();
     if (!label || !editingId) { cancelEdit(); return; }
+    // Always a string (never undefined) — Firestore rejects `undefined`
+    // field values outright, which was silently failing the whole save
+    // (including the label) whenever someone cleared the note back out.
     const note = editNote.trim();
-    await save(items.map(i => i.id === editingId ? { ...i, label, note: note || undefined } : i));
+    await save(items.map(i => i.id === editingId ? { ...i, label, note } : i));
     cancelEdit();
   }
 
@@ -152,6 +160,10 @@ export default function TemplateListEditor({ title, subtitle, items, onSave, add
             </div>
           ))}
         </div>
+      )}
+
+      {saveError && (
+        <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{saveError}</div>
       )}
 
       <div style={{ display: 'flex', gap: 8 }}>
