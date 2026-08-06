@@ -54,7 +54,7 @@ export default function NotificationBell() {
           due.map(a => (
             <Link key={a.id} to="/app/applications" className="app-notif-item" onClick={() => setOpen(false)}>
               <div style={{ fontWeight: 600, fontSize: 13.5 }}>{a.name}</div>
-              <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>Last updated {fmtDate(a.lastUpdated)}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>Last Edited {fmtDate(a.lastUpdated)}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: 12.5, fontWeight: 600, color: 'var(--danger)' }}>
                 <span className="app-dot" style={{ background: 'var(--danger)' }} />
                 {a.reminderDaysLeft === 0 ? 'Due today' : `${Math.abs(a.reminderDaysLeft)}d overdue`}

@@ -37,17 +37,17 @@ export default function ApplicantModal({
 
         <div style={{ display: 'flex', gap: 12 }}>
           <div className="app-field" style={{ flex: 1 }}>
-            <label>Application created</label>
+            <label>Creation on</label>
             <input className="app-input" type="date" value={form.created} onChange={e => setForm({ ...form, created: e.target.value })} />
           </div>
           <div className="app-field" style={{ flex: 1 }}>
-            <label>Application submitted</label>
+            <label>Waiting List Joined On</label>
             <input className="app-input" type="date" value={form.submitted} onChange={e => setForm({ ...form, submitted: e.target.value })} />
           </div>
         </div>
 
         <div className="app-field">
-          <label>Last updated</label>
+          <label>Last Edited</label>
           <input className="app-input" type="date" value={form.lastUpdated} onChange={e => setForm({ ...form, lastUpdated: e.target.value })} />
         </div>
 
@@ -57,7 +57,7 @@ export default function ApplicantModal({
         </div>
 
         <div className="app-field">
-          <label>Application Reminder (30-Day)</label>
+          <label>Confirm Application Request (30-Day)</label>
           <select className="app-select" value={form.reminderMailSent} onChange={e => setForm({ ...form, reminderMailSent: e.target.value as ReminderStatus })}>
             {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{REMINDER_LABELS[r]}</option>)}
           </select>

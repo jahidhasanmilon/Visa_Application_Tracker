@@ -26,7 +26,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
 
   async function handleSave() {
     if (!name.trim() || !created || !submitted || !lastUpdated) {
-      setError('Name, applied date, submitted date, and last updated date are all required.');
+      setError('Name, creation date, waiting list joined date, and last edited date are all required.');
       return;
     }
     setError('');
@@ -59,17 +59,17 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
 
         <div style={{ display: 'flex', gap: 12 }}>
           <div className="app-field" style={{ flex: 1 }}>
-            <label>Applied date *</label>
+            <label>Creation date *</label>
             <input className="app-input" type="date" value={created} onChange={e => setCreated(e.target.value)} />
           </div>
           <div className="app-field" style={{ flex: 1 }}>
-            <label>Submitted date *</label>
+            <label>Waiting List Joined Date *</label>
             <input className="app-input" type="date" value={submitted} onChange={e => setSubmitted(e.target.value)} />
           </div>
         </div>
 
         <div className="app-field">
-          <label>Last updated *</label>
+          <label>Last Edited *</label>
           <input className="app-input" type="date" value={lastUpdated} onChange={e => setLastUpdated(e.target.value)} />
           <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
             Counts down from this date — jumps to today automatically when you change the reminder status.

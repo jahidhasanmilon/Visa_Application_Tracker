@@ -26,13 +26,13 @@ const REMINDER_WINDOW_DAYS = 30;
 // Mirrors src/constants/emailTemplate.ts — used only if the admin hasn't
 // saved a custom template yet at meta/emailTemplate.
 const DEFAULT_TEMPLATE = {
-  subject: 'Application Reminder (30-Day): {{name}} — {{serialNo}}',
+  subject: 'Confirm Application Request (30-Day): {{name}} — {{serialNo}}',
   body: `The 30-day follow-up window has passed for this application.
 
 Name: {{name}}
 Serial No: {{serialNo}}
 Status: {{status}}
-Last updated: {{lastUpdated}}
+Last Edited: {{lastUpdated}}
 Days overdue: {{daysOverdue}}
 
 Please review and follow up.`,

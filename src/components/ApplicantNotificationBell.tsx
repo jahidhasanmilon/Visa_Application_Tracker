@@ -36,7 +36,7 @@ export default function ApplicantNotificationBell({ uid }: { uid: string }) {
           <div className="app-empty">Nothing due right now.</div>
         ) : (
           <div className="app-notif-item">
-            <div style={{ fontWeight: 600, fontSize: 13.5 }}>Application Reminder (30-Day)</div>
+            <div style={{ fontWeight: 600, fontSize: 13.5 }}>Confirm Application Request (30-Day)</div>
             <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 2 }}>
               It's been over 30 days since your last update.
             </div>
