@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
-import { Bold, Italic, Underline, List, Heading } from 'lucide-react';
-import { wrapSelection, prefixLines, type TextEdit } from '../utils/richText';
+import { Bold, Italic, Underline, List, Heading, Link2 } from 'lucide-react';
+import { wrapSelection, prefixLines, insertLink, type TextEdit } from '../utils/richText';
 
 interface RichTextToolbarProps {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -39,6 +39,19 @@ export default function RichTextToolbar({ textareaRef, onChange }: RichTextToolb
       </button>
       <button type="button" className="app-icon-btn" title="Sub-heading" aria-label="Sub-heading" onClick={() => apply(ta => prefixLines(ta, '## '))}>
         <Heading size={14} />
+      </button>
+      <button
+        type="button"
+        className="app-icon-btn"
+        title="Insert link"
+        aria-label="Insert link"
+        onClick={() => {
+          const url = window.prompt('Link URL (https://…)');
+          if (!url) return;
+          apply(ta => insertLink(ta, url.trim()));
+        }}
+      >
+        <Link2 size={14} />
       </button>
     </div>
   );

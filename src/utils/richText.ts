@@ -1,7 +1,8 @@
 // A tiny, safe subset of markdown used for Guide section bodies —
-// **bold**, *italic*, __underline__, "## " sub-headings, "- " bullet lists.
-// Not a general markdown parser: just enough for the admin toolbar in
-// AdminGuides.tsx to write, and renderSectionBody() below to display.
+// **bold**, *italic*, __underline__, "## " sub-headings, "- " bullet lists,
+// "[text](url)" links. Not a general markdown parser: just enough for the
+// admin toolbar (RichTextToolbar.tsx / AdminGuides.tsx) to write, and
+// renderSectionBody() below to display.
 
 export function escapeHtml(s: string): string {
   return s
@@ -12,11 +13,22 @@ export function escapeHtml(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
+// Only http(s)/mailto links render as real links — anything else (notably
+// javascript:) falls back to "#" so a pasted/typed URL can never execute
+// script when rendered via dangerouslySetInnerHTML.
+function sanitizeUrl(url: string): string {
+  const trimmed = url.trim();
+  return /^(https?:|mailto:)/i.test(trimmed) ? trimmed : '#';
+}
+
 function inlineFormat(escaped: string): string {
   return escaped
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/__(.+?)__/g, '<u>$1</u>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, (_m, text: string, url: string) => (
+      `<a href="${sanitizeUrl(url)}" target="_blank" rel="noreferrer">${text}</a>`
+    ));
 }
 
 // Input is raw user text (never trusted) — every piece of it is escaped
@@ -73,6 +85,19 @@ export function wrapSelection(textarea: HTMLTextAreaElement, before: string, aft
   const next = value.slice(0, selectionStart) + before + selected + after + value.slice(selectionEnd);
   const newStart = selectionStart + before.length;
   return { value: next, selectionStart: newStart, selectionEnd: newStart + selected.length };
+}
+
+// Wraps the current selection as a "[text](url)" link — if nothing is
+// selected, inserts a "link text" placeholder, selected so it's easy to
+// type over.
+export function insertLink(textarea: HTMLTextAreaElement, url: string): TextEdit {
+  const { value, selectionStart, selectionEnd } = textarea;
+  const selected = value.slice(selectionStart, selectionEnd);
+  const text = selected || 'link text';
+  const markup = `[${text}](${url})`;
+  const next = value.slice(0, selectionStart) + markup + value.slice(selectionEnd);
+  const textStart = selectionStart + 1;
+  return { value: next, selectionStart: textStart, selectionEnd: textStart + text.length };
 }
 
 // Prefixes every line touched by the current selection with `prefix` (e.g.

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Pencil, Trash2, X, Paperclip, FileText, Bold, Italic, Underline, List, Heading } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Paperclip, FileText, Bold, Italic, Underline, List, Heading, Link2 } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import {
   subscribeGuides, addGuide, updateGuide, deleteGuide, slugify,
   uploadGuideAttachment, deleteGuideAttachment,
 } from '../../services/guidesService';
-import { wrapSelection, prefixLines } from '../../utils/richText';
+import { wrapSelection, prefixLines, insertLink } from '../../utils/richText';
 import type { Guide, GuideAttachment, GuideSection } from '../../types';
 
 const EMPTY_FORM = {
@@ -226,6 +226,19 @@ export default function AdminGuides() {
                       </button>
                       <button type="button" className="app-icon-btn" title="Sub-heading" aria-label="Sub-heading" onClick={() => applyFormat(i, ta => prefixLines(ta, '## '))}>
                         <Heading size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="app-icon-btn"
+                        title="Insert link"
+                        aria-label="Insert link"
+                        onClick={() => {
+                          const url = window.prompt('Link URL (https://…)');
+                          if (!url) return;
+                          applyFormat(i, ta => insertLink(ta, url.trim()));
+                        }}
+                      >
+                        <Link2 size={14} />
                       </button>
                     </div>
                     <textarea

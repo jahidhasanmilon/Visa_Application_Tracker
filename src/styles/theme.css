@@ -282,6 +282,7 @@ button.app-sidebar-close { display: none; }
 .app-section-body .app-section-list { margin: 0 0 14px; padding-left: 20px; }
 .app-section-body .app-section-list:last-child { margin-bottom: 0; }
 .app-section-body .app-section-list li { margin-bottom: 4px; }
+.app-section-body a { color: var(--violet); text-decoration: underline; }
 
 /* ---------- About page: story timeline + team avatars ---------- */
 .app-about-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
