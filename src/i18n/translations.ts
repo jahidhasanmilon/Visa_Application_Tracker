@@ -153,11 +153,13 @@ export const translations: Record<Lang, Record<string, string>> = {
     'howToUse.s3.heading': '3. Checklist',
     'howToUse.s3.body': 'A to-do list of documents and steps to prepare. Tap an item to mark it done — this is your own personal checklist, separate from the roadmap.',
     'howToUse.s4.heading': '4. Confirm Application Request (30-Day)',
-    'howToUse.s4.body': 'A simple nudge so you don\'t forget to follow up with the embassy. Mark it "Done" after you\'ve checked in — it resets automatically, counting down again from today.',
+    'howToUse.s4.body': 'A live countdown — days, hours, minutes, and seconds — tracks the 30-day window since your record was last edited. Mark it "Done" once you\'ve checked in with the embassy; that\'s the only thing that resets it. Switching it back to "Not yet" won\'t restart the clock.',
     'howToUse.s5.heading': '5. Guides & Resources',
     'howToUse.s5.body': 'Step-by-step write-ups on applying for the visa, understanding the checklist, and applying for jobs — organized by category. No login needed to browse them.',
     'howToUse.s6.heading': '6. Interview Questions',
     'howToUse.s6.body': 'Common interview questions with notes on how to approach them — worth reviewing before your embassy appointment.',
+    'howToUse.s7.heading': '7. More pages may appear over time',
+    'howToUse.s7.body': 'Admins can add extra pages to your sidebar as needed — new guides, announcements, or resources. If you see something new there, it\'s worth a look.',
 
     // Profile
     'profile.title': 'Profile',
@@ -376,11 +378,13 @@ export const translations: Record<Lang, Record<string, string>> = {
     'howToUse.s3.heading': '৩. চেকলিস্ট',
     'howToUse.s3.body': 'যেসব document আর ধাপ প্রস্তুত করতে হবে তার একটা to-do list। কোনো item শেষ হলে ট্যাপ করে done করুন — এটা roadmap থেকে আলাদা, সম্পূর্ণ আপনার নিজের personal checklist।',
     'howToUse.s4.heading': '৪. অ্যাপ্লিকেশন রিকোয়েস্ট কনফার্ম করুন (৩০ দিন)',
-    'howToUse.s4.body': 'দূতাবাসের সাথে follow up করতে ভুলে না যাওয়ার জন্য একটা সাধারণ reminder। খোঁজ নেওয়ার পর এটা "হয়ে গেছে" মার্ক করুন — এটা স্বয়ংক্রিয়ভাবে reset হয়ে আজ থেকে আবার countdown শুরু করে।',
+    'howToUse.s4.body': 'আপনার রেকর্ড সর্বশেষ এডিট হওয়ার পর থেকে ৩০ দিনের window-টা এখন live countdown-এ (দিন, ঘণ্টা, মিনিট, সেকেন্ড) দেখানো হয়। দূতাবাসের সাথে খোঁজ নেওয়ার পর "হয়ে গেছে" মার্ক করুন — এটাই একমাত্র জিনিস যা countdown রিসেট করে। "এখনো হয়নি"-তে ফিরিয়ে দিলে countdown আবার শুরু হয় না।',
     'howToUse.s5.heading': '৫. গাইড ও রিসোর্স',
     'howToUse.s5.body': 'ভিসার জন্য আবেদন, checklist বোঝা, আর চাকরির জন্য আবেদন করা নিয়ে ধাপে ধাপে লেখা — category অনুযায়ী সাজানো। এগুলো দেখতে login লাগবে না।',
     'howToUse.s6.heading': '৬. ইন্টারভিউ প্রশ্ন',
     'howToUse.s6.body': 'সাধারণ ইন্টারভিউ প্রশ্ন, কীভাবে সেগুলোর উত্তর দেবেন তার নোটসহ — দূতাবাসের অ্যাপয়েন্টমেন্টের আগে দেখে নেওয়া ভালো।',
+    'howToUse.s7.heading': '৭. সময়ের সাথে আরও পেজ যোগ হতে পারে',
+    'howToUse.s7.body': 'প্রয়োজন অনুযায়ী admin আপনার sidebar-এ নতুন পেজ যোগ করতে পারেন — নতুন গাইড, ঘোষণা, বা রিসোর্স। sidebar-এ নতুন কিছু দেখলে একবার দেখে নেওয়া ভালো।',
 
     // Profile
     'profile.title': 'প্রোফাইল',

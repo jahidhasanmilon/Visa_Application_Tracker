@@ -1,7 +1,7 @@
 import PageHeader from '../../components/PageHeader';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-const SECTION_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6'] as const;
+const SECTION_KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7'] as const;
 
 export default function HowToUse() {
   const { t } = useLanguage();
