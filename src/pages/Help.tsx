@@ -21,6 +21,10 @@ export default function Help({ role }: HelpProps) {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const removingEntryRef = useRef<HTMLTextAreaElement>(null);
+  const emailDescriptionRef = useRef<HTMLTextAreaElement>(null);
+  const embassyAddressRef = useRef<HTMLTextAreaElement>(null);
+  const embassyDescriptionRef = useRef<HTMLTextAreaElement>(null);
+  const communityDescriptionRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => subscribeHelp(setHelp), []);
 
@@ -77,7 +81,8 @@ export default function Help({ role }: HelpProps) {
             </div>
             <div className="app-field">
               <label>Email description</label>
-              <textarea className="app-textarea" value={draft.emailDescription} onChange={e => setDraft({ ...draft, emailDescription: e.target.value })} style={{ minHeight: 60 }} />
+              <RichTextToolbar textareaRef={emailDescriptionRef} onChange={emailDescription => setDraft({ ...draft, emailDescription })} />
+              <textarea ref={emailDescriptionRef} className="app-textarea" value={draft.emailDescription} onChange={e => setDraft({ ...draft, emailDescription: e.target.value })} style={{ minHeight: 60 }} />
             </div>
 
             <div className="app-field">
@@ -86,11 +91,13 @@ export default function Help({ role }: HelpProps) {
             </div>
             <div className="app-field">
               <label>Germany Embassy address</label>
-              <textarea className="app-textarea" value={draft.embassyAddress} onChange={e => setDraft({ ...draft, embassyAddress: e.target.value })} style={{ minHeight: 60 }} placeholder="Address of the German Embassy" />
+              <RichTextToolbar textareaRef={embassyAddressRef} onChange={embassyAddress => setDraft({ ...draft, embassyAddress })} />
+              <textarea ref={embassyAddressRef} className="app-textarea" value={draft.embassyAddress} onChange={e => setDraft({ ...draft, embassyAddress: e.target.value })} style={{ minHeight: 60 }} placeholder="Address of the German Embassy" />
             </div>
             <div className="app-field">
               <label>Embassy card description</label>
-              <textarea className="app-textarea" value={draft.embassyDescription} onChange={e => setDraft({ ...draft, embassyDescription: e.target.value })} style={{ minHeight: 60 }} />
+              <RichTextToolbar textareaRef={embassyDescriptionRef} onChange={embassyDescription => setDraft({ ...draft, embassyDescription })} />
+              <textarea ref={embassyDescriptionRef} className="app-textarea" value={draft.embassyDescription} onChange={e => setDraft({ ...draft, embassyDescription: e.target.value })} style={{ minHeight: 60 }} />
             </div>
 
             <div className="app-field">
@@ -112,7 +119,8 @@ export default function Help({ role }: HelpProps) {
 
             <div className="app-field">
               <label>Community description</label>
-              <textarea className="app-textarea" value={draft.communityDescription} onChange={e => setDraft({ ...draft, communityDescription: e.target.value })} style={{ minHeight: 60 }} />
+              <RichTextToolbar textareaRef={communityDescriptionRef} onChange={communityDescription => setDraft({ ...draft, communityDescription })} />
+              <textarea ref={communityDescriptionRef} className="app-textarea" value={draft.communityDescription} onChange={e => setDraft({ ...draft, communityDescription: e.target.value })} style={{ minHeight: 60 }} />
             </div>
             <div className="app-field">
               <label>Community links</label>
@@ -158,7 +166,11 @@ export default function Help({ role }: HelpProps) {
                   <div className="app-card-title">{t('help.email')}</div>
                 </div>
                 {help.emailDescription && (
-                  <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>{help.emailDescription}</p>
+                  <div
+                    className="app-section-body"
+                    style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 14 }}
+                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.emailDescription) }}
+                  />
                 )}
                 <a href={`mailto:${help.email}`} className="app-btn app-btn-primary app-btn-block">{help.email}</a>
               </div>
@@ -171,10 +183,18 @@ export default function Help({ role }: HelpProps) {
                   <div className="app-card-title">Germany Embassy</div>
                 </div>
                 {help.embassyDescription && (
-                  <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 14px' }}>{help.embassyDescription}</p>
+                  <div
+                    className="app-section-body"
+                    style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 14 }}
+                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.embassyDescription) }}
+                  />
                 )}
                 {help.embassyAddress && (
-                  <p style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.6, margin: '0 0 14px', whiteSpace: 'pre-line' }}>{help.embassyAddress}</p>
+                  <div
+                    className="app-section-body"
+                    style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.6, marginBottom: 14 }}
+                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.embassyAddress) }}
+                  />
                 )}
                 {help.embassyEmail && (
                   <a href={`mailto:${help.embassyEmail}`} className="app-btn app-btn-primary app-btn-block">{help.embassyEmail}</a>
@@ -197,7 +217,11 @@ export default function Help({ role }: HelpProps) {
               <div>
                 <div className="app-card-title" style={{ marginBottom: 8 }}>{t('help.community')}</div>
                 {help.communityDescription && (
-                  <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 12px' }}>{help.communityDescription}</p>
+                  <div
+                    className="app-section-body"
+                    style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 12 }}
+                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.communityDescription) }}
+                  />
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {help.communityLinks.map((link, i) => (
