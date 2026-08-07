@@ -158,8 +158,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'howToUse.s5.body': 'Step-by-step write-ups on applying for the visa, understanding the checklist, and applying for jobs — organized by category. No login needed to browse them.',
     'howToUse.s6.heading': '6. Interview Questions',
     'howToUse.s6.body': 'Common interview questions with notes on how to approach them — worth reviewing before your embassy appointment.',
-    'howToUse.s7.heading': '7. More pages may appear over time',
-    'howToUse.s7.body': 'Admins can add extra pages to your sidebar as needed — new guides, announcements, or resources. If you see something new there, it\'s worth a look.',
 
     // Profile
     'profile.title': 'Profile',
@@ -383,8 +381,6 @@ export const translations: Record<Lang, Record<string, string>> = {
     'howToUse.s5.body': 'ভিসার জন্য আবেদন, checklist বোঝা, আর চাকরির জন্য আবেদন করা নিয়ে ধাপে ধাপে লেখা — category অনুযায়ী সাজানো। এগুলো দেখতে login লাগবে না।',
     'howToUse.s6.heading': '৬. ইন্টারভিউ প্রশ্ন',
     'howToUse.s6.body': 'সাধারণ ইন্টারভিউ প্রশ্ন, কীভাবে সেগুলোর উত্তর দেবেন তার নোটসহ — দূতাবাসের অ্যাপয়েন্টমেন্টের আগে দেখে নেওয়া ভালো।',
-    'howToUse.s7.heading': '৭. সময়ের সাথে আরও পেজ যোগ হতে পারে',
-    'howToUse.s7.body': 'প্রয়োজন অনুযায়ী admin আপনার sidebar-এ নতুন পেজ যোগ করতে পারেন — নতুন গাইড, ঘোষণা, বা রিসোর্স। sidebar-এ নতুন কিছু দেখলে একবার দেখে নেওয়া ভালো।',
 
     // Profile
     'profile.title': 'প্রোফাইল',
