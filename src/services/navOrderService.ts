@@ -3,6 +3,7 @@ import { db } from '../firebase';
 
 const NAV_ORDER_DOC = doc(db, 'meta', 'navOrder');
 const NAV_HIDDEN_DOC = doc(db, 'meta', 'navHidden');
+const NAV_LABELS_DOC = doc(db, 'meta', 'navLabels');
 
 // Array of nav `to` keys, in the order admin wants the applicant sidebar to
 // show them. null = no customization saved yet, use the built-in default order.
@@ -26,4 +27,17 @@ export function subscribeApplicantNavHidden(onData: (keys: string[]) => void): (
 
 export async function saveApplicantNavHidden(keys: string[]): Promise<void> {
   await setDoc(NAV_HIDDEN_DOC, { keys });
+}
+
+// Admin-renamed labels for built-in sidebar links (custom pages already
+// have their own freely-editable title — this is just for the fixed ones,
+// keyed by route "to"). Falls back to the normal i18n label when absent.
+export function subscribeApplicantNavLabels(onData: (labels: Record<string, string>) => void): () => void {
+  return onSnapshot(NAV_LABELS_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { labels?: Record<string, string> }).labels || {}) : {});
+  });
+}
+
+export async function saveApplicantNavLabels(labels: Record<string, string>): Promise<void> {
+  await setDoc(NAV_LABELS_DOC, { labels });
 }

@@ -184,5 +184,10 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if isAdminEmail();
     }
+    // Admin-renamed labels for built-in sidebar links.
+    match /meta/navLabels {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
   }
 }

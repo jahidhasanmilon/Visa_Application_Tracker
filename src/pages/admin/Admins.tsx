@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, Eye, EyeOff } from 'lucide-react';
+import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, RotateCcw, Check, X } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import CustomSectionForm from '../../components/CustomSectionForm';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
-import { saveApplicantNavOrder, saveApplicantNavHidden } from '../../services/navOrderService';
+import { saveApplicantNavOrder, saveApplicantNavHidden, saveApplicantNavLabels } from '../../services/navOrderService';
 import {
+  subscribeAbout, saveAbout, DEFAULT_ABOUT,
+  subscribeHelp, saveHelp, DEFAULT_HELP,
   saveAboutSectionOrder, saveHelpSectionOrder,
   saveAboutCustomSections, saveHelpCustomSections,
   saveAboutHiddenSections, saveHelpHiddenSections,
 } from '../../services/siteContentService';
 import { saveCustomPages } from '../../services/customPagesService';
-import { useApplicantNavOrder } from '../../hooks/useNavOrder';
+import { useApplicantNavOrder, useApplicantNavLabels } from '../../hooks/useNavOrder';
 import { useAboutSectionOrder } from '../../hooks/useAboutSectionOrder';
 import { useHelpSectionOrder } from '../../hooks/useHelpSectionOrder';
 import { useAboutCustomSections, useHelpCustomSections } from '../../hooks/useCustomSections';
@@ -22,7 +24,7 @@ import { ABOUT_SECTION_LABELS, DEFAULT_ABOUT_SECTION_ORDER } from '../../constan
 import { HELP_SECTION_LABELS, DEFAULT_HELP_SECTION_ORDER } from '../../constants/helpSections';
 import { OWNER_EMAIL } from '../../constants/roles';
 import { useLanguage } from '../../i18n/LanguageContext';
-import type { CustomSection } from '../../types';
+import type { CustomSection, AboutContent, HelpInfo } from '../../types';
 
 export default function AdminAdmins() {
   const { t } = useLanguage();
@@ -148,12 +150,33 @@ function useCustomItemForm() {
   return { editingId, title, setTitle, body, setBody, saving, setSaving, startAdd, startEdit, cancel };
 }
 
+// Fixed (built-in) sections/pages can't be deleted or rewritten from
+// scratch here — they're wired to specific content fields, not freeform
+// items — but a title-only rename plus hide/restore covers "edit and
+// remove" for them too, without duplicating each page's own full editor.
+function useInlineRename() {
+  const [key, setKey] = useState<string | null>(null);
+  const [value, setValue] = useState('');
+  function start(k: string, initial: string) {
+    setKey(k);
+    setValue(initial);
+  }
+  function cancel() {
+    setKey(null);
+  }
+  return { key, value, setValue, start, cancel };
+}
+
 // Shown on every row (fixed or custom) — fixed sections can't be deleted,
-// but can be hidden from the page without losing their content.
-function HideToggleButton({ hidden, onToggle }: { hidden: boolean; onToggle: () => void }) {
-  return (
-    <button type="button" className="app-icon-btn" onClick={onToggle} aria-label={hidden ? 'Show on page' : 'Hide from page'} title={hidden ? 'Hidden — click to show' : 'Click to hide from page'}>
-      {hidden ? <EyeOff size={14} color="var(--danger)" /> : <Eye size={14} />}
+// so "remove" for them means "hide from the page" instead (reversible).
+function RemoveToggleButton({ hidden, onToggle }: { hidden: boolean; onToggle: () => void }) {
+  return hidden ? (
+    <button type="button" className="app-icon-btn" onClick={onToggle} aria-label="Restore to page" title="Hidden — click to restore">
+      <RotateCcw size={14} color="var(--success)" />
+    </button>
+  ) : (
+    <button type="button" className="app-icon-btn" onClick={onToggle} aria-label="Remove from page" title="Remove (hide) from page">
+      <Trash2 size={14} />
     </button>
   );
 }
@@ -163,7 +186,9 @@ function ApplicantNavOrderCard() {
   const savedOrder = useApplicantNavOrder();
   const customPages = useCustomPages();
   const hiddenKeys = useApplicantNavHidden();
+  const navLabels = useApplicantNavLabels();
   const form = useCustomItemForm();
+  const rename = useInlineRename();
 
   const pageRoute = (id: string) => `/app/pages/${id}`;
   const fixedTos = APPLICANT_NAV.map(i => i.to);
@@ -180,6 +205,14 @@ function ApplicantNavOrderCard() {
     await saveApplicantNavHidden(next);
   }
 
+  async function saveRename(to: string) {
+    const v = rename.value.trim();
+    const next = { ...navLabels };
+    if (v) next[to] = v; else delete next[to];
+    await saveApplicantNavLabels(next);
+    rename.cancel();
+  }
+
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
     if (target < 0 || target >= order.length) return;
@@ -189,7 +222,7 @@ function ApplicantNavOrderCard() {
   }
 
   async function removePage(id: string) {
-    if (!confirm('Remove this page from the sidebar? This deletes its content too.')) return;
+    if (!confirm('Delete this page entirely? This cannot be undone.')) return;
     await saveCustomPages((customPages ?? []).filter(p => p.id !== id));
     await saveApplicantNavOrder(order.filter(to => to !== pageRoute(id)));
   }
@@ -225,21 +258,39 @@ function ApplicantNavOrderCard() {
           const item = byTo.get(to);
           if (!item) return null;
           const Icon = item.icon;
-          const label = item.isCustom ? item.label : (t(NAV_LABEL_KEYS[to] ?? '') || item.label);
+          const label = item.isCustom ? item.label : (navLabels[to] || t(NAV_LABEL_KEYS[to] ?? '') || item.label);
           const hidden = hiddenKeys.includes(to);
+          const isRenaming = rename.key === to;
           return (
             <div key={to} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
               <Icon size={15} color="var(--muted-2)" />
-              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
-              <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(to)} />
-              {item.isCustom && (
+              {isRenaming ? (
+                <input className="app-input" value={rename.value} onChange={e => rename.setValue(e.target.value)} style={{ flex: 1, height: 32 }} autoFocus />
+              ) : (
+                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+              )}
+              {isRenaming ? (
                 <>
-                  <button type="button" className="app-icon-btn" onClick={() => form.startEdit((customPages ?? []).find(p => pageRoute(p.id) === to)!)} aria-label="Edit page">
-                    <Pencil size={14} />
-                  </button>
-                  <button type="button" className="app-icon-btn" onClick={() => removePage(to.replace('/app/pages/', ''))} aria-label="Remove page">
-                    <Trash2 size={14} />
-                  </button>
+                  <button type="button" className="app-icon-btn" onClick={() => saveRename(to)} aria-label="Save name"><Check size={14} /></button>
+                  <button type="button" className="app-icon-btn" onClick={rename.cancel} aria-label="Cancel"><X size={14} /></button>
+                </>
+              ) : (
+                <>
+                  {item.isCustom ? (
+                    <>
+                      <button type="button" className="app-icon-btn" onClick={() => form.startEdit((customPages ?? []).find(p => pageRoute(p.id) === to)!)} aria-label="Edit page">
+                        <Pencil size={14} />
+                      </button>
+                      <button type="button" className="app-icon-btn" onClick={() => removePage(to.replace('/app/pages/', ''))} aria-label="Delete page">
+                        <Trash2 size={14} color="var(--danger)" />
+                      </button>
+                    </>
+                  ) : (
+                    <button type="button" className="app-icon-btn" onClick={() => rename.start(to, label)} aria-label="Rename">
+                      <Pencil size={14} />
+                    </button>
+                  )}
+                  <RemoveToggleButton hidden={hidden} onToggle={() => toggleHidden(to)} />
                 </>
               )}
               <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label={t('admin.moveUp')}>
@@ -273,11 +324,19 @@ function ApplicantNavOrderCard() {
   );
 }
 
+const ABOUT_TITLE_FIELD: Partial<Record<string, keyof AboutContent>> = {
+  story: 'storyHeading', partner: 'partnerTitle', team: 'teamTitle',
+};
+
 function AboutSectionOrderCard() {
   const savedOrder = useAboutSectionOrder();
   const customSections = useAboutCustomSections();
   const hiddenKeys = useAboutHiddenSections();
   const form = useCustomItemForm();
+  const rename = useInlineRename();
+
+  const [about, setAbout] = useState<AboutContent>(DEFAULT_ABOUT);
+  useEffect(() => subscribeAbout(setAbout), []);
 
   const customIds = (customSections ?? []).map(s => s.id);
   const order = mergeSectionOrder(savedOrder, DEFAULT_ABOUT_SECTION_ORDER, customIds);
@@ -286,6 +345,15 @@ function AboutSectionOrderCard() {
   async function toggleHidden(key: string) {
     const next = hiddenKeys.includes(key) ? hiddenKeys.filter(k => k !== key) : [...hiddenKeys, key];
     await saveAboutHiddenSections(next);
+  }
+
+  async function saveRename(key: string) {
+    const field = ABOUT_TITLE_FIELD[key];
+    const v = rename.value.trim();
+    if (field && v) {
+      await saveAbout({ ...about, [field]: v });
+    }
+    rename.cancel();
   }
 
   async function move(index: number, dir: -1 | 1) {
@@ -297,7 +365,7 @@ function AboutSectionOrderCard() {
   }
 
   async function removeSection(id: string) {
-    if (!confirm('Remove this section from the About page?')) return;
+    if (!confirm('Delete this section entirely? This cannot be undone.')) return;
     await saveAboutCustomSections((customSections ?? []).filter(s => s.id !== id));
     await saveAboutSectionOrder(order.filter(k => k !== id));
   }
@@ -331,21 +399,40 @@ function AboutSectionOrderCard() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {order.map((key, i) => {
           const custom = customById.get(key);
-          const label = custom ? custom.title : ABOUT_SECTION_LABELS[key as keyof typeof ABOUT_SECTION_LABELS];
+          const fixedField = ABOUT_TITLE_FIELD[key];
+          const label = custom ? custom.title : (fixedField ? about[fixedField] as string : undefined) || ABOUT_SECTION_LABELS[key as keyof typeof ABOUT_SECTION_LABELS];
           if (!label) return null;
           const hidden = hiddenKeys.includes(key);
+          const isRenaming = rename.key === key;
           return (
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
-              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
-              <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
-              {custom && (
+              {isRenaming ? (
+                <input className="app-input" value={rename.value} onChange={e => rename.setValue(e.target.value)} style={{ flex: 1, height: 32 }} autoFocus />
+              ) : (
+                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+              )}
+              {isRenaming ? (
                 <>
-                  <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">
-                    <Pencil size={14} />
-                  </button>
-                  <button type="button" className="app-icon-btn" onClick={() => removeSection(key)} aria-label="Remove section">
-                    <Trash2 size={14} />
-                  </button>
+                  <button type="button" className="app-icon-btn" onClick={() => saveRename(key)} aria-label="Save name"><Check size={14} /></button>
+                  <button type="button" className="app-icon-btn" onClick={rename.cancel} aria-label="Cancel"><X size={14} /></button>
+                </>
+              ) : (
+                <>
+                  {custom ? (
+                    <>
+                      <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">
+                        <Pencil size={14} />
+                      </button>
+                      <button type="button" className="app-icon-btn" onClick={() => removeSection(key)} aria-label="Delete section">
+                        <Trash2 size={14} color="var(--danger)" />
+                      </button>
+                    </>
+                  ) : fixedField && (
+                    <button type="button" className="app-icon-btn" onClick={() => rename.start(key, label)} aria-label="Rename">
+                      <Pencil size={14} />
+                    </button>
+                  )}
+                  <RemoveToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
                 </>
               )}
               <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">
@@ -379,11 +466,19 @@ function AboutSectionOrderCard() {
   );
 }
 
+const HELP_TITLE_FIELD: Partial<Record<string, keyof HelpInfo>> = {
+  email: 'emailTitle', embassy: 'embassyTitle', removingEntry: 'removingEntryTitle', community: 'communityTitle',
+};
+
 function HelpSectionOrderCard() {
   const savedOrder = useHelpSectionOrder();
   const customSections = useHelpCustomSections();
   const hiddenKeys = useHelpHiddenSections();
   const form = useCustomItemForm();
+  const rename = useInlineRename();
+
+  const [help, setHelp] = useState<HelpInfo>(DEFAULT_HELP);
+  useEffect(() => subscribeHelp(setHelp), []);
 
   const customIds = (customSections ?? []).map(s => s.id);
   const order = mergeSectionOrder(savedOrder, DEFAULT_HELP_SECTION_ORDER, customIds);
@@ -392,6 +487,15 @@ function HelpSectionOrderCard() {
   async function toggleHidden(key: string) {
     const next = hiddenKeys.includes(key) ? hiddenKeys.filter(k => k !== key) : [...hiddenKeys, key];
     await saveHelpHiddenSections(next);
+  }
+
+  async function saveRename(key: string) {
+    const field = HELP_TITLE_FIELD[key];
+    const v = rename.value.trim();
+    if (field && v) {
+      await saveHelp({ ...help, [field]: v });
+    }
+    rename.cancel();
   }
 
   async function move(index: number, dir: -1 | 1) {
@@ -403,7 +507,7 @@ function HelpSectionOrderCard() {
   }
 
   async function removeSection(id: string) {
-    if (!confirm('Remove this section from the Help page?')) return;
+    if (!confirm('Delete this section entirely? This cannot be undone.')) return;
     await saveHelpCustomSections((customSections ?? []).filter(s => s.id !== id));
     await saveHelpSectionOrder(order.filter(k => k !== id));
   }
@@ -437,21 +541,40 @@ function HelpSectionOrderCard() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {order.map((key, i) => {
           const custom = customById.get(key);
-          const label = custom ? custom.title : HELP_SECTION_LABELS[key as keyof typeof HELP_SECTION_LABELS];
+          const fixedField = HELP_TITLE_FIELD[key];
+          const label = custom ? custom.title : (fixedField ? help[fixedField] as string : undefined) || HELP_SECTION_LABELS[key as keyof typeof HELP_SECTION_LABELS];
           if (!label) return null;
           const hidden = hiddenKeys.includes(key);
+          const isRenaming = rename.key === key;
           return (
             <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
-              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
-              <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
-              {custom && (
+              {isRenaming ? (
+                <input className="app-input" value={rename.value} onChange={e => rename.setValue(e.target.value)} style={{ flex: 1, height: 32 }} autoFocus />
+              ) : (
+                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+              )}
+              {isRenaming ? (
                 <>
-                  <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">
-                    <Pencil size={14} />
-                  </button>
-                  <button type="button" className="app-icon-btn" onClick={() => removeSection(key)} aria-label="Remove section">
-                    <Trash2 size={14} />
-                  </button>
+                  <button type="button" className="app-icon-btn" onClick={() => saveRename(key)} aria-label="Save name"><Check size={14} /></button>
+                  <button type="button" className="app-icon-btn" onClick={rename.cancel} aria-label="Cancel"><X size={14} /></button>
+                </>
+              ) : (
+                <>
+                  {custom ? (
+                    <>
+                      <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">
+                        <Pencil size={14} />
+                      </button>
+                      <button type="button" className="app-icon-btn" onClick={() => removeSection(key)} aria-label="Delete section">
+                        <Trash2 size={14} color="var(--danger)" />
+                      </button>
+                    </>
+                  ) : fixedField && (
+                    <button type="button" className="app-icon-btn" onClick={() => rename.start(key, label)} aria-label="Rename">
+                      <Pencil size={14} />
+                    </button>
+                  )}
+                  <RemoveToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
                 </>
               )}
               <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">

@@ -5,7 +5,7 @@ import type { User } from 'firebase/auth';
 import type { AppRole } from '../constants/roles';
 import { ADMIN_NAV, APPLICANT_NAV, NAV_SECTION_KEYS, type NavSection } from '../constants/nav';
 import { signOut } from '../services/authService';
-import { useApplicantNavOrder } from '../hooks/useNavOrder';
+import { useApplicantNavOrder, useApplicantNavLabels } from '../hooks/useNavOrder';
 import { useCustomPages } from '../hooks/useCustomPages';
 import { useApplicantNavHidden } from '../hooks/useHiddenSections';
 import ThemeToggle from '../components/ThemeToggle';
@@ -32,6 +32,7 @@ export default function AppShell({ user, role }: AppShellProps) {
   const applicantOrder = useApplicantNavOrder();
   const customPages = useCustomPages();
   const hiddenNavKeys = useApplicantNavHidden();
+  const navLabels = useApplicantNavLabels();
   const applicantNavWithCustomPages = [
     ...APPLICANT_NAV,
     ...(customPages ?? []).map(p => ({
@@ -75,7 +76,7 @@ export default function AppShell({ user, role }: AppShellProps) {
 
         <nav className="app-nav">
           {role === 'admin' ? (
-            navItems.map(item => renderNavItem(item, t, role, () => setMobileNavOpen(false)))
+            navItems.map(item => renderNavItem(item, t, role, navLabels, () => setMobileNavOpen(false)))
           ) : (
             (['main', 'account', 'support'] as NavSection[]).map(section => {
               const items = (navItems as typeof APPLICANT_NAV).filter(i => i.section === section);
@@ -83,7 +84,7 @@ export default function AppShell({ user, role }: AppShellProps) {
               return (
                 <div key={section} className="app-nav-section">
                   <div className="app-nav-section-label">{t(NAV_SECTION_KEYS[section])}</div>
-                  {items.map(item => renderNavItem(item, t, role, () => setMobileNavOpen(false)))}
+                  {items.map(item => renderNavItem(item, t, role, navLabels, () => setMobileNavOpen(false)))}
                 </div>
               );
             })
@@ -154,11 +155,14 @@ function renderNavItem(
   { to, label, icon: Icon }: NavItemLike,
   t: (key: string) => string,
   role: AppRole,
+  navLabels: Record<string, string>,
   onNavigate: () => void,
 ) {
-  const navLabel = to === '/app/dashboard' && role !== 'admin'
-    ? t('nav.myStatus')
-    : t(NAV_LABEL_KEYS[to] ?? '') || label;
+  const navLabel = navLabels[to] || (
+    to === '/app/dashboard' && role !== 'admin'
+      ? t('nav.myStatus')
+      : t(NAV_LABEL_KEYS[to] ?? '') || label
+  );
   return (
     <NavLink
       key={to}
