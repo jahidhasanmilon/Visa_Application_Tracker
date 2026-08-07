@@ -91,7 +91,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.createAccountInstead': 'Create an account',
 
     // Footer
-    'footer.text': 'This is an unofficial app and is not affiliated with any embassy.',
+    'footer.text': 'This is an unofficial app and is not affiliated with the German Embassy.',
     'footer.createdBy': 'Created and developed by',
 
     // My Status (applicant dashboard)
@@ -314,7 +314,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.createAccountInstead': 'একটা account তৈরি করুন',
 
     // Footer
-    'footer.text': 'এটি একটি অনানুষ্ঠানিক অ্যাপ, কোনো দূতাবাসের সাথে সম্পর্কিত নয়।',
+    'footer.text': 'এটি একটি অনানুষ্ঠানিক অ্যাপ, জার্মান দূতাবাসের সাথে সম্পর্কিত নয়।',
     'footer.createdBy': 'তৈরি ও ডেভেলপ করেছেন',
 
     // My Status (applicant dashboard)
