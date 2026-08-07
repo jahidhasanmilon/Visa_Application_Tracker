@@ -1,9 +1,10 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Pencil, Mail, Landmark, ArrowRight, Plus, X } from 'lucide-react';
+import { Pencil, Mail, Landmark, ArrowRight, Plus, X, Trash2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import RichTextToolbar from '../components/RichTextToolbar';
-import { subscribeHelp, saveHelp, DEFAULT_HELP } from '../services/siteContentService';
+import CustomSectionForm from '../components/CustomSectionForm';
+import { subscribeHelp, saveHelp, DEFAULT_HELP, saveHelpCustomSections, saveHelpSectionOrder } from '../services/siteContentService';
 import { renderSectionBody } from '../utils/richText';
 import { useHelpSectionOrder } from '../hooks/useHelpSectionOrder';
 import { useHelpCustomSections } from '../hooks/useCustomSections';
@@ -67,6 +68,38 @@ export default function Help({ role }: HelpProps) {
   const customSections = useHelpCustomSections();
   const customById = new Map((customSections ?? []).map(s => [s.id, s]));
   const sectionOrder: string[] = mergeSectionOrder(savedSectionOrder, DEFAULT_HELP_SECTION_ORDER, [...customById.keys()]);
+
+  // ---- Custom section editing (admin add/edit/remove right on the page) ----
+  const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
+  const [customTitle, setCustomTitle] = useState('');
+  const [customBody, setCustomBody] = useState('');
+  const [customSaving, setCustomSaving] = useState(false);
+
+  function startEditCustom(id: string) {
+    const s = customById.get(id);
+    if (!s) return;
+    setEditingCustomId(id);
+    setCustomTitle(s.title);
+    setCustomBody(s.body);
+  }
+
+  async function saveEditCustom() {
+    const title = customTitle.trim();
+    if (!title || !editingCustomId) return;
+    setCustomSaving(true);
+    try {
+      await saveHelpCustomSections((customSections ?? []).map(s => s.id === editingCustomId ? { ...s, title, body: customBody } : s));
+      setEditingCustomId(null);
+    } finally {
+      setCustomSaving(false);
+    }
+  }
+
+  async function removeCustomSection(id: string) {
+    if (!confirm('Remove this section from the Help page?')) return;
+    await saveHelpCustomSections((customSections ?? []).filter(s => s.id !== id));
+    await saveHelpSectionOrder(sectionOrder.filter(k => k !== id));
+  }
 
   const sectionsByKey: Record<HelpSectionKey, ReactNode> = {
     email: help.email && (
@@ -267,14 +300,39 @@ export default function Help({ role }: HelpProps) {
               return (
                 <Fragment key={key}>
                   {custom ? (
-                    <div>
-                      <div className="app-card-title" style={{ marginBottom: 8 }}>{custom.title}</div>
-                      <div
-                        className="app-section-body"
-                        style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
-                        dangerouslySetInnerHTML={{ __html: renderSectionBody(custom.body) }}
+                    editingCustomId === custom.id ? (
+                      <CustomSectionForm
+                        title={customTitle}
+                        body={customBody}
+                        onTitleChange={setCustomTitle}
+                        onBodyChange={setCustomBody}
+                        onSave={saveEditCustom}
+                        onCancel={() => setEditingCustomId(null)}
+                        saving={customSaving}
+                        titlePlaceholder="Section title"
                       />
-                    </div>
+                    ) : (
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                          <div className="app-card-title" style={{ flex: 1 }}>{custom.title}</div>
+                          {isAdmin && (
+                            <>
+                              <button type="button" className="app-icon-btn" onClick={() => startEditCustom(custom.id)} aria-label="Edit section">
+                                <Pencil size={14} />
+                              </button>
+                              <button type="button" className="app-icon-btn" onClick={() => removeCustomSection(custom.id)} aria-label="Remove section">
+                                <Trash2 size={14} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        <div
+                          className="app-section-body"
+                          style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
+                          dangerouslySetInnerHTML={{ __html: renderSectionBody(custom.body) }}
+                        />
+                      </div>
+                    )
                   ) : (
                     sectionsByKey[key as HelpSectionKey]
                   )}

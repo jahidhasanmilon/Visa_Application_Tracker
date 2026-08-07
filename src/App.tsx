@@ -169,7 +169,7 @@ export default function App() {
         <Route path="viva-questions" element={role === 'admin' ? <AdminVivaQuestions /> : <ApplicantVivaQuestions />} />
         <Route path="how-to-use" element={role === 'admin' ? <Navigate to="/app/dashboard" replace /> : <HowToUse />} />
         <Route path="about" element={<About role={role} />} />
-        <Route path="pages/:id" element={<CustomPage />} />
+        <Route path="pages/:id" element={<CustomPage role={role} />} />
         <Route path="faq" element={<Faq role={role} />} />
         <Route path="checklist" element={role === 'admin' ? <AdminChecklist /> : <ApplicantChecklist applicant={myApplicant!} />} />
         <Route
