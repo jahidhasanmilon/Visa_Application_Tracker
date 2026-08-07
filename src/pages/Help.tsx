@@ -6,6 +6,8 @@ import RichTextToolbar from '../components/RichTextToolbar';
 import { subscribeHelp, saveHelp, DEFAULT_HELP } from '../services/siteContentService';
 import { renderSectionBody } from '../utils/richText';
 import { useHelpSectionOrder } from '../hooks/useHelpSectionOrder';
+import { useHelpCustomSections } from '../hooks/useCustomSections';
+import { mergeSectionOrder } from '../utils/sectionOrder';
 import { DEFAULT_HELP_SECTION_ORDER, type HelpSectionKey } from '../constants/helpSections';
 import type { AppRole } from '../constants/roles';
 import type { HelpInfo, HelpLink } from '../types';
@@ -62,12 +64,9 @@ export default function Help({ role }: HelpProps) {
   }
 
   const savedSectionOrder = useHelpSectionOrder();
-  const sectionOrder: HelpSectionKey[] = savedSectionOrder && savedSectionOrder.length > 0
-    ? [
-        ...savedSectionOrder.filter((k): k is HelpSectionKey => (DEFAULT_HELP_SECTION_ORDER as string[]).includes(k)),
-        ...DEFAULT_HELP_SECTION_ORDER.filter(k => !savedSectionOrder.includes(k)),
-      ]
-    : DEFAULT_HELP_SECTION_ORDER;
+  const customSections = useHelpCustomSections();
+  const customById = new Map((customSections ?? []).map(s => [s.id, s]));
+  const sectionOrder: string[] = mergeSectionOrder(savedSectionOrder, DEFAULT_HELP_SECTION_ORDER, [...customById.keys()]);
 
   const sectionsByKey: Record<HelpSectionKey, ReactNode> = {
     email: help.email && (
@@ -263,9 +262,27 @@ export default function Help({ role }: HelpProps) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {sectionOrder.map(key => <Fragment key={key}>{sectionsByKey[key]}</Fragment>)}
+            {sectionOrder.map(key => {
+              const custom = customById.get(key);
+              return (
+                <Fragment key={key}>
+                  {custom ? (
+                    <div>
+                      <div className="app-card-title" style={{ marginBottom: 8 }}>{custom.title}</div>
+                      <div
+                        className="app-section-body"
+                        style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
+                        dangerouslySetInnerHTML={{ __html: renderSectionBody(custom.body) }}
+                      />
+                    </div>
+                  ) : (
+                    sectionsByKey[key as HelpSectionKey]
+                  )}
+                </Fragment>
+              );
+            })}
 
-            {!help.email && !help.embassyEmail && !help.embassyAddress && !help.removingEntryBody && help.communityLinks.length === 0 && (
+            {!help.email && !help.embassyEmail && !help.embassyAddress && !help.removingEntryBody && help.communityLinks.length === 0 && customById.size === 0 && (
               <div className="app-card app-card-pad">
                 <div className="app-empty">{isAdmin ? t('help.emptyAdmin') : t('help.emptyApplicant')}</div>
               </div>

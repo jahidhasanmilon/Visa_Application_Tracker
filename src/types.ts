@@ -128,6 +128,16 @@ export interface HelpLink {
   url: string;
 }
 
+// A freeform admin-added block — title + rich-text body (see utils/richText.ts).
+// Used for custom About/Help sections and custom sidebar pages, all the
+// same shape since they're all just "a titled block of rich text" wherever
+// they end up rendered.
+export interface CustomSection {
+  id: string;
+  title: string;
+  body: string;
+}
+
 export interface HelpInfo {
   subtitle: string;
   emailTitle: string;

@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react';
-import { ShieldCheck, Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
+import CustomSectionForm from '../../components/CustomSectionForm';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
 import { saveApplicantNavOrder } from '../../services/navOrderService';
-import { saveAboutSectionOrder, saveHelpSectionOrder } from '../../services/siteContentService';
+import {
+  saveAboutSectionOrder, saveHelpSectionOrder,
+  saveAboutCustomSections, saveHelpCustomSections,
+} from '../../services/siteContentService';
+import { saveCustomPages } from '../../services/customPagesService';
 import { useApplicantNavOrder } from '../../hooks/useNavOrder';
 import { useAboutSectionOrder } from '../../hooks/useAboutSectionOrder';
 import { useHelpSectionOrder } from '../../hooks/useHelpSectionOrder';
+import { useAboutCustomSections, useHelpCustomSections } from '../../hooks/useCustomSections';
+import { useCustomPages } from '../../hooks/useCustomPages';
+import { mergeSectionOrder } from '../../utils/sectionOrder';
 import { APPLICANT_NAV, NAV_LABEL_KEYS } from '../../constants/nav';
-import { ABOUT_SECTION_LABELS, DEFAULT_ABOUT_SECTION_ORDER, type AboutSectionKey } from '../../constants/aboutSections';
-import { HELP_SECTION_LABELS, DEFAULT_HELP_SECTION_ORDER, type HelpSectionKey } from '../../constants/helpSections';
+import { ABOUT_SECTION_LABELS, DEFAULT_ABOUT_SECTION_ORDER } from '../../constants/aboutSections';
+import { HELP_SECTION_LABELS, DEFAULT_HELP_SECTION_ORDER } from '../../constants/helpSections';
 import { OWNER_EMAIL } from '../../constants/roles';
 import { useLanguage } from '../../i18n/LanguageContext';
+import type { CustomSection } from '../../types';
 
 export default function AdminAdmins() {
   const { t } = useLanguage();
@@ -111,28 +120,79 @@ export default function AdminAdmins() {
   );
 }
 
+// Shared "add / edit a custom item" state machine — used identically by all
+// three cards below (custom sidebar pages, custom About sections, custom
+// Help sections). '__new__' is a sentinel meaning "the add form is open".
+function useCustomItemForm() {
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  function startAdd() {
+    setEditingId('__new__');
+    setTitle('');
+    setBody('');
+  }
+  function startEdit(item: CustomSection) {
+    setEditingId(item.id);
+    setTitle(item.title);
+    setBody(item.body);
+  }
+  function cancel() {
+    setEditingId(null);
+  }
+
+  return { editingId, title, setTitle, body, setBody, saving, setSaving, startAdd, startEdit, cancel };
+}
+
 function ApplicantNavOrderCard() {
   const { t } = useLanguage();
   const savedOrder = useApplicantNavOrder();
-  const order = savedOrder && savedOrder.length > 0
-    ? [...savedOrder, ...APPLICANT_NAV.map(i => i.to).filter(to => !savedOrder.includes(to))]
-    : APPLICANT_NAV.map(i => i.to);
-  const [saving, setSaving] = useState(false);
+  const customPages = useCustomPages();
+  const form = useCustomItemForm();
+
+  const pageRoute = (id: string) => `/app/pages/${id}`;
+  const fixedTos = APPLICANT_NAV.map(i => i.to);
+  const customTos = (customPages ?? []).map(p => pageRoute(p.id));
+  const order = mergeSectionOrder(savedOrder, fixedTos, customTos);
+
+  const byTo = new Map<string, { to: string; label: string; icon: typeof FileText; isCustom: boolean }>([
+    ...APPLICANT_NAV.map(i => [i.to, { ...i, isCustom: false }] as const),
+    ...(customPages ?? []).map(p => [pageRoute(p.id), { to: pageRoute(p.id), label: p.title, icon: FileText, isCustom: true }] as const),
+  ]);
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
     if (target < 0 || target >= order.length) return;
     const next = [...order];
     [next[index], next[target]] = [next[target], next[index]];
-    setSaving(true);
-    try {
-      await saveApplicantNavOrder(next);
-    } finally {
-      setSaving(false);
-    }
+    await saveApplicantNavOrder(next);
   }
 
-  const byTo = new Map(APPLICANT_NAV.map(i => [i.to, i]));
+  async function removePage(id: string) {
+    if (!confirm('Remove this page from the sidebar? This deletes its content too.')) return;
+    await saveCustomPages((customPages ?? []).filter(p => p.id !== id));
+    await saveApplicantNavOrder(order.filter(to => to !== pageRoute(id)));
+  }
+
+  async function saveForm() {
+    const title = form.title.trim();
+    if (!title) return;
+    form.setSaving(true);
+    try {
+      if (form.editingId === '__new__') {
+        const id = crypto.randomUUID();
+        await saveCustomPages([...(customPages ?? []), { id, title, body: form.body }]);
+        await saveApplicantNavOrder([...order, pageRoute(id)]);
+      } else {
+        await saveCustomPages((customPages ?? []).map(p => p.id === form.editingId ? { ...p, title, body: form.body } : p));
+      }
+      form.cancel();
+    } finally {
+      form.setSaving(false);
+    }
+  }
 
   return (
     <div className="app-card app-card-pad">
@@ -140,52 +200,97 @@ function ApplicantNavOrderCard() {
         <div className="app-card-title">{t('admin.navOrderTitle')}</div>
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: -8, marginBottom: 14 }}>
-        {t('admin.navOrderSubtitle')}
+        {t('admin.navOrderSubtitle')} You can also add extra static pages here.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {order.map((to, i) => {
           const item = byTo.get(to);
           if (!item) return null;
           const Icon = item.icon;
-          const label = t(NAV_LABEL_KEYS[to] ?? '') || item.label;
+          const label = item.isCustom ? item.label : (t(NAV_LABEL_KEYS[to] ?? '') || item.label);
           return (
             <div key={to} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
               <Icon size={15} color="var(--muted-2)" />
               <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
-              <button type="button" className="app-icon-btn" disabled={saving || i === 0} onClick={() => move(i, -1)} aria-label={t('admin.moveUp')}>
+              {item.isCustom && (
+                <>
+                  <button type="button" className="app-icon-btn" onClick={() => form.startEdit((customPages ?? []).find(p => pageRoute(p.id) === to)!)} aria-label="Edit page">
+                    <Pencil size={14} />
+                  </button>
+                  <button type="button" className="app-icon-btn" onClick={() => removePage(to.replace('/app/pages/', ''))} aria-label="Remove page">
+                    <Trash2 size={14} />
+                  </button>
+                </>
+              )}
+              <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label={t('admin.moveUp')}>
                 <ArrowUp size={14} />
               </button>
-              <button type="button" className="app-icon-btn" disabled={saving || i === order.length - 1} onClick={() => move(i, 1)} aria-label={t('admin.moveDown')}>
+              <button type="button" className="app-icon-btn" disabled={i === order.length - 1} onClick={() => move(i, 1)} aria-label={t('admin.moveDown')}>
                 <ArrowDown size={14} />
               </button>
             </div>
           );
         })}
       </div>
+
+      {form.editingId ? (
+        <CustomSectionForm
+          title={form.title}
+          body={form.body}
+          onTitleChange={form.setTitle}
+          onBodyChange={form.setBody}
+          onSave={saveForm}
+          onCancel={form.cancel}
+          saving={form.saving}
+          titlePlaceholder="Page title, e.g. Interview Tips"
+        />
+      ) : (
+        <button type="button" className="app-btn app-btn-ghost app-btn-sm" style={{ marginTop: 10 }} onClick={form.startAdd}>
+          <Plus size={14} /> Add page
+        </button>
+      )}
     </div>
   );
 }
 
 function AboutSectionOrderCard() {
   const savedOrder = useAboutSectionOrder();
-  const order: AboutSectionKey[] = savedOrder && savedOrder.length > 0
-    ? [
-        ...savedOrder.filter((k): k is AboutSectionKey => (DEFAULT_ABOUT_SECTION_ORDER as string[]).includes(k)),
-        ...DEFAULT_ABOUT_SECTION_ORDER.filter(k => !savedOrder.includes(k)),
-      ]
-    : DEFAULT_ABOUT_SECTION_ORDER;
-  const [saving, setSaving] = useState(false);
+  const customSections = useAboutCustomSections();
+  const form = useCustomItemForm();
+
+  const customIds = (customSections ?? []).map(s => s.id);
+  const order = mergeSectionOrder(savedOrder, DEFAULT_ABOUT_SECTION_ORDER, customIds);
+  const customById = new Map((customSections ?? []).map(s => [s.id, s]));
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
     if (target < 0 || target >= order.length) return;
     const next = [...order];
     [next[index], next[target]] = [next[target], next[index]];
-    setSaving(true);
+    await saveAboutSectionOrder(next);
+  }
+
+  async function removeSection(id: string) {
+    if (!confirm('Remove this section from the About page?')) return;
+    await saveAboutCustomSections((customSections ?? []).filter(s => s.id !== id));
+    await saveAboutSectionOrder(order.filter(k => k !== id));
+  }
+
+  async function saveForm() {
+    const title = form.title.trim();
+    if (!title) return;
+    form.setSaving(true);
     try {
-      await saveAboutSectionOrder(next);
+      if (form.editingId === '__new__') {
+        const id = crypto.randomUUID();
+        await saveAboutCustomSections([...(customSections ?? []), { id, title, body: form.body }]);
+        await saveAboutSectionOrder([...order, id]);
+      } else {
+        await saveAboutCustomSections((customSections ?? []).map(s => s.id === form.editingId ? { ...s, title, body: form.body } : s));
+      }
+      form.cancel();
     } finally {
-      setSaving(false);
+      form.setSaving(false);
     }
   }
 
@@ -195,45 +300,95 @@ function AboutSectionOrderCard() {
         <div className="app-card-title">About page section order</div>
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: -8, marginBottom: 14 }}>
-        The order the section cards appear in on the About page.
+        The order the section cards appear in on the About page. You can also add extra custom sections here.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {order.map((key, i) => (
-          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-            <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{ABOUT_SECTION_LABELS[key]}</span>
-            <button type="button" className="app-icon-btn" disabled={saving || i === 0} onClick={() => move(i, -1)} aria-label="Move up">
-              <ArrowUp size={14} />
-            </button>
-            <button type="button" className="app-icon-btn" disabled={saving || i === order.length - 1} onClick={() => move(i, 1)} aria-label="Move down">
-              <ArrowDown size={14} />
-            </button>
-          </div>
-        ))}
+        {order.map((key, i) => {
+          const custom = customById.get(key);
+          const label = custom ? custom.title : ABOUT_SECTION_LABELS[key as keyof typeof ABOUT_SECTION_LABELS];
+          if (!label) return null;
+          return (
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
+              {custom && (
+                <>
+                  <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">
+                    <Pencil size={14} />
+                  </button>
+                  <button type="button" className="app-icon-btn" onClick={() => removeSection(key)} aria-label="Remove section">
+                    <Trash2 size={14} />
+                  </button>
+                </>
+              )}
+              <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">
+                <ArrowUp size={14} />
+              </button>
+              <button type="button" className="app-icon-btn" disabled={i === order.length - 1} onClick={() => move(i, 1)} aria-label="Move down">
+                <ArrowDown size={14} />
+              </button>
+            </div>
+          );
+        })}
       </div>
+
+      {form.editingId ? (
+        <CustomSectionForm
+          title={form.title}
+          body={form.body}
+          onTitleChange={form.setTitle}
+          onBodyChange={form.setBody}
+          onSave={saveForm}
+          onCancel={form.cancel}
+          saving={form.saving}
+          titlePlaceholder="Section title"
+        />
+      ) : (
+        <button type="button" className="app-btn app-btn-ghost app-btn-sm" style={{ marginTop: 10 }} onClick={form.startAdd}>
+          <Plus size={14} /> Add section
+        </button>
+      )}
     </div>
   );
 }
 
 function HelpSectionOrderCard() {
   const savedOrder = useHelpSectionOrder();
-  const order: HelpSectionKey[] = savedOrder && savedOrder.length > 0
-    ? [
-        ...savedOrder.filter((k): k is HelpSectionKey => (DEFAULT_HELP_SECTION_ORDER as string[]).includes(k)),
-        ...DEFAULT_HELP_SECTION_ORDER.filter(k => !savedOrder.includes(k)),
-      ]
-    : DEFAULT_HELP_SECTION_ORDER;
-  const [saving, setSaving] = useState(false);
+  const customSections = useHelpCustomSections();
+  const form = useCustomItemForm();
+
+  const customIds = (customSections ?? []).map(s => s.id);
+  const order = mergeSectionOrder(savedOrder, DEFAULT_HELP_SECTION_ORDER, customIds);
+  const customById = new Map((customSections ?? []).map(s => [s.id, s]));
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
     if (target < 0 || target >= order.length) return;
     const next = [...order];
     [next[index], next[target]] = [next[target], next[index]];
-    setSaving(true);
+    await saveHelpSectionOrder(next);
+  }
+
+  async function removeSection(id: string) {
+    if (!confirm('Remove this section from the Help page?')) return;
+    await saveHelpCustomSections((customSections ?? []).filter(s => s.id !== id));
+    await saveHelpSectionOrder(order.filter(k => k !== id));
+  }
+
+  async function saveForm() {
+    const title = form.title.trim();
+    if (!title) return;
+    form.setSaving(true);
     try {
-      await saveHelpSectionOrder(next);
+      if (form.editingId === '__new__') {
+        const id = crypto.randomUUID();
+        await saveHelpCustomSections([...(customSections ?? []), { id, title, body: form.body }]);
+        await saveHelpSectionOrder([...order, id]);
+      } else {
+        await saveHelpCustomSections((customSections ?? []).map(s => s.id === form.editingId ? { ...s, title, body: form.body } : s));
+      }
+      form.cancel();
     } finally {
-      setSaving(false);
+      form.setSaving(false);
     }
   }
 
@@ -243,21 +398,53 @@ function HelpSectionOrderCard() {
         <div className="app-card-title">Help page section order</div>
       </div>
       <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: -8, marginBottom: 14 }}>
-        The order the section cards appear in on the Help page.
+        The order the section cards appear in on the Help page. You can also add extra custom sections here.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {order.map((key, i) => (
-          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-            <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{HELP_SECTION_LABELS[key]}</span>
-            <button type="button" className="app-icon-btn" disabled={saving || i === 0} onClick={() => move(i, -1)} aria-label="Move up">
-              <ArrowUp size={14} />
-            </button>
-            <button type="button" className="app-icon-btn" disabled={saving || i === order.length - 1} onClick={() => move(i, 1)} aria-label="Move down">
-              <ArrowDown size={14} />
-            </button>
-          </div>
-        ))}
+        {order.map((key, i) => {
+          const custom = customById.get(key);
+          const label = custom ? custom.title : HELP_SECTION_LABELS[key as keyof typeof HELP_SECTION_LABELS];
+          if (!label) return null;
+          return (
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
+              {custom && (
+                <>
+                  <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">
+                    <Pencil size={14} />
+                  </button>
+                  <button type="button" className="app-icon-btn" onClick={() => removeSection(key)} aria-label="Remove section">
+                    <Trash2 size={14} />
+                  </button>
+                </>
+              )}
+              <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">
+                <ArrowUp size={14} />
+              </button>
+              <button type="button" className="app-icon-btn" disabled={i === order.length - 1} onClick={() => move(i, 1)} aria-label="Move down">
+                <ArrowDown size={14} />
+              </button>
+            </div>
+          );
+        })}
       </div>
+
+      {form.editingId ? (
+        <CustomSectionForm
+          title={form.title}
+          body={form.body}
+          onTitleChange={form.setTitle}
+          onBodyChange={form.setBody}
+          onSave={saveForm}
+          onCancel={form.cancel}
+          saving={form.saving}
+          titlePlaceholder="Section title"
+        />
+      ) : (
+        <button type="button" className="app-btn app-btn-ghost app-btn-sm" style={{ marginTop: 10 }} onClick={form.startAdd}>
+          <Plus size={14} /> Add section
+        </button>
+      )}
     </div>
   );
 }

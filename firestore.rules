@@ -154,5 +154,20 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if isAdminEmail();
     }
+
+    // Admin-added freeform sections/pages — same access level as the
+    // ordering docs above, since they're only ever read alongside them.
+    match /meta/aboutCustomSections {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+    match /meta/helpCustomSections {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+    match /meta/customPages {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
   }
 }

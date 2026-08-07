@@ -4,6 +4,9 @@ import PageHeader from '../components/PageHeader';
 import { subscribeAbout, saveAbout, DEFAULT_ABOUT } from '../services/siteContentService';
 import { subscribeTeam, addTeamMember, updateTeamMember, deleteTeamMember, type TeamMemberFormData } from '../services/teamService';
 import { useAboutSectionOrder } from '../hooks/useAboutSectionOrder';
+import { useAboutCustomSections } from '../hooks/useCustomSections';
+import { mergeSectionOrder } from '../utils/sectionOrder';
+import { renderSectionBody } from '../utils/richText';
 import { DEFAULT_ABOUT_SECTION_ORDER, type AboutSectionKey } from '../constants/aboutSections';
 import type { AppRole } from '../constants/roles';
 import type { AboutContent, AboutPartnerLink, TeamMember } from '../types';
@@ -131,12 +134,9 @@ export default function About({ role }: AboutProps) {
   }
 
   const savedSectionOrder = useAboutSectionOrder();
-  const sectionOrder: AboutSectionKey[] = savedSectionOrder && savedSectionOrder.length > 0
-    ? [
-        ...savedSectionOrder.filter((k): k is AboutSectionKey => (DEFAULT_ABOUT_SECTION_ORDER as string[]).includes(k)),
-        ...DEFAULT_ABOUT_SECTION_ORDER.filter(k => !savedSectionOrder.includes(k)),
-      ]
-    : DEFAULT_ABOUT_SECTION_ORDER;
+  const customSections = useAboutCustomSections();
+  const customById = new Map((customSections ?? []).map(s => [s.id, s]));
+  const sectionOrder: string[] = mergeSectionOrder(savedSectionOrder, DEFAULT_ABOUT_SECTION_ORDER, [...customById.keys()]);
 
   const storySection: ReactNode = (
         <div className="app-card app-card-pad">
@@ -376,7 +376,25 @@ export default function About({ role }: AboutProps) {
         ) : undefined}
       />
       <div className="app-content">
-        {sectionOrder.map(key => <Fragment key={key}>{sectionsByKey[key]}</Fragment>)}
+        {sectionOrder.map(key => {
+          const custom = customById.get(key);
+          return (
+            <Fragment key={key}>
+              {custom ? (
+                <div>
+                  <div className="app-card-title" style={{ marginBottom: 8 }}>{custom.title}</div>
+                  <div
+                    className="app-section-body"
+                    style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
+                    dangerouslySetInnerHTML={{ __html: renderSectionBody(custom.body) }}
+                  />
+                </div>
+              ) : (
+                sectionsByKey[key as AboutSectionKey]
+              )}
+            </Fragment>
+          );
+        })}
       </div>
 
 

@@ -23,6 +23,7 @@ import HowToUse from './pages/applicant/HowToUse';
 import Guides from './pages/Guides';
 import GuideDetail from './pages/GuideDetail';
 import About from './pages/About';
+import CustomPage from './pages/CustomPage';
 import Faq from './pages/Faq';
 import Help from './pages/Help';
 import Privacy from './pages/Privacy';
@@ -168,6 +169,7 @@ export default function App() {
         <Route path="viva-questions" element={role === 'admin' ? <AdminVivaQuestions /> : <ApplicantVivaQuestions />} />
         <Route path="how-to-use" element={role === 'admin' ? <Navigate to="/app/dashboard" replace /> : <HowToUse />} />
         <Route path="about" element={<About role={role} />} />
+        <Route path="pages/:id" element={<CustomPage />} />
         <Route path="faq" element={<Faq role={role} />} />
         <Route path="checklist" element={role === 'admin' ? <AdminChecklist /> : <ApplicantChecklist applicant={myApplicant!} />} />
         <Route

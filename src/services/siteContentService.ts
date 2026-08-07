@@ -1,12 +1,14 @@
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import type { AboutContent, HelpInfo, PrivacyContent } from '../types';
+import type { AboutContent, HelpInfo, PrivacyContent, CustomSection } from '../types';
 
 const HELP_DOC = doc(db, 'meta', 'help');
 const ABOUT_DOC = doc(db, 'meta', 'about');
 const PRIVACY_DOC = doc(db, 'meta', 'privacy');
 const ABOUT_SECTION_ORDER_DOC = doc(db, 'meta', 'aboutSectionOrder');
 const HELP_SECTION_ORDER_DOC = doc(db, 'meta', 'helpSectionOrder');
+const ABOUT_CUSTOM_SECTIONS_DOC = doc(db, 'meta', 'aboutCustomSections');
+const HELP_CUSTOM_SECTIONS_DOC = doc(db, 'meta', 'helpCustomSections');
 
 export const DEFAULT_HELP: HelpInfo = {
   subtitle: 'Found a bug? Have a question or feedback? Reach out.',
@@ -117,4 +119,28 @@ export function subscribeHelpSectionOrder(onData: (order: string[] | null) => vo
 
 export async function saveHelpSectionOrder(order: string[]): Promise<void> {
   await setDoc(HELP_SECTION_ORDER_DOC, { order });
+}
+
+// Admin-added freeform sections (title + rich-text body) shown alongside
+// the built-in About sections — their ids live in the same
+// aboutSectionOrder array as the built-in keys (see mergeSectionOrder).
+export function subscribeAboutCustomSections(onData: (items: CustomSection[]) => void): () => void {
+  return onSnapshot(ABOUT_CUSTOM_SECTIONS_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { items?: CustomSection[] }).items || []) : []);
+  });
+}
+
+export async function saveAboutCustomSections(items: CustomSection[]): Promise<void> {
+  await setDoc(ABOUT_CUSTOM_SECTIONS_DOC, { items });
+}
+
+// Same idea as above, for the Help page.
+export function subscribeHelpCustomSections(onData: (items: CustomSection[]) => void): () => void {
+  return onSnapshot(HELP_CUSTOM_SECTIONS_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { items?: CustomSection[] }).items || []) : []);
+  });
+}
+
+export async function saveHelpCustomSections(items: CustomSection[]): Promise<void> {
+  await setDoc(HELP_CUSTOM_SECTIONS_DOC, { items });
 }

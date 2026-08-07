@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { LogOut, PlaneTakeoff, Menu, X, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LogOut, PlaneTakeoff, Menu, X, PanelLeftClose, PanelLeftOpen, FileText } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import type { AppRole } from '../constants/roles';
 import { ADMIN_NAV, APPLICANT_NAV, NAV_SECTION_KEYS, type NavSection } from '../constants/nav';
 import { signOut } from '../services/authService';
 import { useApplicantNavOrder } from '../hooks/useNavOrder';
+import { useCustomPages } from '../hooks/useCustomPages';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import UserAvatar from '../components/UserAvatar';
@@ -28,7 +29,14 @@ const COLLAPSE_KEY = 'visa-tracker-sidebar-collapsed';
 export default function AppShell({ user, role }: AppShellProps) {
   const { t } = useLanguage();
   const applicantOrder = useApplicantNavOrder();
-  const navItems = role === 'admin' ? ADMIN_NAV : orderNavItems(APPLICANT_NAV, applicantOrder);
+  const customPages = useCustomPages();
+  const applicantNavWithCustomPages = [
+    ...APPLICANT_NAV,
+    ...(customPages ?? []).map(p => ({
+      to: `/app/pages/${p.id}`, label: p.title, icon: FileText, section: 'support' as NavSection,
+    })),
+  ];
+  const navItems = role === 'admin' ? ADMIN_NAV : orderNavItems(applicantNavWithCustomPages, applicantOrder);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');
 
