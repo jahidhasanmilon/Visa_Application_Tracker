@@ -34,7 +34,7 @@ export default function ApplicantVivaQuestions() {
               if (sectionQuestions.length === 0) return null;
               return (
                 <div key={section}>
-                  <div className="app-card-title" style={{ marginBottom: 10 }}>{section}</div>
+                  <div style={{ marginBottom: 12, paddingBottom: 8, borderBottom: '2px solid var(--violet-soft)', fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 18, color: 'var(--violet)' }}>{section}</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {sectionQuestions.map((q, i) => (
                       <div key={q.id} className="app-card app-card-pad" style={{ display: 'flex', gap: 12 }}>
