@@ -385,7 +385,7 @@ export default function About({ role }: AboutProps) {
                   </div>
                   {m.bio && <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, margin: '0 0 10px' }}>{m.bio}</p>}
                   {m.linkedinUrl && (
-                    <a href={m.linkedinUrl} target="_blank" rel="noreferrer" className="app-card-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <a href={m.linkedinUrl} target="_blank" rel="noreferrer" className="app-card-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 800 }}>
                       Connect on LinkedIn <ArrowRight size={13} />
                     </a>
                   )}
