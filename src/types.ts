@@ -121,6 +121,7 @@ export interface VivaQuestion {
   question: string;
   note: string;
   order: number;
+  section: string;
 }
 
 export interface HelpLink {

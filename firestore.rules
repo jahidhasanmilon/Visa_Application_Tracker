@@ -112,6 +112,11 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if isAdminEmail();
     }
+    // Admin-configurable ordering for Interview Question sections.
+    match /meta/vivaSectionOrder {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
 
     // Admin-editable Help / About content — public read (the WhatsApp
     // floating button and About page need to work for signed-out visitors
