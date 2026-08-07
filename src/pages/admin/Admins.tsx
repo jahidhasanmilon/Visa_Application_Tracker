@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, RotateCcw, Check, X } from 'lucide-react';
+import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, Eye, EyeOff, Check, X } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import CustomSectionForm from '../../components/CustomSectionForm';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
@@ -167,16 +167,13 @@ function useInlineRename() {
   return { key, value, setValue, start, cancel };
 }
 
-// Shown on every row (fixed or custom) — fixed sections can't be deleted,
-// so "remove" for them means "hide from the page" instead (reversible).
-function RemoveToggleButton({ hidden, onToggle }: { hidden: boolean; onToggle: () => void }) {
-  return hidden ? (
-    <button type="button" className="app-icon-btn" onClick={onToggle} aria-label="Restore to page" title="Hidden — click to restore">
-      <RotateCcw size={14} color="var(--success)" />
-    </button>
-  ) : (
-    <button type="button" className="app-icon-btn" onClick={onToggle} aria-label="Remove from page" title="Remove (hide) from page">
-      <Trash2 size={14} />
+// Shown on every row (fixed or custom) — separate from rename/delete. Fixed
+// sections can't be permanently deleted, so this hide/show toggle is their
+// "remove" — reversible, unlike the custom-item Trash2 delete below.
+function HideToggleButton({ hidden, onToggle }: { hidden: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className="app-icon-btn" onClick={onToggle} aria-label={hidden ? 'Show on page' : 'Hide from page'} title={hidden ? 'Hidden — click to show' : 'Click to hide from page'}>
+      {hidden ? <EyeOff size={14} color="var(--danger)" /> : <Eye size={14} />}
     </button>
   );
 }
@@ -290,7 +287,7 @@ function ApplicantNavOrderCard() {
                       <Pencil size={14} />
                     </button>
                   )}
-                  <RemoveToggleButton hidden={hidden} onToggle={() => toggleHidden(to)} />
+                  <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(to)} />
                 </>
               )}
               <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label={t('admin.moveUp')}>
@@ -432,7 +429,7 @@ function AboutSectionOrderCard() {
                       <Pencil size={14} />
                     </button>
                   )}
-                  <RemoveToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
+                  <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
                 </>
               )}
               <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">
@@ -574,7 +571,7 @@ function HelpSectionOrderCard() {
                       <Pencil size={14} />
                     </button>
                   )}
-                  <RemoveToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
+                  <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
                 </>
               )}
               <button type="button" className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">
