@@ -359,6 +359,11 @@ export default function About({ role }: AboutProps) {
                 <label>Team section subtitle <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional)</span></label>
                 <input className="app-input" value={draft.teamSubtitle} onChange={e => setDraft({ ...draft, teamSubtitle: e.target.value })} placeholder="e.g. The person behind VisaTrack" />
               </div>
+              {storyError && <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{storyError}</div>}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditingStory(false)} disabled={savingStory}>{t('common.cancel')}</button>
+                <button className="app-btn app-btn-primary app-btn-sm" onClick={saveStory} disabled={savingStory}>{savingStory ? t('common.saving') : t('common.save')}</button>
+              </div>
             </>
           )}
           <div className="app-card-head" style={{ marginBottom: 14 }}>
