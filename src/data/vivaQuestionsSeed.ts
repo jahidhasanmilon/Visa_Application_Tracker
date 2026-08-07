@@ -21,7 +21,7 @@ export const SEED_SECTION_ORDER = [
 export const VIVA_QUESTIONS_SEED: Omit<VivaQuestionFormData, 'order'>[] = [
   // Personal introduction
   { section: 'Personal Introduction', question: "What's your name?", note: '' },
-  { section: 'Personal Introduction', question: 'Spell your name.', note: '' },
+  { section: 'Personal Introduction', question: 'Spell your name.', note: "Only asked if the officer is confused by your name — spell it out clearly, letter by letter." },
 
   // Education
   { section: 'Education', question: 'Describe your degree and university.', note: '' },
