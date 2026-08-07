@@ -167,13 +167,25 @@ function useInlineRename() {
   return { key, value, setValue, start, cancel };
 }
 
-// Shown on every row (fixed or custom) — separate from rename/delete. Fixed
-// sections can't be permanently deleted, so this hide/show toggle is their
-// "remove" — reversible, unlike the custom-item Trash2 delete below.
+// Shown on every row (fixed or custom) — a plain bidirectional show/hide
+// toggle, separate from the one-way Remove button below.
 function HideToggleButton({ hidden, onToggle }: { hidden: boolean; onToggle: () => void }) {
   return (
     <button type="button" className="app-icon-btn" onClick={onToggle} aria-label={hidden ? 'Show on page' : 'Hide from page'} title={hidden ? 'Hidden — click to show' : 'Click to hide from page'}>
       {hidden ? <EyeOff size={14} color="var(--danger)" /> : <Eye size={14} />}
+    </button>
+  );
+}
+
+// A separate, explicit "Remove" action for fixed sections — they can't be
+// permanently deleted (they're wired to specific code/fields, not freeform
+// items), so this just hides them, same as the toggle above, but as its
+// own one-way button distinct from Hide/Show — mirrors the Trash2 delete
+// custom items get, without pretending fixed content can be truly deleted.
+function RemoveButton({ hidden, onRemove }: { hidden: boolean; onRemove: () => void }) {
+  return (
+    <button type="button" className="app-icon-btn" onClick={onRemove} disabled={hidden} aria-label="Remove from page" title={hidden ? 'Already removed' : 'Remove from page'}>
+      <Trash2 size={14} color={hidden ? 'var(--muted-2)' : 'var(--danger)'} />
     </button>
   );
 }
@@ -200,6 +212,11 @@ function ApplicantNavOrderCard() {
   async function toggleHidden(to: string) {
     const next = hiddenKeys.includes(to) ? hiddenKeys.filter(k => k !== to) : [...hiddenKeys, to];
     await saveApplicantNavHidden(next);
+  }
+
+  async function removeFixed(to: string) {
+    if (hiddenKeys.includes(to)) return;
+    await saveApplicantNavHidden([...hiddenKeys, to]);
   }
 
   async function saveRename(to: string) {
@@ -283,9 +300,12 @@ function ApplicantNavOrderCard() {
                       </button>
                     </>
                   ) : (
-                    <button type="button" className="app-icon-btn" onClick={() => rename.start(to, label)} aria-label="Rename">
-                      <Pencil size={14} />
-                    </button>
+                    <>
+                      <button type="button" className="app-icon-btn" onClick={() => rename.start(to, label)} aria-label="Rename">
+                        <Pencil size={14} />
+                      </button>
+                      <RemoveButton hidden={hidden} onRemove={() => removeFixed(to)} />
+                    </>
                   )}
                   <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(to)} />
                 </>
@@ -342,6 +362,11 @@ function AboutSectionOrderCard() {
   async function toggleHidden(key: string) {
     const next = hiddenKeys.includes(key) ? hiddenKeys.filter(k => k !== key) : [...hiddenKeys, key];
     await saveAboutHiddenSections(next);
+  }
+
+  async function removeFixed(key: string) {
+    if (hiddenKeys.includes(key)) return;
+    await saveAboutHiddenSections([...hiddenKeys, key]);
   }
 
   async function saveRename(key: string) {
@@ -424,10 +449,15 @@ function AboutSectionOrderCard() {
                         <Trash2 size={14} color="var(--danger)" />
                       </button>
                     </>
-                  ) : fixedField && (
-                    <button type="button" className="app-icon-btn" onClick={() => rename.start(key, label)} aria-label="Rename">
-                      <Pencil size={14} />
-                    </button>
+                  ) : (
+                    <>
+                      {fixedField && (
+                        <button type="button" className="app-icon-btn" onClick={() => rename.start(key, label)} aria-label="Rename">
+                          <Pencil size={14} />
+                        </button>
+                      )}
+                      <RemoveButton hidden={hidden} onRemove={() => removeFixed(key)} />
+                    </>
                   )}
                   <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
                 </>
@@ -484,6 +514,11 @@ function HelpSectionOrderCard() {
   async function toggleHidden(key: string) {
     const next = hiddenKeys.includes(key) ? hiddenKeys.filter(k => k !== key) : [...hiddenKeys, key];
     await saveHelpHiddenSections(next);
+  }
+
+  async function removeFixed(key: string) {
+    if (hiddenKeys.includes(key)) return;
+    await saveHelpHiddenSections([...hiddenKeys, key]);
   }
 
   async function saveRename(key: string) {
@@ -566,10 +601,15 @@ function HelpSectionOrderCard() {
                         <Trash2 size={14} color="var(--danger)" />
                       </button>
                     </>
-                  ) : fixedField && (
-                    <button type="button" className="app-icon-btn" onClick={() => rename.start(key, label)} aria-label="Rename">
-                      <Pencil size={14} />
-                    </button>
+                  ) : (
+                    <>
+                      {fixedField && (
+                        <button type="button" className="app-icon-btn" onClick={() => rename.start(key, label)} aria-label="Rename">
+                          <Pencil size={14} />
+                        </button>
+                      )}
+                      <RemoveButton hidden={hidden} onRemove={() => removeFixed(key)} />
+                    </>
                   )}
                   <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
                 </>
