@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Pencil, Mail, Landmark, ArrowRight, Plus, X } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import RichTextToolbar from '../components/RichTextToolbar';
 import { subscribeHelp, saveHelp, DEFAULT_HELP } from '../services/siteContentService';
 import { renderSectionBody } from '../utils/richText';
+import { useHelpSectionOrder } from '../hooks/useHelpSectionOrder';
+import { DEFAULT_HELP_SECTION_ORDER, type HelpSectionKey } from '../constants/helpSections';
 import type { AppRole } from '../constants/roles';
 import type { HelpInfo, HelpLink } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -57,6 +60,95 @@ export default function Help({ role }: HelpProps) {
   function removeCommunityLink(i: number) {
     setDraft(d => ({ ...d, communityLinks: d.communityLinks.filter((_, idx) => idx !== i) }));
   }
+
+  const savedSectionOrder = useHelpSectionOrder();
+  const sectionOrder: HelpSectionKey[] = savedSectionOrder && savedSectionOrder.length > 0
+    ? [
+        ...savedSectionOrder.filter((k): k is HelpSectionKey => (DEFAULT_HELP_SECTION_ORDER as string[]).includes(k)),
+        ...DEFAULT_HELP_SECTION_ORDER.filter(k => !savedSectionOrder.includes(k)),
+      ]
+    : DEFAULT_HELP_SECTION_ORDER;
+
+  const sectionsByKey: Record<HelpSectionKey, ReactNode> = {
+    email: help.email && (
+      <div className="app-card app-card-pad">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <Mail size={16} color="var(--violet)" />
+          <div className="app-card-title">{help.emailTitle}</div>
+        </div>
+        {help.emailDescription && (
+          <div
+            className="app-section-body"
+            style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 14 }}
+            dangerouslySetInnerHTML={{ __html: renderSectionBody(help.emailDescription) }}
+          />
+        )}
+        <a href={`mailto:${help.email}`} className="app-btn app-btn-primary app-btn-block">{help.email}</a>
+      </div>
+    ),
+    embassy: (help.embassyEmail || help.embassyAddress) && (
+      <div className="app-card app-card-pad">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+          <Landmark size={16} color="var(--violet)" />
+          <div className="app-card-title">{help.embassyTitle}</div>
+        </div>
+        {help.embassyDescription && (
+          <div
+            className="app-section-body"
+            style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 14 }}
+            dangerouslySetInnerHTML={{ __html: renderSectionBody(help.embassyDescription) }}
+          />
+        )}
+        {help.embassyAddress && (
+          <div
+            className="app-section-body"
+            style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.6, marginBottom: 14 }}
+            dangerouslySetInnerHTML={{ __html: renderSectionBody(help.embassyAddress) }}
+          />
+        )}
+        {help.embassyEmail && (
+          <a href={`mailto:${help.embassyEmail}`} className="app-btn app-btn-primary app-btn-block">{help.embassyEmail}</a>
+        )}
+      </div>
+    ),
+    removingEntry: help.removingEntryBody && (
+      <div>
+        <div className="app-card-title" style={{ marginBottom: 8 }}>{help.removingEntryTitle}</div>
+        <div
+          className="app-section-body"
+          style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
+          dangerouslySetInnerHTML={{ __html: renderSectionBody(help.removingEntryBody) }}
+        />
+      </div>
+    ),
+    community: help.communityLinks.length > 0 && (
+      <div>
+        <div className="app-card-title" style={{ marginBottom: 8 }}>{help.communityTitle}</div>
+        {help.communityDescription && (
+          <div
+            className="app-section-body"
+            style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 12 }}
+            dangerouslySetInnerHTML={{ __html: renderSectionBody(help.communityDescription) }}
+          />
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {help.communityLinks.map((link, i) => (
+            <a
+              key={i}
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              className="app-card app-card-pad"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
+            >
+              <div style={{ fontWeight: 600, fontSize: 13.5 }}>{link.label}</div>
+              <ArrowRight size={16} color="var(--violet)" />
+            </a>
+          ))}
+        </div>
+      </div>
+    ),
+  };
 
   return (
     <>
@@ -171,87 +263,7 @@ export default function Help({ role }: HelpProps) {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {help.email && (
-              <div className="app-card app-card-pad">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                  <Mail size={16} color="var(--violet)" />
-                  <div className="app-card-title">{help.emailTitle}</div>
-                </div>
-                {help.emailDescription && (
-                  <div
-                    className="app-section-body"
-                    style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 14 }}
-                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.emailDescription) }}
-                  />
-                )}
-                <a href={`mailto:${help.email}`} className="app-btn app-btn-primary app-btn-block">{help.email}</a>
-              </div>
-            )}
-
-            {(help.embassyEmail || help.embassyAddress) && (
-              <div className="app-card app-card-pad">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                  <Landmark size={16} color="var(--violet)" />
-                  <div className="app-card-title">{help.embassyTitle}</div>
-                </div>
-                {help.embassyDescription && (
-                  <div
-                    className="app-section-body"
-                    style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 14 }}
-                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.embassyDescription) }}
-                  />
-                )}
-                {help.embassyAddress && (
-                  <div
-                    className="app-section-body"
-                    style={{ fontSize: 13.5, color: 'var(--ink)', lineHeight: 1.6, marginBottom: 14 }}
-                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.embassyAddress) }}
-                  />
-                )}
-                {help.embassyEmail && (
-                  <a href={`mailto:${help.embassyEmail}`} className="app-btn app-btn-primary app-btn-block">{help.embassyEmail}</a>
-                )}
-              </div>
-            )}
-
-            {help.removingEntryBody && (
-              <div>
-                <div className="app-card-title" style={{ marginBottom: 8 }}>{help.removingEntryTitle}</div>
-                <div
-                  className="app-section-body"
-                  style={{ fontSize: 13.5, lineHeight: 1.7, color: 'var(--ink)' }}
-                  dangerouslySetInnerHTML={{ __html: renderSectionBody(help.removingEntryBody) }}
-                />
-              </div>
-            )}
-
-            {help.communityLinks.length > 0 && (
-              <div>
-                <div className="app-card-title" style={{ marginBottom: 8 }}>{help.communityTitle}</div>
-                {help.communityDescription && (
-                  <div
-                    className="app-section-body"
-                    style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 12 }}
-                    dangerouslySetInnerHTML={{ __html: renderSectionBody(help.communityDescription) }}
-                  />
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {help.communityLinks.map((link, i) => (
-                    <a
-                      key={i}
-                      href={link.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="app-card app-card-pad"
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', color: 'inherit' }}
-                    >
-                      <div style={{ fontWeight: 600, fontSize: 13.5 }}>{link.label}</div>
-                      <ArrowRight size={16} color="var(--violet)" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
+            {sectionOrder.map(key => <Fragment key={key}>{sectionsByKey[key]}</Fragment>)}
 
             {!help.email && !help.embassyEmail && !help.embassyAddress && !help.removingEntryBody && help.communityLinks.length === 0 && (
               <div className="app-card app-card-pad">

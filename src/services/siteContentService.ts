@@ -6,6 +6,7 @@ const HELP_DOC = doc(db, 'meta', 'help');
 const ABOUT_DOC = doc(db, 'meta', 'about');
 const PRIVACY_DOC = doc(db, 'meta', 'privacy');
 const ABOUT_SECTION_ORDER_DOC = doc(db, 'meta', 'aboutSectionOrder');
+const HELP_SECTION_ORDER_DOC = doc(db, 'meta', 'helpSectionOrder');
 
 export const DEFAULT_HELP: HelpInfo = {
   subtitle: 'Found a bug? Have a question or feedback? Reach out.',
@@ -104,4 +105,16 @@ export function subscribeAboutSectionOrder(onData: (order: string[] | null) => v
 
 export async function saveAboutSectionOrder(order: string[]): Promise<void> {
   await setDoc(ABOUT_SECTION_ORDER_DOC, { order });
+}
+
+// Array of Help-page section keys, in the order admin wants them shown.
+// null = no customization saved yet, use DEFAULT_HELP_SECTION_ORDER.
+export function subscribeHelpSectionOrder(onData: (order: string[] | null) => void): () => void {
+  return onSnapshot(HELP_SECTION_ORDER_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { order?: string[] }).order || null) : null);
+  });
+}
+
+export async function saveHelpSectionOrder(order: string[]): Promise<void> {
+  await setDoc(HELP_SECTION_ORDER_DOC, { order });
 }
