@@ -17,6 +17,13 @@ export default function ApplicantVivaQuestions() {
   const sectionsInUse = [...new Set((questions ?? []).map(q => q.section))];
   const sectionOrder = mergeSectionOrder(savedSectionOrder, [], sectionsInUse);
 
+  // Numbering runs continuously across all sections (1, 2, 3…) rather than
+  // restarting at each section header.
+  const orderedQuestions = sectionOrder.flatMap(section =>
+    (questions ?? []).filter(q => q.section === section).sort((a, b) => a.order - b.order)
+  );
+  const globalNumber = new Map(orderedQuestions.map((q, i) => [q.id, i + 1]));
+
   return (
     <>
       <PageHeader title={t('vivaQuestions.title')} subtitle={t('vivaQuestions.subtitle')} />
@@ -36,14 +43,14 @@ export default function ApplicantVivaQuestions() {
                 <div key={section}>
                   <div style={{ marginBottom: 12, paddingBottom: 8, borderBottom: '2px solid var(--violet-soft)', fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 18, color: 'var(--violet)' }}>{section}</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {sectionQuestions.map((q, i) => (
+                    {sectionQuestions.map(q => (
                       <div key={q.id} className="app-card app-card-pad" style={{ display: 'flex', gap: 12 }}>
                         <div style={{
                           width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           background: 'var(--violet-soft)', color: 'var(--violet)', fontWeight: 700, fontSize: 13,
                         }}>
-                          {i + 1}
+                          {globalNumber.get(q.id)}
                         </div>
                         <div>
                           <div style={{ fontSize: 14.5, fontWeight: 600 }}>{q.question}</div>
