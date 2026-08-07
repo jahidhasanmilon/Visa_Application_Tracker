@@ -1,5 +1,6 @@
 import { REMINDER_OPTIONS, REMINDER_LABELS } from '../constants/status';
 import { splitDateTimeUtc, combineDateTimeUtc } from '../utils/dateHelpers';
+import TimeInput24 from './TimeInput24';
 import type { ApplicantFormData, ReminderStatus } from '../types';
 
 interface ApplicantModalProps {
@@ -59,7 +60,7 @@ export default function ApplicantModal({
           <label>Last Edited (UTC)</label>
           <div style={{ display: 'flex', gap: 12 }}>
             <input className="app-input" type="date" value={lastUpdated.date} onChange={e => setLastUpdatedDate(e.target.value)} style={{ flex: 1 }} />
-            <input className="app-input" type="time" lang="en-GB" value={lastUpdated.time} onChange={e => setLastUpdatedTime(e.target.value)} style={{ flex: 1 }} />
+            <TimeInput24 value={lastUpdated.time} onChange={setLastUpdatedTime} />
           </div>
         </div>
 
