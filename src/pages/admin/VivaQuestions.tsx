@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Download } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import {
   subscribeVivaQuestions, addVivaQuestion, updateVivaQuestion, deleteVivaQuestion,
   type VivaQuestionFormData,
 } from '../../services/vivaQuestionsService';
+import { VIVA_QUESTIONS_SEED } from '../../data/vivaQuestionsSeed';
 import type { VivaQuestion } from '../../types';
 
 const EMPTY_FORM: VivaQuestionFormData = { question: '', note: '', order: 0 };
@@ -15,8 +16,26 @@ export default function AdminVivaQuestions() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => subscribeVivaQuestions(setQuestions), []);
+
+  async function importSeed() {
+    if (!questions) return;
+    const existing = new Set(questions.map(q => q.question.trim().toLowerCase()));
+    const toAdd = VIVA_QUESTIONS_SEED.filter(s => !existing.has(s.question.trim().toLowerCase()));
+    if (toAdd.length === 0) return;
+    setImporting(true);
+    try {
+      let order = questions.length;
+      for (const item of toAdd) {
+        order += 1;
+        await addVivaQuestion({ ...item, order });
+      }
+    } finally {
+      setImporting(false);
+    }
+  }
 
   function openAdd() {
     setForm({ ...EMPTY_FORM, order: (questions?.length ?? 0) + 1 });
@@ -62,7 +81,14 @@ export default function AdminVivaQuestions() {
       <PageHeader
         title="Interview Questions"
         subtitle="Interview-prep questions every applicant sees, with your notes underneath."
-        actions={<button className="app-btn app-btn-primary" onClick={openAdd}><Plus size={16} /> New question</button>}
+        actions={
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="app-btn app-btn-ghost" onClick={importSeed} disabled={importing || questions === null}>
+              <Download size={16} /> {importing ? 'Importing…' : 'Import starter questions'}
+            </button>
+            <button className="app-btn app-btn-primary" onClick={openAdd}><Plus size={16} /> New question</button>
+          </div>
+        }
       />
       <div className="app-content">
         {questions === null ? (

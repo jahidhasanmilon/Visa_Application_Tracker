@@ -140,7 +140,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Viva Questions
     'vivaQuestions.title': 'Interview Questions',
-    'vivaQuestions.subtitle': 'Common interview questions — practice these before your appointment.',
+    'vivaQuestions.subtitle': 'Here are all the possible questions asked by the German Embassy during Opportunity Card visa interviews. This list will be continuously updated as new interview questions become available.',
     'vivaQuestions.empty': 'No questions published yet.',
 
     // How to Use
@@ -363,7 +363,7 @@ export const translations: Record<Lang, Record<string, string>> = {
 
     // Viva Questions
     'vivaQuestions.title': 'ইন্টারভিউ প্রশ্ন',
-    'vivaQuestions.subtitle': 'সাধারণ ইন্টারভিউ প্রশ্ন — আপনার অ্যাপয়েন্টমেন্টের আগে অনুশীলন করুন।',
+    'vivaQuestions.subtitle': 'Germany Opportunity Card visa ইন্টারভিউতে German Embassy যেসব প্রশ্ন জিজ্ঞেস করতে পারে তার সবগুলো এখানে দেওয়া আছে। নতুন প্রশ্ন পাওয়া গেলে এই তালিকা নিয়মিত আপডেট করা হবে।',
     'vivaQuestions.empty': 'এখনো কোনো প্রশ্ন প্রকাশ করা হয়নি।',
 
     // How to Use
