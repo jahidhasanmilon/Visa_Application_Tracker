@@ -7,6 +7,7 @@ import { ADMIN_NAV, APPLICANT_NAV, NAV_SECTION_KEYS, type NavSection } from '../
 import { signOut } from '../services/authService';
 import { useApplicantNavOrder } from '../hooks/useNavOrder';
 import { useCustomPages } from '../hooks/useCustomPages';
+import { useApplicantNavHidden } from '../hooks/useHiddenSections';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageToggle from '../components/LanguageToggle';
 import UserAvatar from '../components/UserAvatar';
@@ -30,12 +31,13 @@ export default function AppShell({ user, role }: AppShellProps) {
   const { t } = useLanguage();
   const applicantOrder = useApplicantNavOrder();
   const customPages = useCustomPages();
+  const hiddenNavKeys = useApplicantNavHidden();
   const applicantNavWithCustomPages = [
     ...APPLICANT_NAV,
     ...(customPages ?? []).map(p => ({
       to: `/app/pages/${p.id}`, label: p.title, icon: FileText, section: 'support' as NavSection,
     })),
-  ];
+  ].filter(item => !hiddenNavKeys.includes(item.to));
   const navItems = role === 'admin' ? ADMIN_NAV : orderNavItems(applicantNavWithCustomPages, applicantOrder);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(COLLAPSE_KEY) === 'true');

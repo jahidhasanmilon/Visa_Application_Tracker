@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText } from 'lucide-react';
+import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, Eye, EyeOff } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import CustomSectionForm from '../../components/CustomSectionForm';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
-import { saveApplicantNavOrder } from '../../services/navOrderService';
+import { saveApplicantNavOrder, saveApplicantNavHidden } from '../../services/navOrderService';
 import {
   saveAboutSectionOrder, saveHelpSectionOrder,
   saveAboutCustomSections, saveHelpCustomSections,
+  saveAboutHiddenSections, saveHelpHiddenSections,
 } from '../../services/siteContentService';
 import { saveCustomPages } from '../../services/customPagesService';
 import { useApplicantNavOrder } from '../../hooks/useNavOrder';
@@ -14,6 +15,7 @@ import { useAboutSectionOrder } from '../../hooks/useAboutSectionOrder';
 import { useHelpSectionOrder } from '../../hooks/useHelpSectionOrder';
 import { useAboutCustomSections, useHelpCustomSections } from '../../hooks/useCustomSections';
 import { useCustomPages } from '../../hooks/useCustomPages';
+import { useAboutHiddenSections, useHelpHiddenSections, useApplicantNavHidden } from '../../hooks/useHiddenSections';
 import { mergeSectionOrder } from '../../utils/sectionOrder';
 import { APPLICANT_NAV, NAV_LABEL_KEYS } from '../../constants/nav';
 import { ABOUT_SECTION_LABELS, DEFAULT_ABOUT_SECTION_ORDER } from '../../constants/aboutSections';
@@ -146,10 +148,21 @@ function useCustomItemForm() {
   return { editingId, title, setTitle, body, setBody, saving, setSaving, startAdd, startEdit, cancel };
 }
 
+// Shown on every row (fixed or custom) — fixed sections can't be deleted,
+// but can be hidden from the page without losing their content.
+function HideToggleButton({ hidden, onToggle }: { hidden: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className="app-icon-btn" onClick={onToggle} aria-label={hidden ? 'Show on page' : 'Hide from page'} title={hidden ? 'Hidden — click to show' : 'Click to hide from page'}>
+      {hidden ? <EyeOff size={14} color="var(--danger)" /> : <Eye size={14} />}
+    </button>
+  );
+}
+
 function ApplicantNavOrderCard() {
   const { t } = useLanguage();
   const savedOrder = useApplicantNavOrder();
   const customPages = useCustomPages();
+  const hiddenKeys = useApplicantNavHidden();
   const form = useCustomItemForm();
 
   const pageRoute = (id: string) => `/app/pages/${id}`;
@@ -161,6 +174,11 @@ function ApplicantNavOrderCard() {
     ...APPLICANT_NAV.map(i => [i.to, { ...i, isCustom: false }] as const),
     ...(customPages ?? []).map(p => [pageRoute(p.id), { to: pageRoute(p.id), label: p.title, icon: FileText, isCustom: true }] as const),
   ]);
+
+  async function toggleHidden(to: string) {
+    const next = hiddenKeys.includes(to) ? hiddenKeys.filter(k => k !== to) : [...hiddenKeys, to];
+    await saveApplicantNavHidden(next);
+  }
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
@@ -208,10 +226,12 @@ function ApplicantNavOrderCard() {
           if (!item) return null;
           const Icon = item.icon;
           const label = item.isCustom ? item.label : (t(NAV_LABEL_KEYS[to] ?? '') || item.label);
+          const hidden = hiddenKeys.includes(to);
           return (
-            <div key={to} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
+            <div key={to} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
               <Icon size={15} color="var(--muted-2)" />
-              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
+              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+              <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(to)} />
               {item.isCustom && (
                 <>
                   <button type="button" className="app-icon-btn" onClick={() => form.startEdit((customPages ?? []).find(p => pageRoute(p.id) === to)!)} aria-label="Edit page">
@@ -256,11 +276,17 @@ function ApplicantNavOrderCard() {
 function AboutSectionOrderCard() {
   const savedOrder = useAboutSectionOrder();
   const customSections = useAboutCustomSections();
+  const hiddenKeys = useAboutHiddenSections();
   const form = useCustomItemForm();
 
   const customIds = (customSections ?? []).map(s => s.id);
   const order = mergeSectionOrder(savedOrder, DEFAULT_ABOUT_SECTION_ORDER, customIds);
   const customById = new Map((customSections ?? []).map(s => [s.id, s]));
+
+  async function toggleHidden(key: string) {
+    const next = hiddenKeys.includes(key) ? hiddenKeys.filter(k => k !== key) : [...hiddenKeys, key];
+    await saveAboutHiddenSections(next);
+  }
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
@@ -307,9 +333,11 @@ function AboutSectionOrderCard() {
           const custom = customById.get(key);
           const label = custom ? custom.title : ABOUT_SECTION_LABELS[key as keyof typeof ABOUT_SECTION_LABELS];
           if (!label) return null;
+          const hidden = hiddenKeys.includes(key);
           return (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
+              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+              <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
               {custom && (
                 <>
                   <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">
@@ -354,11 +382,17 @@ function AboutSectionOrderCard() {
 function HelpSectionOrderCard() {
   const savedOrder = useHelpSectionOrder();
   const customSections = useHelpCustomSections();
+  const hiddenKeys = useHelpHiddenSections();
   const form = useCustomItemForm();
 
   const customIds = (customSections ?? []).map(s => s.id);
   const order = mergeSectionOrder(savedOrder, DEFAULT_HELP_SECTION_ORDER, customIds);
   const customById = new Map((customSections ?? []).map(s => [s.id, s]));
+
+  async function toggleHidden(key: string) {
+    const next = hiddenKeys.includes(key) ? hiddenKeys.filter(k => k !== key) : [...hiddenKeys, key];
+    await saveHelpHiddenSections(next);
+  }
 
   async function move(index: number, dir: -1 | 1) {
     const target = index + dir;
@@ -405,9 +439,11 @@ function HelpSectionOrderCard() {
           const custom = customById.get(key);
           const label = custom ? custom.title : HELP_SECTION_LABELS[key as keyof typeof HELP_SECTION_LABELS];
           if (!label) return null;
+          const hidden = hiddenKeys.includes(key);
           return (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
-              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
+              <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+              <HideToggleButton hidden={hidden} onToggle={() => toggleHidden(key)} />
               {custom && (
                 <>
                   <button type="button" className="app-icon-btn" onClick={() => form.startEdit(custom)} aria-label="Edit section">

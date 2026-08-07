@@ -8,6 +8,7 @@ import { subscribeHelp, saveHelp, DEFAULT_HELP, saveHelpCustomSections, saveHelp
 import { renderSectionBody } from '../utils/richText';
 import { useHelpSectionOrder } from '../hooks/useHelpSectionOrder';
 import { useHelpCustomSections } from '../hooks/useCustomSections';
+import { useHelpHiddenSections } from '../hooks/useHiddenSections';
 import { mergeSectionOrder } from '../utils/sectionOrder';
 import { DEFAULT_HELP_SECTION_ORDER, type HelpSectionKey } from '../constants/helpSections';
 import type { AppRole } from '../constants/roles';
@@ -66,8 +67,13 @@ export default function Help({ role }: HelpProps) {
 
   const savedSectionOrder = useHelpSectionOrder();
   const customSections = useHelpCustomSections();
+  const hiddenKeys = useHelpHiddenSections();
   const customById = new Map((customSections ?? []).map(s => [s.id, s]));
-  const sectionOrder: string[] = mergeSectionOrder(savedSectionOrder, DEFAULT_HELP_SECTION_ORDER, [...customById.keys()]);
+  // fullOrder (including hidden entries) is what gets saved back when a
+  // custom section is deleted — sectionOrder (rendered on the page) drops
+  // whatever's currently hidden.
+  const fullOrder: string[] = mergeSectionOrder(savedSectionOrder, DEFAULT_HELP_SECTION_ORDER, [...customById.keys()]);
+  const sectionOrder: string[] = fullOrder.filter(k => !hiddenKeys.includes(k));
 
   // ---- Custom section editing (admin add/edit/remove right on the page) ----
   const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
@@ -98,7 +104,7 @@ export default function Help({ role }: HelpProps) {
   async function removeCustomSection(id: string) {
     if (!confirm('Remove this section from the Help page?')) return;
     await saveHelpCustomSections((customSections ?? []).filter(s => s.id !== id));
-    await saveHelpSectionOrder(sectionOrder.filter(k => k !== id));
+    await saveHelpSectionOrder(fullOrder.filter(k => k !== id));
   }
 
   const sectionsByKey: Record<HelpSectionKey, ReactNode> = {

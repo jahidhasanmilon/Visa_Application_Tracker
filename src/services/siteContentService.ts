@@ -9,6 +9,8 @@ const ABOUT_SECTION_ORDER_DOC = doc(db, 'meta', 'aboutSectionOrder');
 const HELP_SECTION_ORDER_DOC = doc(db, 'meta', 'helpSectionOrder');
 const ABOUT_CUSTOM_SECTIONS_DOC = doc(db, 'meta', 'aboutCustomSections');
 const HELP_CUSTOM_SECTIONS_DOC = doc(db, 'meta', 'helpCustomSections');
+const ABOUT_HIDDEN_SECTIONS_DOC = doc(db, 'meta', 'aboutHiddenSections');
+const HELP_HIDDEN_SECTIONS_DOC = doc(db, 'meta', 'helpHiddenSections');
 
 export const DEFAULT_HELP: HelpInfo = {
   subtitle: 'Found a bug? Have a question or feedback? Reach out.',
@@ -61,9 +63,11 @@ export const DEFAULT_ABOUT: AboutContent = {
   storyHeading: 'Our story',
   storyIntro: 'VisaTrack helps this community track Germany Opportunity Card applications — from preparing your documents through to the day you land. Built by and for the group, not an official service.',
   timeline: [],
+  partnerTitle: 'Official partner',
   partnerName: 'Rubalif',
   partnerDescription: '',
   partnerLinks: [],
+  teamTitle: 'The people behind the platform',
 };
 
 export function subscribeAbout(onData: (content: AboutContent) => void): () => void {
@@ -143,4 +147,28 @@ export function subscribeHelpCustomSections(onData: (items: CustomSection[]) => 
 
 export async function saveHelpCustomSections(items: CustomSection[]): Promise<void> {
   await setDoc(HELP_CUSTOM_SECTIONS_DOC, { items });
+}
+
+// Fixed (built-in) sections can't be deleted — they're wired to specific
+// content fields, not freeform items — so "remove" for them means "hide
+// from the page" instead. Works for custom section/page ids too, in case
+// admin wants to temporarily hide one without deleting it.
+export function subscribeAboutHiddenSections(onData: (keys: string[]) => void): () => void {
+  return onSnapshot(ABOUT_HIDDEN_SECTIONS_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { keys?: string[] }).keys || []) : []);
+  });
+}
+
+export async function saveAboutHiddenSections(keys: string[]): Promise<void> {
+  await setDoc(ABOUT_HIDDEN_SECTIONS_DOC, { keys });
+}
+
+export function subscribeHelpHiddenSections(onData: (keys: string[]) => void): () => void {
+  return onSnapshot(HELP_HIDDEN_SECTIONS_DOC, (snap) => {
+    onData(snap.exists() ? ((snap.data() as { keys?: string[] }).keys || []) : []);
+  });
+}
+
+export async function saveHelpHiddenSections(keys: string[]): Promise<void> {
+  await setDoc(HELP_HIDDEN_SECTIONS_DOC, { keys });
 }

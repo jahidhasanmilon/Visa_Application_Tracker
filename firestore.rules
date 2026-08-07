@@ -169,5 +169,20 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if isAdminEmail();
     }
+
+    // Fixed sections/pages can't be deleted, only hidden — same access
+    // level as the ordering docs above.
+    match /meta/aboutHiddenSections {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+    match /meta/helpHiddenSections {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
+    match /meta/navHidden {
+      allow read: if request.auth != null;
+      allow write: if isAdminEmail();
+    }
   }
 }

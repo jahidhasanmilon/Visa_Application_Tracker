@@ -6,6 +6,7 @@ import { subscribeAbout, saveAbout, DEFAULT_ABOUT, saveAboutCustomSections, save
 import { subscribeTeam, addTeamMember, updateTeamMember, deleteTeamMember, type TeamMemberFormData } from '../services/teamService';
 import { useAboutSectionOrder } from '../hooks/useAboutSectionOrder';
 import { useAboutCustomSections } from '../hooks/useCustomSections';
+import { useAboutHiddenSections } from '../hooks/useHiddenSections';
 import { mergeSectionOrder } from '../utils/sectionOrder';
 import { renderSectionBody } from '../utils/richText';
 import { DEFAULT_ABOUT_SECTION_ORDER, type AboutSectionKey } from '../constants/aboutSections';
@@ -136,8 +137,13 @@ export default function About({ role }: AboutProps) {
 
   const savedSectionOrder = useAboutSectionOrder();
   const customSections = useAboutCustomSections();
+  const hiddenKeys = useAboutHiddenSections();
   const customById = new Map((customSections ?? []).map(s => [s.id, s]));
-  const sectionOrder: string[] = mergeSectionOrder(savedSectionOrder, DEFAULT_ABOUT_SECTION_ORDER, [...customById.keys()]);
+  // fullOrder (including hidden entries) is what gets saved back when a
+  // custom section is deleted — sectionOrder (rendered on the page) drops
+  // whatever's currently hidden.
+  const fullOrder: string[] = mergeSectionOrder(savedSectionOrder, DEFAULT_ABOUT_SECTION_ORDER, [...customById.keys()]);
+  const sectionOrder: string[] = fullOrder.filter(k => !hiddenKeys.includes(k));
 
   // ---- Custom section editing (admin add/edit/remove right on the page) ----
   const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
@@ -168,7 +174,7 @@ export default function About({ role }: AboutProps) {
   async function removeCustomSection(id: string) {
     if (!confirm('Remove this section from the About page?')) return;
     await saveAboutCustomSections((customSections ?? []).filter(s => s.id !== id));
-    await saveAboutSectionOrder(sectionOrder.filter(k => k !== id));
+    await saveAboutSectionOrder(fullOrder.filter(k => k !== id));
   }
 
   const storySection: ReactNode = (
@@ -257,7 +263,11 @@ export default function About({ role }: AboutProps) {
             {editingStory ? (
               <>
                 <div className="app-field">
-                  <label>Official partner — organization name <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(leave blank to hide this section)</span></label>
+                  <label>Section title</label>
+                  <input className="app-input" value={draft.partnerTitle} onChange={e => setDraft({ ...draft, partnerTitle: e.target.value })} placeholder="Official partner" />
+                </div>
+                <div className="app-field">
+                  <label>Organization name <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(leave blank to hide this section)</span></label>
                   <input className="app-input" value={draft.partnerName} onChange={e => setDraft({ ...draft, partnerName: e.target.value })} placeholder="e.g. Rubalif" />
                 </div>
                 <div className="app-field">
@@ -306,7 +316,7 @@ export default function About({ role }: AboutProps) {
                   <div className="app-about-section-icon" style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)' }}>
                     <Handshake size={16} />
                   </div>
-                  <div className="app-about-section-title">Official partner</div>
+                  <div className="app-about-section-title">{content.partnerTitle}</div>
                 </div>
                 <div className="app-card-title" style={{ marginBottom: 8, marginLeft: 42 }}>{content.partnerName}</div>
                 {content.partnerDescription && (
@@ -339,12 +349,18 @@ export default function About({ role }: AboutProps) {
 
   const teamSection: ReactNode = (
         <div>
+          {editingStory && (
+            <div className="app-field" style={{ maxWidth: 360 }}>
+              <label>Team section title</label>
+              <input className="app-input" value={draft.teamTitle} onChange={e => setDraft({ ...draft, teamTitle: e.target.value })} placeholder="The people behind the platform" />
+            </div>
+          )}
           <div className="app-card-head" style={{ marginBottom: 14 }}>
             <div className="app-about-section-head" style={{ marginBottom: 0 }}>
               <div className="app-about-section-icon" style={{ background: 'var(--success-soft)', color: 'var(--success)' }}>
                 <Users size={16} />
               </div>
-              <div className="app-about-section-title">The people behind the platform</div>
+              <div className="app-about-section-title">{content.teamTitle}</div>
             </div>
             {isAdmin && (
               <button className="app-btn app-btn-ghost app-btn-sm" onClick={openAddMember}><Plus size={14} /> Add member</button>

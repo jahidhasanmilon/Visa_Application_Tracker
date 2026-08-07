@@ -176,9 +176,11 @@ export interface AboutContent {
   storyHeading: string;
   storyIntro: string;
   timeline: AboutTimelineItem[];
+  partnerTitle: string;
   partnerName: string;
   partnerDescription: string;
   partnerLinks: AboutPartnerLink[];
+  teamTitle: string;
 }
 
 export interface FaqItem {
