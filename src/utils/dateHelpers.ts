@@ -40,6 +40,24 @@ export function fmtDateTimeUtc(d?: string): string {
   return `${dd}.${mm}.${dt.getUTCFullYear()}, ${hh}:${min} UTC`;
 }
 
+// Splits a lastUpdated value into separate <input type="date"> /
+// <input type="time"> values, both read as UTC — so a manual edit shows
+// (and lets you set) the exact UTC time, not just the date.
+export function splitDateTimeUtc(d?: string): { date: string; time: string } {
+  if (!d) return { date: '', time: '00:00' };
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return { date: '', time: '00:00' };
+  const hh = String(dt.getUTCHours()).padStart(2, '0');
+  const min = String(dt.getUTCMinutes()).padStart(2, '0');
+  return { date: d.slice(0, 10), time: `${hh}:${min}` };
+}
+
+// Inverse of splitDateTimeUtc — combines a date/time pair (both entered as
+// UTC) back into a single ISO timestamp for storage.
+export function combineDateTimeUtc(date: string, time: string): string {
+  return `${date}T${time || '00:00'}:00.000Z`;
+}
+
 export function urgency(remaining: number): { label: string; color: string } {
   if (remaining <= 0) return { label: 'Overdue', color: '#F04438' };
   if (remaining <= 30) return { label: 'Urgent', color: '#F04438' };

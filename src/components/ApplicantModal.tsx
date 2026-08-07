@@ -1,4 +1,5 @@
 import { REMINDER_OPTIONS, REMINDER_LABELS } from '../constants/status';
+import { splitDateTimeUtc, combineDateTimeUtc } from '../utils/dateHelpers';
 import type { ApplicantFormData, ReminderStatus } from '../types';
 
 interface ApplicantModalProps {
@@ -14,6 +15,14 @@ export default function ApplicantModal({
   open, isEditing, form, setForm, onSave, onClose,
 }: ApplicantModalProps) {
   if (!open) return null;
+
+  const lastUpdated = splitDateTimeUtc(form.lastUpdated);
+  function setLastUpdatedDate(date: string) {
+    setForm({ ...form, lastUpdated: combineDateTimeUtc(date, lastUpdated.time) });
+  }
+  function setLastUpdatedTime(time: string) {
+    setForm({ ...form, lastUpdated: combineDateTimeUtc(lastUpdated.date, time) });
+  }
 
   return (
     <div className="app-modal-backdrop" onClick={onClose}>
@@ -47,13 +56,11 @@ export default function ApplicantModal({
         </div>
 
         <div className="app-field">
-          <label>Last Edited</label>
-          {/* lastUpdated may now carry a full UTC timestamp (set when an
-              applicant marks their reminder Done) — a <input type="date">
-              only accepts "YYYY-MM-DD", so only the date part is shown here.
-              Editing it collapses the stored value to midnight UTC on the
-              picked date, which is expected for a manual override. */}
-          <input className="app-input" type="date" value={form.lastUpdated.slice(0, 10)} onChange={e => setForm({ ...form, lastUpdated: e.target.value })} />
+          <label>Last Edited (UTC)</label>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <input className="app-input" type="date" value={lastUpdated.date} onChange={e => setLastUpdatedDate(e.target.value)} style={{ flex: 1 }} />
+            <input className="app-input" type="time" value={lastUpdated.time} onChange={e => setLastUpdatedTime(e.target.value)} style={{ flex: 1 }} />
+          </div>
         </div>
 
         <div className="app-field">

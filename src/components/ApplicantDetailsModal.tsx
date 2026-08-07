@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { updateMyDetails } from '../services/applicantsService';
-import { todayStr } from '../utils/dateHelpers';
+import { todayStr, splitDateTimeUtc, combineDateTimeUtc } from '../utils/dateHelpers';
 import type { Applicant } from '../types';
 
 interface ApplicantDetailsModalProps {
@@ -18,19 +18,22 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
   const [serialNo, setSerialNo] = useState(applicant.serialNo);
   const [created, setCreated] = useState(applicant.created);
   const [submitted, setSubmitted] = useState(applicant.submitted);
-  // lastUpdated may carry a full UTC timestamp (set automatically when you
-  // mark the reminder Done) — <input type="date"> only accepts
-  // "YYYY-MM-DD", so only the date part is edited here. Saving from this
-  // form collapses it to midnight UTC on the picked date, same as the
-  // admin's editor.
-  const [lastUpdated, setLastUpdated] = useState((applicant.lastUpdated || todayStr()).slice(0, 10));
+  const [lastUpdated, setLastUpdated] = useState(applicant.lastUpdated || todayStr());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   if (!open) return null;
 
+  const lastUpdatedParts = splitDateTimeUtc(lastUpdated);
+  function setLastUpdatedDate(date: string) {
+    setLastUpdated(combineDateTimeUtc(date, lastUpdatedParts.time));
+  }
+  function setLastUpdatedTime(time: string) {
+    setLastUpdated(combineDateTimeUtc(lastUpdatedParts.date, time));
+  }
+
   async function handleSave() {
-    if (!name.trim() || !created || !submitted || !lastUpdated) {
+    if (!name.trim() || !created || !submitted || !lastUpdatedParts.date) {
       setError('Name, creation date, waiting list joined date, and last edited date are all required.');
       return;
     }
@@ -74,10 +77,13 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
         </div>
 
         <div className="app-field">
-          <label>Last Edited *</label>
-          <input className="app-input" type="date" value={lastUpdated} onChange={e => setLastUpdated(e.target.value)} />
+          <label>Last Edited (UTC) *</label>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <input className="app-input" type="date" value={lastUpdatedParts.date} onChange={e => setLastUpdatedDate(e.target.value)} style={{ flex: 1 }} />
+            <input className="app-input" type="time" value={lastUpdatedParts.time} onChange={e => setLastUpdatedTime(e.target.value)} style={{ flex: 1 }} />
+          </div>
           <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
-            The 30-day reminder countdown counts down from this date — it jumps to today automatically only when you mark the reminder as Done.
+            The 30-day reminder countdown counts down from this date and time — it jumps to now automatically only when you mark the reminder as Done.
           </div>
         </div>
 
