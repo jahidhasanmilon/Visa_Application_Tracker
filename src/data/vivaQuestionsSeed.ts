@@ -25,7 +25,7 @@ export const VIVA_QUESTIONS_SEED: Omit<VivaQuestionFormData, 'order'>[] = [
 
   // Education
   { section: 'Education', question: 'Describe your degree and university.', note: '' },
-  { section: 'Education', question: 'What is your passing year?', note: '' },
+  { section: 'Education', question: 'What year did you graduate?', note: '' },
   { section: 'Education', question: 'Which city is your university in?', note: '' },
 
   // Professional background
