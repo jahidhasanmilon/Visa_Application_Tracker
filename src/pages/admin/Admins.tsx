@@ -190,6 +190,29 @@ function RemoveButton({ hidden, onRemove }: { hidden: boolean; onRemove: () => v
   );
 }
 
+// Hidden rows drop out of the main list entirely (not just greyed out) —
+// this is where they land instead, with a one-click Restore.
+function HiddenSectionsList({ items, onRestore }: { items: { key: string; label: string }[]; onRestore: (key: string) => void }) {
+  if (items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed var(--border)' }}>
+      <div style={{ fontSize: 11, color: 'var(--muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.4 }}>
+        Hidden ({items.length})
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {items.map(({ key, label }) => (
+          <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 8, background: 'var(--neutral-soft)' }}>
+            <span style={{ flex: 1, fontSize: 12.5, color: 'var(--muted)' }}>{label}</span>
+            <button type="button" className="app-icon-btn" onClick={() => onRestore(key)} aria-label="Restore to page" title="Restore to page">
+              <Eye size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ApplicantNavOrderCard() {
   const { t } = useLanguage();
   const savedOrder = useApplicantNavOrder();
@@ -271,17 +294,18 @@ function ApplicantNavOrderCard() {
         {order.map((to, i) => {
           const item = byTo.get(to);
           if (!item) return null;
+          const hidden = hiddenKeys.includes(to);
+          if (hidden) return null;
           const Icon = item.icon;
           const label = item.isCustom ? item.label : (navLabels[to] || t(NAV_LABEL_KEYS[to] ?? '') || item.label);
-          const hidden = hiddenKeys.includes(to);
           const isRenaming = rename.key === to;
           return (
-            <div key={to} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
+            <div key={to} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
               <Icon size={15} color="var(--muted-2)" />
               {isRenaming ? (
                 <input className="app-input" value={rename.value} onChange={e => rename.setValue(e.target.value)} style={{ flex: 1, height: 32 }} autoFocus />
               ) : (
-                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
               )}
               {isRenaming ? (
                 <>
@@ -320,6 +344,15 @@ function ApplicantNavOrderCard() {
           );
         })}
       </div>
+
+      <HiddenSectionsList
+        items={order.filter(to => hiddenKeys.includes(to)).map(to => {
+          const item = byTo.get(to);
+          const label = item ? (item.isCustom ? item.label : (navLabels[to] || t(NAV_LABEL_KEYS[to] ?? '') || item.label)) : to;
+          return { key: to, label };
+        })}
+        onRestore={toggleHidden}
+      />
 
       {form.editingId ? (
         <CustomSectionForm
@@ -425,13 +458,14 @@ function AboutSectionOrderCard() {
           const label = custom ? custom.title : (fixedField ? about[fixedField] as string : undefined) || ABOUT_SECTION_LABELS[key as keyof typeof ABOUT_SECTION_LABELS];
           if (!label) return null;
           const hidden = hiddenKeys.includes(key);
+          if (hidden) return null;
           const isRenaming = rename.key === key;
           return (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
               {isRenaming ? (
                 <input className="app-input" value={rename.value} onChange={e => rename.setValue(e.target.value)} style={{ flex: 1, height: 32 }} autoFocus />
               ) : (
-                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
               )}
               {isRenaming ? (
                 <>
@@ -472,6 +506,16 @@ function AboutSectionOrderCard() {
           );
         })}
       </div>
+
+      <HiddenSectionsList
+        items={order.filter(key => hiddenKeys.includes(key)).map(key => {
+          const custom = customById.get(key);
+          const fixedField = ABOUT_TITLE_FIELD[key];
+          const label = custom ? custom.title : (fixedField ? about[fixedField] as string : undefined) || ABOUT_SECTION_LABELS[key as keyof typeof ABOUT_SECTION_LABELS] || key;
+          return { key, label };
+        })}
+        onRestore={toggleHidden}
+      />
 
       {form.editingId ? (
         <CustomSectionForm
@@ -577,13 +621,14 @@ function HelpSectionOrderCard() {
           const label = custom ? custom.title : (fixedField ? help[fixedField] as string : undefined) || HELP_SECTION_LABELS[key as keyof typeof HELP_SECTION_LABELS];
           if (!label) return null;
           const hidden = hiddenKeys.includes(key);
+          if (hidden) return null;
           const isRenaming = rename.key === key;
           return (
-            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', opacity: hidden ? 0.55 : 1 }}>
+            <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px' }}>
               {isRenaming ? (
                 <input className="app-input" value={rename.value} onChange={e => rename.setValue(e.target.value)} style={{ flex: 1, height: 32 }} autoFocus />
               ) : (
-                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}{hidden && ' (hidden)'}</span>
+                <span style={{ flex: 1, fontSize: 13.5, fontWeight: 500 }}>{label}</span>
               )}
               {isRenaming ? (
                 <>
@@ -624,6 +669,16 @@ function HelpSectionOrderCard() {
           );
         })}
       </div>
+
+      <HiddenSectionsList
+        items={order.filter(key => hiddenKeys.includes(key)).map(key => {
+          const custom = customById.get(key);
+          const fixedField = HELP_TITLE_FIELD[key];
+          const label = custom ? custom.title : (fixedField ? help[fixedField] as string : undefined) || HELP_SECTION_LABELS[key as keyof typeof HELP_SECTION_LABELS] || key;
+          return { key, label };
+        })}
+        onRestore={toggleHidden}
+      />
 
       {form.editingId ? (
         <CustomSectionForm
