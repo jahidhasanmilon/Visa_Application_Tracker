@@ -59,7 +59,7 @@ export default function ApplicantModal({
           <label>Last Edited (UTC)</label>
           <div style={{ display: 'flex', gap: 12 }}>
             <input className="app-input" type="date" value={lastUpdated.date} onChange={e => setLastUpdatedDate(e.target.value)} style={{ flex: 1 }} />
-            <input className="app-input" type="time" value={lastUpdated.time} onChange={e => setLastUpdatedTime(e.target.value)} style={{ flex: 1 }} />
+            <input className="app-input" type="time" lang="en-GB" value={lastUpdated.time} onChange={e => setLastUpdatedTime(e.target.value)} style={{ flex: 1 }} />
           </div>
         </div>
 

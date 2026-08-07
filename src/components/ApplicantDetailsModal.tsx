@@ -80,7 +80,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
           <label>Last Edited (UTC) *</label>
           <div style={{ display: 'flex', gap: 12 }}>
             <input className="app-input" type="date" value={lastUpdatedParts.date} onChange={e => setLastUpdatedDate(e.target.value)} style={{ flex: 1 }} />
-            <input className="app-input" type="time" value={lastUpdatedParts.time} onChange={e => setLastUpdatedTime(e.target.value)} style={{ flex: 1 }} />
+            <input className="app-input" type="time" lang="en-GB" value={lastUpdatedParts.time} onChange={e => setLastUpdatedTime(e.target.value)} style={{ flex: 1 }} />
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
             The 30-day reminder countdown counts down from this date and time — it jumps to now automatically only when you mark the reminder as Done.
