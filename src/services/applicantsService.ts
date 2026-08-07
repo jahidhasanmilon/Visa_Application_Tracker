@@ -76,7 +76,9 @@ export async function deleteApplicant(id: string): Promise<void> {
 export async function updateReminderStatus(id: string, reminderMailSent: ReminderStatus): Promise<void> {
   const patch: Record<string, unknown> = { reminderMailSent };
   if (reminderMailSent === 'Done') {
-    patch.lastUpdated = todayStr();
+    // A full timestamp, not just a date — the countdown is precise to the
+    // second, not just the day.
+    patch.lastUpdated = new Date().toISOString();
   }
   await updateDoc(doc(db, APPLICANTS_COL, id), patch);
 }

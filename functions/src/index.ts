@@ -18,10 +18,12 @@ async function getAdminEmails(db: FirebaseFirestore.Firestore): Promise<string[]
   return [OWNER_EMAIL, ...snap.docs.map(d => d.id)];
 }
 
-// Must match TARGET_DAYS-style logic in src/constants/status.ts (REMINDER_WINDOW_DAYS)
-// and src/utils/dateHelpers.ts (enrichApplicant) — the 30-day countdown is measured
-// from the applicant's lastUpdated date.
+// Must match REMINDER_WINDOW_DAYS in src/constants/status.ts — the 30-day
+// countdown is measured to the millisecond from the applicant's lastUpdated
+// timestamp, so this sweep fires as soon as possible after it actually
+// expires rather than waiting for the next calendar day.
 const REMINDER_WINDOW_DAYS = 30;
+const REMINDER_WINDOW_MS = REMINDER_WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
 // Mirrors src/constants/emailTemplate.ts — used only if the admin hasn't
 // saved a custom template yet at meta/emailTemplate.
@@ -41,16 +43,14 @@ Please review and follow up.`,
 const GMAIL_USER = defineSecret('GMAIL_USER');
 const GMAIL_APP_PASSWORD = defineSecret('GMAIL_APP_PASSWORD');
 
-function daysBetween(a: string, b: string): number {
-  const A = new Date(`${a}T00:00:00`);
-  const B = new Date(`${b}T00:00:00`);
-  return Math.round((B.getTime() - A.getTime()) / 86400000);
-}
-
-// Mirrors src/utils/dateHelpers.ts — UTC calendar date, so the server-side
-// overdue check agrees with what applicants see client-side.
-function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+// "07.07.2026, 07:18 UTC" — mirrors fmtDateTimeUtc() in src/utils/dateHelpers.ts.
+function fmtDateTimeUtc(iso: string): string {
+  const dt = new Date(iso);
+  const dd = String(dt.getUTCDate()).padStart(2, '0');
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, '0');
+  const hh = String(dt.getUTCHours()).padStart(2, '0');
+  const min = String(dt.getUTCMinutes()).padStart(2, '0');
+  return `${dd}.${mm}.${dt.getUTCFullYear()}, ${hh}:${min} UTC`;
 }
 
 function renderTemplate(template: string, vars: Record<string, string>): string {
@@ -88,7 +88,8 @@ interface EmailTemplateDoc {
 
 async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
   const db = getFirestore();
-  const today = todayStr();
+  const now = Date.now();
+  const nowIso = new Date(now).toISOString();
 
   const templateSnap = await db.doc('meta/emailTemplate').get();
   const templateDoc = templateSnap.data() as EmailTemplateDoc | undefined;
@@ -112,11 +113,12 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
     const a = doc.data() as ApplicantDoc;
     if (!a.lastUpdated || a.reminderMailSent !== 'Not yet') continue;
 
-    const reminderDaysLeft = REMINDER_WINDOW_DAYS - daysBetween(a.lastUpdated, today);
-    if (reminderDaysLeft > 0) continue;
+    const lastUpdatedMs = new Date(a.lastUpdated).getTime();
+    const deadlineMs = lastUpdatedMs + REMINDER_WINDOW_MS;
+    if (now < deadlineMs) continue;
 
     // Already emailed for this cycle? (lastUpdated hasn't changed since the last send)
-    if (a.reminderEmailSentAt && a.reminderEmailSentAt >= a.lastUpdated) continue;
+    if (a.reminderEmailSentAt && new Date(a.reminderEmailSentAt).getTime() >= lastUpdatedMs) continue;
 
     // No email on file (e.g. an admin-precreated ghost record for someone
     // who hasn't signed up yet) — nothing to send to.
@@ -129,8 +131,8 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
       name: a.name ?? 'Applicant',
       serialNo: a.serialNo ?? '',
       status: deriveStatus(a, roadmapTemplate),
-      lastUpdated: a.lastUpdated,
-      daysOverdue: String(Math.abs(reminderDaysLeft)),
+      lastUpdated: fmtDateTimeUtc(a.lastUpdated),
+      daysOverdue: String(Math.floor((now - deadlineMs) / 86400000)),
     };
 
     try {
@@ -143,7 +145,7 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
         subject: renderTemplate(template.subject, vars),
         text: renderTemplate(template.body, vars),
       });
-      await doc.ref.update({ reminderEmailSentAt: today });
+      await doc.ref.update({ reminderEmailSentAt: nowIso });
       sent++;
     } catch (err) {
       logger.error(`Failed to send reminder email for ${doc.id}`, err);
@@ -157,7 +159,7 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
         from: `VisaTrack <${GMAIL_USER.value()}>`,
         to: adminEmails.join(', '),
         subject: `Reminder sweep: ${sent} email(s) sent`,
-        text: `The daily 30-day reminder sweep sent ${sent} email(s) out of ${snapshot.size} applicant record(s) checked.`,
+        text: `The 30-day reminder sweep sent ${sent} email(s) out of ${snapshot.size} applicant record(s) checked.`,
       });
     } catch (err) {
       logger.error('Failed to send admin digest email', err);
@@ -168,10 +170,14 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
   return { sent, checked: snapshot.size };
 }
 
+// Runs every 15 minutes (rather than once a day) so the email goes out
+// close to the exact moment the 30-day countdown reaches zero, not up to a
+// day late. There's no per-document scheduling here — this is a polling
+// sweep, so "close to" means within one 15-minute window, not the exact
+// second.
 export const sendReminderEmails = onSchedule(
   {
-    schedule: '0 9 * * *',
-    timeZone: 'Asia/Dhaka',
+    schedule: '*/15 * * * *',
     secrets: [GMAIL_USER, GMAIL_APP_PASSWORD],
   },
   async () => {

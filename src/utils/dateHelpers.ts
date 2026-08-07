@@ -1,9 +1,12 @@
 import { TARGET_DAYS, REMINDER_WINDOW_DAYS } from '../constants/status';
 import type { Applicant, ChecklistItem, EnrichedApplicant } from '../types';
 
+// Works with both bare dates ('2026-07-07') and full UTC timestamps
+// ('2026-07-07T07:18:00.000Z') — both parse correctly via the Date
+// constructor, so no special-casing is needed either way.
 export function daysBetween(a: string, b: string): number {
-  const A = new Date(a + 'T00:00:00');
-  const B = new Date(b + 'T00:00:00');
+  const A = new Date(a);
+  const B = new Date(b);
   return Math.round((B.getTime() - A.getTime()) / 86400000);
 }
 
@@ -15,10 +18,26 @@ export function todayStr(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Works with both bare dates and full UTC timestamps (see daysBetween) —
+// rendered in UTC explicitly so the calendar date shown doesn't drift with
+// the viewer's own browser timezone.
 export function fmtDate(d?: string): string {
   if (!d) return '—';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+// "07.07.2026, 07:18 UTC" — used for lastUpdated, which now carries a real
+// time-of-day (not just a calendar date) so the 30-day reminder countdown
+// can be precise to the minute/second, not just the day.
+export function fmtDateTimeUtc(d?: string): string {
+  if (!d) return '—';
+  const dt = new Date(d);
+  const dd = String(dt.getUTCDate()).padStart(2, '0');
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, '0');
+  const hh = String(dt.getUTCHours()).padStart(2, '0');
+  const min = String(dt.getUTCMinutes()).padStart(2, '0');
+  return `${dd}.${mm}.${dt.getUTCFullYear()}, ${hh}:${min} UTC`;
 }
 
 export function urgency(remaining: number): { label: string; color: string } {

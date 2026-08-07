@@ -3,8 +3,9 @@ import { Check, Pencil } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import ApplicantDetailsModal from '../../components/ApplicantDetailsModal';
 import InfoTooltip from '../../components/InfoTooltip';
+import LiveCountdown from '../../components/LiveCountdown';
 import { updateReminderStatus, updateRoadmap } from '../../services/applicantsService';
-import { enrichApplicant, effectiveRoadmap, effectiveChecklist, fmtDate, todayStr } from '../../utils/dateHelpers';
+import { enrichApplicant, effectiveRoadmap, effectiveChecklist, fmtDate, fmtDateTimeUtc, todayStr } from '../../utils/dateHelpers';
 import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
 import { useRoadmapTemplate, useChecklistTemplate } from '../../hooks/useTemplates';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -65,12 +66,6 @@ export default function ApplicantDashboard({ applicant }: ApplicantDashboardProp
   );
 }
 
-function countdownColors(days: number): { bg: string; color: string } {
-  if (days <= 0) return { bg: 'var(--danger-soft)', color: 'var(--danger)' };
-  if (days <= 7) return { bg: 'var(--warning-soft)', color: 'var(--warning-ink)' };
-  return { bg: 'var(--success-soft)', color: 'var(--success)' };
-}
-
 interface ApplicationCardProps {
   a: EnrichedApplicant;
   checklistTemplate: ChecklistItem[];
@@ -114,8 +109,6 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
     }
   }
 
-  const countdown = countdownColors(a.reminderDaysLeft);
-
   return (
     <div className="app-card app-card-pad">
       <div className="app-card-head app-status-card-head" style={{ alignItems: 'flex-start' }}>
@@ -133,21 +126,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
           )}
         </div>
 
-        <div style={{
-          textAlign: 'center', minWidth: 96, padding: '10px 14px', borderRadius: 14,
-          background: countdown.bg, color: countdown.color, flexShrink: 0,
-        }}>
-          <div className="app-brand-font" style={{ fontWeight: 800, fontSize: 30, lineHeight: 1 }}>
-            {Math.abs(a.reminderDaysLeft)}
-          </div>
-          <div style={{ fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 3 }}>
-            {a.reminderDaysLeft > 0 ? t('status.daysLeft') : a.reminderDaysLeft === 0 ? t('status.dueToday') : t('status.daysOverdue')}
-          </div>
-          <div style={{ fontSize: 9.5, opacity: 0.8, marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
-            {t('status.reminderTitle')}
-            <InfoTooltip text={t('status.countdownTooltip')} />
-          </div>
-        </div>
+        <LiveCountdown lastUpdated={a.lastUpdated} />
       </div>
 
       <ProgressBar pct={progressPct} />
@@ -203,7 +182,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
         />
         <Field
           label={t('status.lastUpdated')}
-          value={fmtDate(a.lastUpdated)}
+          value={fmtDateTimeUtc(a.lastUpdated)}
           tooltip={t('status.lastUpdatedTooltip')}
         />
       </div>

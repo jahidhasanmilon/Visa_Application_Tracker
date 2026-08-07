@@ -48,7 +48,12 @@ export default function ApplicantModal({
 
         <div className="app-field">
           <label>Last Edited</label>
-          <input className="app-input" type="date" value={form.lastUpdated} onChange={e => setForm({ ...form, lastUpdated: e.target.value })} />
+          {/* lastUpdated may now carry a full UTC timestamp (set when an
+              applicant marks their reminder Done) — a <input type="date">
+              only accepts "YYYY-MM-DD", so only the date part is shown here.
+              Editing it collapses the stored value to midnight UTC on the
+              picked date, which is expected for a manual override. */}
+          <input className="app-input" type="date" value={form.lastUpdated.slice(0, 10)} onChange={e => setForm({ ...form, lastUpdated: e.target.value })} />
         </div>
 
         <div className="app-field">

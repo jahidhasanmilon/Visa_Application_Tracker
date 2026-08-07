@@ -18,7 +18,12 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
   const [serialNo, setSerialNo] = useState(applicant.serialNo);
   const [created, setCreated] = useState(applicant.created);
   const [submitted, setSubmitted] = useState(applicant.submitted);
-  const [lastUpdated, setLastUpdated] = useState(applicant.lastUpdated || todayStr());
+  // lastUpdated may carry a full UTC timestamp (set automatically when you
+  // mark the reminder Done) — <input type="date"> only accepts
+  // "YYYY-MM-DD", so only the date part is edited here. Saving from this
+  // form collapses it to midnight UTC on the picked date, same as the
+  // admin's editor.
+  const [lastUpdated, setLastUpdated] = useState((applicant.lastUpdated || todayStr()).slice(0, 10));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -63,7 +68,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
             <input className="app-input" type="date" value={created} onChange={e => setCreated(e.target.value)} />
           </div>
           <div className="app-field" style={{ flex: 1 }}>
-            <label>List Joined Date *</label>
+            <label>Waiting List Joined Date *</label>
             <input className="app-input" type="date" value={submitted} onChange={e => setSubmitted(e.target.value)} />
           </div>
         </div>
@@ -72,7 +77,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
           <label>Last Edited *</label>
           <input className="app-input" type="date" value={lastUpdated} onChange={e => setLastUpdated(e.target.value)} />
           <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
-            Counts down from this date — jumps to today automatically when you change the reminder status.
+            The 30-day reminder countdown counts down from this date — it jumps to today automatically only when you mark the reminder as Done.
           </div>
         </div>
 
