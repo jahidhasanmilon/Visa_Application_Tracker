@@ -76,6 +76,10 @@ export default function Help({ role }: HelpProps) {
             </div>
 
             <div className="app-field">
+              <label>Email card title</label>
+              <input className="app-input" value={draft.emailTitle} onChange={e => setDraft({ ...draft, emailTitle: e.target.value })} placeholder="Email" />
+            </div>
+            <div className="app-field">
               <label>{t('help.supportEmailLabel')}</label>
               <input className="app-input" type="email" value={draft.email} onChange={e => setDraft({ ...draft, email: e.target.value })} placeholder="help@example.com" />
             </div>
@@ -85,6 +89,10 @@ export default function Help({ role }: HelpProps) {
               <textarea ref={emailDescriptionRef} className="app-textarea" value={draft.emailDescription} onChange={e => setDraft({ ...draft, emailDescription: e.target.value })} style={{ minHeight: 60 }} />
             </div>
 
+            <div className="app-field">
+              <label>Embassy card title</label>
+              <input className="app-input" value={draft.embassyTitle} onChange={e => setDraft({ ...draft, embassyTitle: e.target.value })} placeholder="Germany Embassy" />
+            </div>
             <div className="app-field">
               <label>Germany Embassy support email</label>
               <input className="app-input" type="email" value={draft.embassyEmail} onChange={e => setDraft({ ...draft, embassyEmail: e.target.value })} placeholder="info@dhaka.diplo.de" />
@@ -117,6 +125,10 @@ export default function Help({ role }: HelpProps) {
               />
             </div>
 
+            <div className="app-field">
+              <label>Community section title</label>
+              <input className="app-input" value={draft.communityTitle} onChange={e => setDraft({ ...draft, communityTitle: e.target.value })} placeholder="Community" />
+            </div>
             <div className="app-field">
               <label>Community description</label>
               <RichTextToolbar textareaRef={communityDescriptionRef} onChange={communityDescription => setDraft({ ...draft, communityDescription })} />
@@ -163,7 +175,7 @@ export default function Help({ role }: HelpProps) {
               <div className="app-card app-card-pad">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                   <Mail size={16} color="var(--violet)" />
-                  <div className="app-card-title">{t('help.email')}</div>
+                  <div className="app-card-title">{help.emailTitle}</div>
                 </div>
                 {help.emailDescription && (
                   <div
@@ -180,7 +192,7 @@ export default function Help({ role }: HelpProps) {
               <div className="app-card app-card-pad">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                   <Landmark size={16} color="var(--violet)" />
-                  <div className="app-card-title">Germany Embassy</div>
+                  <div className="app-card-title">{help.embassyTitle}</div>
                 </div>
                 {help.embassyDescription && (
                   <div
@@ -215,7 +227,7 @@ export default function Help({ role }: HelpProps) {
 
             {help.communityLinks.length > 0 && (
               <div>
-                <div className="app-card-title" style={{ marginBottom: 8 }}>{t('help.community')}</div>
+                <div className="app-card-title" style={{ marginBottom: 8 }}>{help.communityTitle}</div>
                 {help.communityDescription && (
                   <div
                     className="app-section-body"

@@ -9,13 +9,16 @@ const ABOUT_SECTION_ORDER_DOC = doc(db, 'meta', 'aboutSectionOrder');
 
 export const DEFAULT_HELP: HelpInfo = {
   subtitle: 'Found a bug? Have a question or feedback? Reach out.',
+  emailTitle: 'Email',
   email: '',
   emailDescription: 'For corrections, questions, or feedback — email us. We read every message.',
+  embassyTitle: 'Germany Embassy',
   embassyEmail: '',
   embassyAddress: '',
   embassyDescription: 'Official contact details for the German Embassy, for visa-related queries.',
   removingEntryTitle: 'Removing an entry',
   removingEntryBody: '',
+  communityTitle: 'Community',
   communityDescription: 'Day-to-day discussion, questions, and feedback live in our community.',
   communityLinks: [],
 };
@@ -30,13 +33,16 @@ export function subscribeHelp(onData: (help: HelpInfo) => void): () => void {
     const data = snap.data() as Partial<HelpInfo> & { whatsappLink?: string; notes?: string };
     onData({
       subtitle: data.subtitle ?? DEFAULT_HELP.subtitle,
+      emailTitle: data.emailTitle ?? DEFAULT_HELP.emailTitle,
       email: data.email ?? '',
       emailDescription: data.emailDescription ?? DEFAULT_HELP.emailDescription,
+      embassyTitle: data.embassyTitle ?? DEFAULT_HELP.embassyTitle,
       embassyEmail: data.embassyEmail ?? '',
       embassyAddress: data.embassyAddress ?? '',
       embassyDescription: data.embassyDescription ?? DEFAULT_HELP.embassyDescription,
       removingEntryTitle: data.removingEntryTitle ?? DEFAULT_HELP.removingEntryTitle,
       removingEntryBody: data.removingEntryBody ?? data.notes ?? '',
+      communityTitle: data.communityTitle ?? DEFAULT_HELP.communityTitle,
       communityDescription: data.communityDescription ?? DEFAULT_HELP.communityDescription,
       communityLinks: data.communityLinks ?? (data.whatsappLink ? [{ label: 'WhatsApp group', url: data.whatsappLink }] : []),
     });

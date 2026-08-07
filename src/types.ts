@@ -130,13 +130,16 @@ export interface HelpLink {
 
 export interface HelpInfo {
   subtitle: string;
+  emailTitle: string;
   email: string;
   emailDescription: string;
+  embassyTitle: string;
   embassyEmail: string;
   embassyAddress: string;
   embassyDescription: string;
   removingEntryTitle: string;
   removingEntryBody: string;
+  communityTitle: string;
   communityDescription: string;
   communityLinks: HelpLink[];
 }
