@@ -132,8 +132,8 @@ export default function AdminVivaQuestions() {
                 .sort((a, b) => a.order - b.order);
               return (
                 <div key={section}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, paddingBottom: 8, borderBottom: '2px solid var(--warning-soft)' }}>
-                    <div style={{ flex: 1, fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 18, color: 'var(--warning-ink)' }}>{section}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, paddingBottom: 8, borderBottom: '2px solid var(--violet-soft)' }}>
+                    <div style={{ flex: 1, fontFamily: "'Sora', sans-serif", fontWeight: 800, fontSize: 18, color: 'var(--violet)' }}>{section}</div>
                     <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => openAdd(section)}><Plus size={14} /> Add here</button>
                     <button className="app-icon-btn" disabled={si === 0} onClick={() => moveSection(si, -1)} aria-label="Move section up"><ArrowUp size={14} /></button>
                     <button className="app-icon-btn" disabled={si === sectionOrder.length - 1} onClick={() => moveSection(si, 1)} aria-label="Move section down"><ArrowDown size={14} /></button>
