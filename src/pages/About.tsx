@@ -350,10 +350,16 @@ export default function About({ role }: AboutProps) {
   const teamSection: ReactNode = (
         <div>
           {editingStory && (
-            <div className="app-field" style={{ maxWidth: 360 }}>
-              <label>Team section title</label>
-              <input className="app-input" value={draft.teamTitle} onChange={e => setDraft({ ...draft, teamTitle: e.target.value })} placeholder="The people behind the platform" />
-            </div>
+            <>
+              <div className="app-field" style={{ maxWidth: 360 }}>
+                <label>Team section title</label>
+                <input className="app-input" value={draft.teamTitle} onChange={e => setDraft({ ...draft, teamTitle: e.target.value })} placeholder="The people behind the platform" />
+              </div>
+              <div className="app-field" style={{ maxWidth: 360 }}>
+                <label>Team section subtitle <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional)</span></label>
+                <input className="app-input" value={draft.teamSubtitle} onChange={e => setDraft({ ...draft, teamSubtitle: e.target.value })} placeholder="e.g. The person behind VisaTrack" />
+              </div>
+            </>
           )}
           <div className="app-card-head" style={{ marginBottom: 14 }}>
             <div className="app-about-section-head" style={{ marginBottom: 0 }}>
@@ -366,6 +372,9 @@ export default function About({ role }: AboutProps) {
               <button className="app-btn app-btn-ghost app-btn-sm" onClick={openAddMember}><Plus size={14} /> Add member</button>
             )}
           </div>
+          {content.teamSubtitle && (
+            <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, margin: '-8px 0 14px', marginLeft: 42 }}>{content.teamSubtitle}</p>
+          )}
           {team === null ? (
             <div className="app-empty">{t('common.loading')}</div>
           ) : team.length === 0 ? (

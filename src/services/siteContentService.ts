@@ -68,6 +68,7 @@ export const DEFAULT_ABOUT: AboutContent = {
   partnerDescription: '',
   partnerLinks: [],
   teamTitle: 'The people behind the platform',
+  teamSubtitle: '',
 };
 
 export function subscribeAbout(onData: (content: AboutContent) => void): () => void {

@@ -181,6 +181,7 @@ export interface AboutContent {
   partnerDescription: string;
   partnerLinks: AboutPartnerLink[];
   teamTitle: string;
+  teamSubtitle: string;
 }
 
 export interface FaqItem {
