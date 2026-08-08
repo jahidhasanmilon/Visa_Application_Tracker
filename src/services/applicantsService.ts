@@ -1,9 +1,9 @@
 import {
-  collection, doc, addDoc, setDoc, updateDoc, deleteDoc,
+  collection, doc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy,
 } from 'firebase/firestore';
-import { db } from '../firebase';
-import { todayStr } from '../utils/dateHelpers';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions } from '../firebase';
 import type { Applicant, ApplicantFormData, ReminderStatus, ChecklistItem } from '../types';
 
 const APPLICANTS_COL = 'applicants';
@@ -33,22 +33,17 @@ export function subscribeMyApplicant(uid: string, onData: (applicant: Applicant 
 }
 
 // Called once, right after sign-up (or first sign-in with no record yet), to
-// silently create the applicant's own uid-keyed record — blank besides
-// name/email, no blocking onboarding step (see pages/applicant/Onboarding
-// having been replaced by the dismissible ApplicantDetailsModal). See
-// firestore.rules — a user may only create the doc at applicants/{their own uid}.
-export async function createOwnApplicant(uid: string, email: string, name: string): Promise<void> {
-  const today = todayStr();
-  const applicant: Omit<Applicant, 'id'> = {
-    uid, email, name,
-    serialNo: '',
-    created: '',
-    submitted: '',
-    notes: '',
-    lastUpdated: today,
-    reminderMailSent: 'Not yet',
-  };
-  await setDoc(doc(db, APPLICANTS_COL, uid), applicant);
+// set up the applicant's own uid-keyed record — no blocking onboarding step
+// (see pages/applicant/Onboarding having been replaced by the dismissible
+// ApplicantDetailsModal). Runs through a Cloud Function (see
+// linkApplicantAccount in functions/src/index.ts) rather than a plain
+// client-side setDoc, because it first needs to check — with Admin SDK
+// privileges the applicant's own client doesn't have — whether an admin
+// already precreated a "ghost" record for this email, and if so carry its
+// details over instead of leaving them orphaned next to a fresh blank one.
+const linkApplicantAccountFn = httpsCallable(functions, 'linkApplicantAccount');
+export async function linkApplicantAccount(): Promise<void> {
+  await linkApplicantAccountFn();
 }
 
 // lastUpdated is a plain field on the form now — admin sets it to whatever

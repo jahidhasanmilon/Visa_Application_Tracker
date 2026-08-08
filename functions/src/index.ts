@@ -1,4 +1,5 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { logger } from 'firebase-functions';
 import { initializeApp } from 'firebase-admin/app';
@@ -184,3 +185,47 @@ export const sendReminderEmails = onSchedule(
     await runReminderSweep();
   },
 );
+
+// Called once from the client right after a signed-in applicant is found to
+// have no applicants/{uid} doc yet (see App.tsx). Runs with the Admin SDK
+// (bypasses firestore.rules) specifically so it can look up an admin's
+// precreated "ghost" record by email — something an applicant's own client
+// can never do, since firestore.rules only lets them read their own record.
+// If a ghost record (same email, no uid claimed yet) is found, its fields
+// are carried over into the new applicants/{uid} doc and the ghost is
+// deleted, so admin-entered details survive the applicant's first login
+// instead of being orphaned next to a fresh blank record. Symmetric with
+// the admin-side fix in Applications.tsx, which does the same lookup
+// (there, client-side, since admin can already read every applicant) before
+// creating a record for someone who already signed up on their own.
+export const linkApplicantAccount = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Must be signed in.');
+  const uid = request.auth.uid;
+  const email = (request.auth.token.email || '').toLowerCase();
+  const name = (request.auth.token.name as string | undefined) || '';
+  const db = getFirestore();
+
+  const ownRef = db.doc(`applicants/${uid}`);
+  const ownSnap = await ownRef.get();
+  if (ownSnap.exists) return { linked: false };
+
+  if (email) {
+    const matches = await db.collection('applicants').where('email', '==', email).get();
+    const ghost = matches.docs.find(d => !d.data().uid);
+    if (ghost) {
+      const data = ghost.data();
+      await ownRef.set({ ...data, uid, email, name: data.name || name });
+      await ghost.ref.delete();
+      logger.info(`Linked ghost record ${ghost.id} to ${uid} (${email})`);
+      return { linked: true };
+    }
+  }
+
+  await ownRef.set({
+    uid, email, name,
+    serialNo: '', created: '', submitted: '', notes: '',
+    lastUpdated: new Date().toISOString().slice(0, 10),
+    reminderMailSent: 'Not yet',
+  });
+  return { linked: false };
+});

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useMyApplicant } from './hooks/useMyApplicant';
-import { createOwnApplicant } from './services/applicantsService';
+import { linkApplicantAccount } from './services/applicantsService';
 import Login from './pages/auth/Login';
 import AppShell from './layouts/AppShell';
 import PublicLayout from './layouts/PublicLayout';
@@ -160,8 +160,8 @@ export default function App() {
   // (ApplicantDetailsModal) is dismissible and shown once the record exists.
   useEffect(() => {
     if (role === 'applicant' && user && myApplicant === null) {
-      createOwnApplicant(user.uid, user.email || '', user.displayName || '')
-        .catch((err) => console.error('createOwnApplicant failed', err));
+      linkApplicantAccount()
+        .catch((err) => console.error('linkApplicantAccount failed', err));
     }
   }, [role, user, myApplicant]);
 
