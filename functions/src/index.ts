@@ -186,17 +186,19 @@ export const sendReminderEmails = onSchedule(
   },
 );
 
-// Called once from the client right after a signed-in applicant is found to
-// own no applicant record yet (see App.tsx). Runs with the Admin SDK
-// (bypasses firestore.rules) specifically so it can look up an admin's
-// precreated "ghost" record(s) by email — something an applicant's own
-// client can never do, since firestore.rules only lets them read records
-// whose uid field already matches their own. One person can legitimately
-// own MORE THAN ONE application record (e.g. a separate Student visa
-// application and Opportunity Card application under the same email), so
-// this claims EVERY unclaimed ghost matching the email — no merging into a
-// single doc, no deleting — rather than picking just one. Idempotent: a
-// returning login that already owns at least one record does nothing.
+// Called every time a signed-in applicant loads the app (see App.tsx).
+// Runs with the Admin SDK (bypasses firestore.rules) specifically so it can
+// look up an admin's precreated "ghost" record(s) by email — something an
+// applicant's own client can never do, since firestore.rules only lets them
+// read records whose uid field already matches their own. One person can
+// legitimately own MORE THAN ONE application record (e.g. a separate
+// Student visa application and Opportunity Card application under the same
+// email), and admin can add a new one for them at any time — not just
+// before their first login — so this always re-checks for and claims any
+// unclaimed ghost matching the email, no merging into a single doc, no
+// deleting, every call, not only the very first one. A blank fallback
+// record is only ever created the one time this person truly owns nothing
+// at all yet (no owned records AND no ghost to claim this run).
 export const linkApplicantAccount = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Must be signed in.');
   const uid = request.auth.uid;
@@ -205,7 +207,6 @@ export const linkApplicantAccount = onCall(async (request) => {
   const db = getFirestore();
 
   const owned = await db.collection('applicants').where('uid', '==', uid).limit(1).get();
-  if (!owned.empty) return { claimed: 0 };
 
   let claimed = 0;
   if (email) {
@@ -218,7 +219,7 @@ export const linkApplicantAccount = onCall(async (request) => {
     if (claimed > 0) logger.info(`Claimed ${claimed} ghost record(s) for ${uid} (${email})`);
   }
 
-  if (claimed === 0) {
+  if (claimed === 0 && owned.empty) {
     await db.collection('applicants').add({
       uid, email, name,
       serialNo: '', created: '', submitted: '', notes: '',

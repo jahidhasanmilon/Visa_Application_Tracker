@@ -156,16 +156,19 @@ export default function App() {
   // can own more than one (see linkApplicantAccount / firestore.rules).
   const { myApplicants } = useMyApplicants(role === 'applicant' ? user?.uid : undefined);
 
-  // Silently create a blank record (or claim any admin-precreated ones) the
-  // first time an applicant is seen owning none yet — no blocking
-  // onboarding screen. The "fill in your details" prompt
+  // Runs once per applicant login (not gated on myApplicants — admin can
+  // precreate a new ghost record for someone at any time, not just before
+  // their first-ever login, so this always re-checks rather than only
+  // firing the one time they own zero records). Silently creates a blank
+  // record only the very first time this person truly owns nothing yet —
+  // no blocking onboarding screen. The "fill in your details" prompt
   // (ApplicantDetailsModal) is dismissible and shown once a record exists.
   useEffect(() => {
-    if (role === 'applicant' && user && myApplicants && myApplicants.length === 0) {
+    if (role === 'applicant' && user) {
       linkApplicantAccount()
         .catch((err) => console.error('linkApplicantAccount failed', err));
     }
-  }, [role, user, myApplicants]);
+  }, [role, user?.uid]);
 
   const rawLoading = authLoading || (!!user && (
     roleLoading || !role || (role === 'applicant' && (!myApplicants || myApplicants.length === 0))
