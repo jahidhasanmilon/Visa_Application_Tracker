@@ -83,7 +83,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginTop: -10, marginBottom: 16 }}>
           <div style={{ fontSize: 11.5, color: 'var(--muted)', flex: 1 }}>
-            Not shown directly on the embassy website — count back about 30 days from when you got your first Confirm Application request email.
+            Waiting List Joined Date isn't shown directly on the embassy website — count back about 30 days from when you got your first Confirm Application request email.
           </div>
           {welcome.imageUrl && (
             <img
