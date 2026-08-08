@@ -5,6 +5,7 @@ import ApplicantDetailsModal from '../../components/ApplicantDetailsModal';
 import WelcomeModal from '../../components/WelcomeModal';
 import InfoTooltip from '../../components/InfoTooltip';
 import LiveCountdown from '../../components/LiveCountdown';
+import FlightLoader from '../../components/FlightLoader';
 import { updateReminderStatus, updateRoadmap } from '../../services/applicantsService';
 import { subscribeWelcome, DEFAULT_WELCOME } from '../../services/welcomeService';
 import { enrichApplicant, effectiveRoadmap, effectiveChecklist, fmtDate, fmtDateTimeUtc, todayStr } from '../../utils/dateHelpers';
@@ -78,7 +79,7 @@ export default function ApplicantDashboard({ applicant }: ApplicantDashboardProp
       />
       <div className="app-content">
         {enriched === null || checklistTemplate === null || roadmapTemplate === null ? (
-          <div className="app-empty">{t('common.loading')}</div>
+          <FlightLoader />
         ) : (
           <ApplicationCard a={enriched} checklistTemplate={checklistTemplate} roadmapTemplate={roadmapTemplate} />
         )}

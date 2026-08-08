@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import FlightLoader from '../components/FlightLoader';
 import { subscribeFaqs, addFaq, updateFaq, deleteFaq, type FaqFormData } from '../services/faqService';
 import type { AppRole } from '../constants/roles';
 import type { FaqItem } from '../types';
-import { useLanguage } from '../i18n/LanguageContext';
 
 const EMPTY_FAQ: FaqFormData = { question: '', answer: '', order: 0 };
 
@@ -13,7 +13,6 @@ interface FaqProps {
 }
 
 export default function Faq({ role }: FaqProps) {
-  const { t } = useLanguage();
   const isAdmin = role === 'admin';
 
   const [faqs, setFaqs] = useState<FaqItem[] | null>(null);
@@ -88,7 +87,7 @@ export default function Faq({ role }: FaqProps) {
       />
       <div className="app-content">
         {faqs === null ? (
-          <div className="app-empty">{t('common.loading')}</div>
+          <FlightLoader />
         ) : faqs.length === 0 ? (
           <div className="app-card app-card-pad">
             <div className="app-empty">{isAdmin ? 'No FAQs yet — add your first one.' : 'No FAQs published yet.'}</div>

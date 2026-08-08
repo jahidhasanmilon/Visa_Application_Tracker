@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import CustomSectionForm from '../components/CustomSectionForm';
+import FlightLoader from '../components/FlightLoader';
 import { useCustomPages } from '../hooks/useCustomPages';
 import { useApplicantNavOrder } from '../hooks/useNavOrder';
 import { saveCustomPages } from '../services/customPagesService';
@@ -34,7 +35,7 @@ export default function CustomPage({ role }: CustomPageProps) {
     return (
       <>
         <PageHeader title="…" />
-        <div className="app-content"><div className="app-empty">Loading…</div></div>
+        <div className="app-content"><FlightLoader /></div>
       </>
     );
   }

@@ -680,6 +680,9 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
   font-family: 'Inter', sans-serif; color: var(--muted); background: var(--bg);
 }
+/* Same flight animation, sized for use inside a normal page (a card's
+   "still loading" state) rather than the full-viewport initial load. */
+.app-flight-inline { display: flex; align-items: center; justify-content: center; padding: 28px 0; }
 
 @media (max-width: 900px) {
   .app-dashboard-grid { grid-template-columns: 1fr; }

@@ -2,6 +2,7 @@ import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Pencil, Plus, X, Trash2, ArrowUp, ArrowDown, ArrowRight, Sparkles, Handshake, Users } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import CustomSectionForm from '../components/CustomSectionForm';
+import FlightLoader from '../components/FlightLoader';
 import { subscribeAbout, saveAbout, DEFAULT_ABOUT, saveAboutCustomSections, saveAboutSectionOrder } from '../services/siteContentService';
 import { subscribeTeam, addTeamMember, updateTeamMember, deleteTeamMember, type TeamMemberFormData } from '../services/teamService';
 import { useAboutSectionOrder } from '../hooks/useAboutSectionOrder';
@@ -381,7 +382,7 @@ export default function About({ role }: AboutProps) {
             <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, margin: '-8px 0 14px', marginLeft: 42 }}>{content.teamSubtitle}</p>
           )}
           {team === null ? (
-            <div className="app-empty">{t('common.loading')}</div>
+            <FlightLoader />
           ) : team.length === 0 ? (
             isAdmin ? (
               <div className="app-card app-card-pad"><div className="app-empty">No team members yet — add your first one.</div></div>

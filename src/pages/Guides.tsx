@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, ChevronRight } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import FlightLoader from '../components/FlightLoader';
 import { subscribeGuides } from '../services/guidesService';
 import { useLanguage } from '../i18n/LanguageContext';
 import type { Guide } from '../types';
@@ -35,7 +36,7 @@ export default function Guides() {
       />
       <div className="app-content">
         {guides === null ? (
-          <div className="app-empty">{t('common.loading')}</div>
+          <FlightLoader />
         ) : guides.length === 0 ? (
           <div className="app-card app-card-pad">
             <div className="app-empty">{t('guides.empty')}</div>

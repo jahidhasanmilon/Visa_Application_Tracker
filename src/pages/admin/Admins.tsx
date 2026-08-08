@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, Eye, EyeOff, Check, X, Image as ImageIcon } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import CustomSectionForm from '../../components/CustomSectionForm';
+import FlightLoader from '../../components/FlightLoader';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
 import { saveApplicantNavOrder, saveApplicantNavHidden, saveApplicantNavLabels } from '../../services/navOrderService';
 import {
@@ -93,7 +94,7 @@ export default function AdminAdmins() {
             </div>
 
             {admins === null ? (
-              <div className="app-empty">{t('common.loading')}</div>
+              <FlightLoader />
             ) : admins.length === 0 ? (
               <div style={{ fontSize: 12.5, color: 'var(--muted)', padding: '4px 2px' }}>{t('admin.noOtherAdmins')}</div>
             ) : (
