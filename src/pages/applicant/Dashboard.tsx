@@ -197,6 +197,7 @@ function ApplicationCard({ a, checklistTemplate, roadmapTemplate }: ApplicationC
         <Field
           label={t('status.waiting')}
           value={a.waiting === null ? '—' : `${a.waiting} ${t('status.daysSuffix')}`}
+          tooltip={t('status.waitingTooltip')}
         />
         <Field
           label={a.remaining === null ? t('status.estimatedRemaining') : a.remaining > 0 ? t('status.estimatedRemaining') : t('status.statusLabel')}
