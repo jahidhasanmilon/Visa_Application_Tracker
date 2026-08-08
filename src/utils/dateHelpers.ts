@@ -137,7 +137,16 @@ export function enrichApplicant(a: Applicant, today: string, roadmapTemplate: Ch
   const isComplete = roadmap.length > 0 && roadmap.every(s => s.done);
   const waiting = a.submitted ? daysBetween(a.submitted, today) : null;
   const remaining = waiting === null ? null : TARGET_DAYS - waiting;
-  const reminderDaysLeft = REMINDER_WINDOW_DAYS - daysBetween(a.lastUpdated, today);
+  // Deliberately NOT daysBetween(a.lastUpdated, today) — today is only a
+  // midnight-UTC calendar date, so rounding a full lastUpdated timestamp
+  // against it can be off by up to a whole day (e.g. an edit made in the
+  // evening UTC reads as "1 day left" here while the applicant's own
+  // second-precise LiveCountdown already shows it overdue). Match
+  // LiveCountdown.tsx's math exactly: real elapsed milliseconds against
+  // the real current instant, floored to whole days.
+  const remainingMs = new Date(a.lastUpdated).getTime() + REMINDER_WINDOW_DAYS * 86400000 - Date.now();
+  const reminderWholeDays = Math.floor(Math.abs(remainingMs) / 86400000);
+  const reminderDaysLeft = remainingMs >= 0 ? reminderWholeDays : -reminderWholeDays;
   const effectiveReminderStatus = a.reminderMailSent === 'Not yet' && reminderDaysLeft <= 0 ? 'Urgent' : a.reminderMailSent;
   const urg = remaining === null ? { label: 'Not submitted', color: 'var(--muted)' } : urgency(remaining);
   return { ...a, status, statusNote, isComplete, waiting, remaining, urg, reminderDaysLeft, effectiveReminderStatus };
