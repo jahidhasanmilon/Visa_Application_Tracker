@@ -24,6 +24,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [welcome, setWelcome] = useState<WelcomeContent>(DEFAULT_WELCOME);
+  const [imageExpanded, setImageExpanded] = useState(false);
 
   useEffect(() => subscribeWelcome(setWelcome), []);
 
@@ -80,16 +81,24 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
             <input className="app-input" type="date" value={submitted} onChange={e => setSubmitted(e.target.value)} />
           </div>
         </div>
-        <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: -10, marginBottom: 16 }}>
-          Not shown directly on the embassy website — count back about 30 days from when you got your first Confirm Application request email.
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginTop: -10, marginBottom: 16 }}>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', flex: 1 }}>
+            Not shown directly on the embassy website — count back about 30 days from when you got your first Confirm Application request email.
+          </div>
+          {welcome.imageUrl && (
+            <img
+              src={welcome.imageUrl}
+              alt="Where to find these dates on the embassy website"
+              onClick={() => setImageExpanded(true)}
+              style={{ width: 72, height: 54, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)', cursor: 'zoom-in', flexShrink: 0 }}
+            />
+          )}
         </div>
 
-        {welcome.imageUrl && (
-          <img
-            src={welcome.imageUrl}
-            alt="Where to find these dates on the embassy website"
-            style={{ width: '100%', borderRadius: 10, marginBottom: 16, display: 'block' }}
-          />
+        {imageExpanded && (
+          <div className="app-modal-backdrop" style={{ zIndex: 60 }} onClick={() => setImageExpanded(false)}>
+            <img src={welcome.imageUrl} alt="" style={{ maxWidth: '92vw', maxHeight: '92vh', borderRadius: 10 }} />
+          </div>
         )}
 
         <div className="app-field">
