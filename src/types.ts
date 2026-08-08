@@ -124,6 +124,21 @@ export interface VivaQuestion {
   section: string;
 }
 
+// Applicant-submitted question, held for admin review before it's added
+// as a real VivaQuestion. suggestedByUid backs the Firestore rule that
+// lets an applicant read only their own suggestions' status.
+export interface VivaQuestionSuggestion {
+  id: string;
+  question: string;
+  note: string;
+  section: string;
+  status: 'pending' | 'approved' | 'rejected';
+  suggestedByUid: string;
+  suggestedByName: string;
+  suggestedByEmail: string;
+  createdAt: string;
+}
+
 export interface HelpLink {
   label: string;
   url: string;

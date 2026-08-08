@@ -117,6 +117,22 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if isAdminEmail();
     }
+    // Applicant-submitted interview questions awaiting admin review (see
+    // "Suggest a question" on the applicant Interview Questions page).
+    // Admin can read/list every suggestion; an applicant can only read
+    // their own (enforced per-document, so their own status-filtered query
+    // — where suggestedByUid == their uid — is the only query shape that
+    // will succeed for them). Only admin can change status
+    // (approve/reject) or delete; a signed-in user can only create a
+    // suggestion attributed to themselves, starting as 'pending'.
+    match /vivaQuestionSuggestions/{suggestionId} {
+      allow read: if isAdminEmail()
+        || (request.auth != null && resource.data.suggestedByUid == request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.suggestedByUid == request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow update, delete: if isAdminEmail();
+    }
     // First-time-applicant welcome popup (see WelcomeModal.tsx).
     match /meta/welcome {
       allow read: if request.auth != null;

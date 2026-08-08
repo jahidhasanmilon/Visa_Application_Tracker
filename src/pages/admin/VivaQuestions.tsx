@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Download } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Download, Check, X, Clock } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import {
   subscribeVivaQuestions, addVivaQuestion, updateVivaQuestion, deleteVivaQuestion,
   saveVivaSectionOrder,
   type VivaQuestionFormData,
 } from '../../services/vivaQuestionsService';
+import {
+  subscribePendingVivaSuggestions, approveVivaSuggestion, rejectVivaSuggestion,
+} from '../../services/vivaQuestionSuggestionsService';
 import { useVivaSectionOrder } from '../../hooks/useVivaSectionOrder';
 import { mergeSectionOrder } from '../../utils/sectionOrder';
 import { VIVA_QUESTIONS_SEED, SEED_SECTION_ORDER } from '../../data/vivaQuestionsSeed';
-import type { VivaQuestion } from '../../types';
+import type { VivaQuestion, VivaQuestionSuggestion } from '../../types';
 
 const NEW_SECTION = '__new__';
 const EMPTY_FORM: VivaQuestionFormData = { question: '', note: '', order: 0, section: '' };
 
 export default function AdminVivaQuestions() {
   const [questions, setQuestions] = useState<VivaQuestion[] | null>(null);
+  const [pendingSuggestions, setPendingSuggestions] = useState<VivaQuestionSuggestion[]>([]);
   const savedSectionOrder = useVivaSectionOrder();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -23,8 +27,31 @@ export default function AdminVivaQuestions() {
   const [newSectionName, setNewSectionName] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
 
   useEffect(() => subscribeVivaQuestions(setQuestions), []);
+  useEffect(() => subscribePendingVivaSuggestions(setPendingSuggestions), []);
+
+  // No need to touch the saved section order here even if s.section is
+  // brand new — mergeSectionOrder() (below) already appends any section
+  // name it finds among the live questions that isn't in the saved order.
+  async function handleApprove(s: VivaQuestionSuggestion) {
+    setReviewingId(s.id);
+    try {
+      await approveVivaSuggestion(s, (questions?.length ?? 0) + 1);
+    } finally {
+      setReviewingId(null);
+    }
+  }
+
+  async function handleReject(id: string) {
+    setReviewingId(id);
+    try {
+      await rejectVivaSuggestion(id);
+    } finally {
+      setReviewingId(null);
+    }
+  }
 
   const sectionsInUse = [...new Set((questions ?? []).map(q => q.section))];
   const sectionOrder = mergeSectionOrder(savedSectionOrder, [], sectionsInUse);
@@ -118,6 +145,37 @@ export default function AdminVivaQuestions() {
         }
       />
       <div className="app-content">
+        {pendingSuggestions.length > 0 && (
+          <div className="app-card app-card-pad" style={{ marginBottom: 20, borderColor: 'var(--warning)' }}>
+            <div className="app-card-head">
+              <div className="app-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Clock size={15} color="var(--warning-ink)" /> Pending suggestions ({pendingSuggestions.length})
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {pendingSuggestions.map(s => (
+                <div key={s.id} className="app-card app-card-pad" style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="app-card-title">{s.question}</div>
+                    {s.note && <div style={{ fontSize: 12.5, color: 'var(--muted)', fontStyle: 'italic', marginTop: 4 }}>{s.note}</div>}
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>
+                      Section: <strong>{s.section}</strong> · Suggested by {s.suggestedByName || s.suggestedByEmail}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                    <button className="app-btn app-btn-primary app-btn-sm" onClick={() => handleApprove(s)} disabled={reviewingId === s.id}>
+                      <Check size={14} /> Approve
+                    </button>
+                    <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => handleReject(s.id)} disabled={reviewingId === s.id}>
+                      <X size={14} /> Reject
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {questions === null ? (
           <div className="app-empty">Loading…</div>
         ) : questions.length === 0 ? (
