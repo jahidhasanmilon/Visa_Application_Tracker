@@ -33,25 +33,27 @@ service cloud.firestore {
       allow write: if isAdminEmail();
     }
 
-    // Self-service applicant records are keyed BY the owner's Firebase Auth
-    // uid (applicantId == uid) — that's what lets someone create and own
-    // their own record without admin involvement. Admin can still
-    // precreate "ghost" records at other (random) doc ids for people who
-    // haven't signed up yet; those just aren't self-writable until that
-    // person signs up and gets their own uid-keyed doc.
+    // Self-service applicant records are keyed by a `uid` FIELD on the doc,
+    // not the doc id — one signed-in person can legitimately own more than
+    // one application record (e.g. a separate Student visa application and
+    // Opportunity Card application under the same email), so doc ids are
+    // always random, same as admin-precreated "ghost" records (which just
+    // don't have a `uid` field yet until linkApplicantAccount — see
+    // functions/src/index.ts — claims them on that person's first login).
     match /applicants/{applicantId} {
-      // Admin can read everything. Applicants can only read their own record.
+      // Admin can read everything. Applicants can only read records whose
+      // uid field matches their own — this also governs the `list` query
+      // an applicant's client runs (where('uid','==',their uid)), same
+      // mechanism as vivaQuestionSuggestions below.
       allow read: if isAdminEmail()
-        || (request.auth != null && request.auth.uid == applicantId);
+        || (request.auth != null && resource.data.uid == request.auth.uid);
 
       // Admin can create any record (e.g. precreating a ghost record).
-      // A signed-in user can create ONLY their own uid-keyed record, and
-      // only with their own uid/email on it (no spoofing someone else's
-      // identity into a self-created doc).
+      // A signed-in user can create a record only with their own uid/email
+      // on it (no spoofing someone else's identity into a self-created doc).
       allow create: if isAdminEmail()
         || (
           request.auth != null
-          && request.auth.uid == applicantId
           && request.resource.data.uid == request.auth.uid
           && request.resource.data.email == request.auth.token.email
         );
@@ -68,11 +70,14 @@ service cloud.firestore {
       // never written directly. lastUpdated is included so the
       // applicant's own 30-day reminder countdown can reset when they
       // touch submitted/reminderMailSent (never for a mere
-      // checklist/roadmap toggle — see applicantsService.ts).
+      // checklist/roadmap toggle — see applicantsService.ts). `uid` is
+      // deliberately NOT in this allowlist — a client can never claim a
+      // ghost record or move a record between accounts this way; only
+      // linkApplicantAccount (Admin SDK, bypasses these rules) ever sets it.
       allow update: if isAdminEmail()
         || (
           request.auth != null
-          && request.auth.uid == applicantId
+          && resource.data.uid == request.auth.uid
           && request.resource.data.diff(resource.data).affectedKeys()
                .hasOnly(['reminderMailSent', 'checklist', 'roadmap', 'submitted', 'created', 'lastUpdated', 'name', 'serialNo'])
         );

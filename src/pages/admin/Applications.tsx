@@ -59,28 +59,14 @@ export default function AdminApplications() {
     if (editingApplicant) {
       await updateApplicant(editingApplicant.id, form);
     } else {
-      // Someone with this email may already have a record — either an
-      // earlier ghost record admin precreated, or a record the person
-      // already self-created by signing in before admin got to them. Either
-      // way there should only ever be one record per email, so fold this
-      // "add" into that existing record (keeping whatever it already had
-      // for any field left blank here) instead of creating a duplicate.
-      const email = form.email.trim().toLowerCase();
-      const existing = email ? enriched.find(a => a.email.trim().toLowerCase() === email) : undefined;
-      if (existing) {
-        await updateApplicant(existing.id, {
-          serialNo: form.serialNo.trim() || existing.serialNo,
-          name: form.name.trim() || existing.name,
-          email: form.email.trim() || existing.email,
-          created: form.created || existing.created,
-          submitted: form.submitted || existing.submitted,
-          notes: form.notes.trim() || existing.notes,
-          lastUpdated: form.lastUpdated || existing.lastUpdated,
-          reminderMailSent: form.reminderMailSent || existing.reminderMailSent,
-        });
-      } else {
-        await addApplicant(form);
-      }
+      // One person can legitimately have more than one application under
+      // the same email (e.g. a separate Student visa application and
+      // Opportunity Card application) — always create a new record here.
+      // Any admin-precreated ghost this person hasn't claimed yet gets
+      // linked to them by linkApplicantAccount on their next login (see
+      // functions/src/index.ts), which claims every matching-email ghost,
+      // not just one — so there's no orphaning risk to guard against here.
+      await addApplicant(form);
     }
     setModalOpen(false);
   }

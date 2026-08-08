@@ -1,6 +1,6 @@
 import {
   collection, doc, addDoc, updateDoc, deleteDoc,
-  onSnapshot, query, orderBy,
+  onSnapshot, query, orderBy, where,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '../firebase';
@@ -19,16 +19,21 @@ export function subscribeApplicants(onData: (applicants: Applicant[]) => void): 
   });
 }
 
-// Applicant-portal view: a self-service applicant's record lives at
-// applicants/{uid} — a single doc, not a query, since the doc id IS their uid.
-export function subscribeMyApplicant(uid: string, onData: (applicant: Applicant | null) => void): () => void {
+// Applicant-portal view: one signed-in person can own more than one
+// application record (see linkApplicantAccount below), so this is a query
+// filtered by the `uid` field, not a lookup at a fixed doc id — sorted
+// client-side rather than via orderBy(), since a where()+orderBy() on a
+// different field needs a composite index that doesn't exist here.
+export function subscribeMyApplicants(uid: string, onData: (applicants: Applicant[]) => void): () => void {
+  const q = query(collection(db, APPLICANTS_COL), where('uid', '==', uid));
   return onSnapshot(
-    doc(db, APPLICANTS_COL, uid),
-    (snap) => {
-      if (!snap.exists()) { onData(null); return; }
-      onData({ ...(snap.data() as Omit<Applicant, 'id'>), id: snap.id });
+    q,
+    (snapshot) => {
+      const list = snapshot.docs.map(d => ({ ...(d.data() as Omit<Applicant, 'id'>), id: d.id }));
+      list.sort((a, b) => (a.created || '').localeCompare(b.created || ''));
+      onData(list);
     },
-    (err) => console.error('subscribeMyApplicant failed', err),
+    (err) => console.error('subscribeMyApplicants failed', err),
   );
 }
 

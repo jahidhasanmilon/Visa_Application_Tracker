@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
-import { useMyApplicant } from './hooks/useMyApplicant';
+import { useMyApplicants } from './hooks/useMyApplicants';
 import { linkApplicantAccount } from './services/applicantsService';
 import Login from './pages/auth/Login';
 import AppShell from './layouts/AppShell';
@@ -152,21 +152,23 @@ const publicRoutes = (
 
 export default function App() {
   const { user, role, authLoading, roleLoading, refreshUser } = useAuth();
-  // Only applicants own a self-service applicants/{uid} doc — admin has none.
-  const { myApplicant } = useMyApplicant(role === 'applicant' ? user?.uid : undefined);
+  // Only applicants own applicant records — admin has none. One applicant
+  // can own more than one (see linkApplicantAccount / firestore.rules).
+  const { myApplicants } = useMyApplicants(role === 'applicant' ? user?.uid : undefined);
 
-  // Silently create a blank record the first time an applicant is seen with
-  // none — no blocking onboarding screen. The "fill in your details" prompt
-  // (ApplicantDetailsModal) is dismissible and shown once the record exists.
+  // Silently create a blank record (or claim any admin-precreated ones) the
+  // first time an applicant is seen owning none yet — no blocking
+  // onboarding screen. The "fill in your details" prompt
+  // (ApplicantDetailsModal) is dismissible and shown once a record exists.
   useEffect(() => {
-    if (role === 'applicant' && user && myApplicant === null) {
+    if (role === 'applicant' && user && myApplicants && myApplicants.length === 0) {
       linkApplicantAccount()
         .catch((err) => console.error('linkApplicantAccount failed', err));
     }
-  }, [role, user, myApplicant]);
+  }, [role, user, myApplicants]);
 
   const rawLoading = authLoading || (!!user && (
-    roleLoading || !role || (role === 'applicant' && !myApplicant)
+    roleLoading || !role || (role === 'applicant' && (!myApplicants || myApplicants.length === 0))
   ));
   const loading = useMinLoadingTime(rawLoading);
 
@@ -195,7 +197,7 @@ export default function App() {
     <Routes>
       {publicRoutes}
       <Route path="/app" element={<AppShell user={user} role={role} />}>
-        <Route path="dashboard" element={role === 'admin' ? <AdminDashboard /> : <ApplicantDashboard applicant={myApplicant!} />} />
+        <Route path="dashboard" element={role === 'admin' ? <AdminDashboard /> : <ApplicantDashboard applicants={myApplicants!} />} />
         <Route path="applications" element={role === 'admin' ? <AdminApplications /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="tracker" element={role === 'admin' ? <AdminTracker /> : <Navigate to="/app/dashboard" replace />} />
         <Route path="roadmap" element={role === 'admin' ? <AdminRoadmap /> : <Navigate to="/app/dashboard" replace />} />
@@ -210,10 +212,10 @@ export default function App() {
         <Route path="about" element={<About role={role} />} />
         <Route path="pages/:id" element={<CustomPage role={role} />} />
         <Route path="faq" element={<Faq role={role} />} />
-        <Route path="checklist" element={role === 'admin' ? <AdminChecklist /> : <ApplicantChecklist applicant={myApplicant!} />} />
+        <Route path="checklist" element={role === 'admin' ? <AdminChecklist /> : <ApplicantChecklist applicants={myApplicants!} />} />
         <Route
           path="profile"
-          element={<Profile user={user} role={role} applicant={role === 'applicant' ? myApplicant : undefined} onUserUpdate={refreshUser} />}
+          element={<Profile user={user} role={role} onUserUpdate={refreshUser} />}
         />
         <Route index element={<Navigate to="dashboard" replace />} />
       </Route>

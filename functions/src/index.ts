@@ -187,17 +187,16 @@ export const sendReminderEmails = onSchedule(
 );
 
 // Called once from the client right after a signed-in applicant is found to
-// have no applicants/{uid} doc yet (see App.tsx). Runs with the Admin SDK
+// own no applicant record yet (see App.tsx). Runs with the Admin SDK
 // (bypasses firestore.rules) specifically so it can look up an admin's
-// precreated "ghost" record by email — something an applicant's own client
-// can never do, since firestore.rules only lets them read their own record.
-// If a ghost record (same email, no uid claimed yet) is found, its fields
-// are carried over into the new applicants/{uid} doc and the ghost is
-// deleted, so admin-entered details survive the applicant's first login
-// instead of being orphaned next to a fresh blank record. Symmetric with
-// the admin-side fix in Applications.tsx, which does the same lookup
-// (there, client-side, since admin can already read every applicant) before
-// creating a record for someone who already signed up on their own.
+// precreated "ghost" record(s) by email — something an applicant's own
+// client can never do, since firestore.rules only lets them read records
+// whose uid field already matches their own. One person can legitimately
+// own MORE THAN ONE application record (e.g. a separate Student visa
+// application and Opportunity Card application under the same email), so
+// this claims EVERY unclaimed ghost matching the email — no merging into a
+// single doc, no deleting — rather than picking just one. Idempotent: a
+// returning login that already owns at least one record does nothing.
 export const linkApplicantAccount = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Must be signed in.');
   const uid = request.auth.uid;
@@ -205,27 +204,28 @@ export const linkApplicantAccount = onCall(async (request) => {
   const name = (request.auth.token.name as string | undefined) || '';
   const db = getFirestore();
 
-  const ownRef = db.doc(`applicants/${uid}`);
-  const ownSnap = await ownRef.get();
-  if (ownSnap.exists) return { linked: false };
+  const owned = await db.collection('applicants').where('uid', '==', uid).limit(1).get();
+  if (!owned.empty) return { claimed: 0 };
 
+  let claimed = 0;
   if (email) {
     const matches = await db.collection('applicants').where('email', '==', email).get();
-    const ghost = matches.docs.find(d => !d.data().uid);
-    if (ghost) {
-      const data = ghost.data();
-      await ownRef.set({ ...data, uid, email, name: data.name || name });
-      await ghost.ref.delete();
-      logger.info(`Linked ghost record ${ghost.id} to ${uid} (${email})`);
-      return { linked: true };
+    const ghosts = matches.docs.filter(d => !d.data().uid);
+    for (const ghost of ghosts) {
+      await ghost.ref.update({ uid, name: ghost.data().name || name });
+      claimed++;
     }
+    if (claimed > 0) logger.info(`Claimed ${claimed} ghost record(s) for ${uid} (${email})`);
   }
 
-  await ownRef.set({
-    uid, email, name,
-    serialNo: '', created: '', submitted: '', notes: '',
-    lastUpdated: new Date().toISOString().slice(0, 10),
-    reminderMailSent: 'Not yet',
-  });
-  return { linked: false };
+  if (claimed === 0) {
+    await db.collection('applicants').add({
+      uid, email, name,
+      serialNo: '', created: '', submitted: '', notes: '',
+      lastUpdated: new Date().toISOString().slice(0, 10),
+      reminderMailSent: 'Not yet',
+    });
+  }
+
+  return { claimed };
 });

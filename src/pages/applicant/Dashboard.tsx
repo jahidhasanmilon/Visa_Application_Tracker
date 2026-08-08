@@ -21,70 +21,83 @@ function detailsIncomplete(a: Applicant): boolean {
 }
 
 interface ApplicantDashboardProps {
-  applicant: Applicant;
+  // One person can own more than one application record (e.g. separate
+  // Student visa and Opportunity Card applications under the same email) —
+  // see linkApplicantAccount/firestore.rules. Each renders as its own
+  // stacked card below.
+  applicants: Applicant[];
 }
 
-export default function ApplicantDashboard({ applicant }: ApplicantDashboardProps) {
+export default function ApplicantDashboard({ applicants }: ApplicantDashboardProps) {
   const { t } = useLanguage();
   const roadmapTemplate = useRoadmapTemplate();
   const checklistTemplate = useChecklistTemplate();
-  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
   const [welcome, setWelcome] = useState<WelcomeContent>(DEFAULT_WELCOME);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
 
   useEffect(() => subscribeWelcome(setWelcome), []);
 
-  const welcomeDismissed = !!localStorage.getItem(WELCOME_DISMISS_KEY_PREFIX + applicant.id);
+  // The welcome popup and the "Add your details" nudge only ever apply to
+  // one representative record — never stack multiple auto-opening modals
+  // just because someone owns several applications. Whichever record still
+  // has incomplete details is the one that matters most to nudge about.
+  const primary = applicants.find(detailsIncomplete) ?? applicants[0];
+
+  const welcomeDismissed = !!localStorage.getItem(WELCOME_DISMISS_KEY_PREFIX + primary.id);
 
   useEffect(() => {
     if (welcome.enabled && !welcomeDismissed) {
       setWelcomeOpen(true);
     }
-  }, [welcome, welcomeDismissed, applicant.id]);
+  }, [welcome, welcomeDismissed, primary.id]);
 
   // The "Add your details" prompt waits until the welcome popup (if any) has
   // been dismissed, so a brand-new applicant isn't faced with two modals at once.
   useEffect(() => {
     if (welcomeOpen) return;
-    if (detailsIncomplete(applicant) && !localStorage.getItem(DISMISS_KEY_PREFIX + applicant.id)) {
-      setDetailsOpen(true);
+    if (detailsIncomplete(primary) && !localStorage.getItem(DISMISS_KEY_PREFIX + primary.id)) {
+      setEditingApplicant(primary);
     }
-  }, [applicant, welcomeOpen]);
+  }, [primary, welcomeOpen]);
 
   function closeDetails() {
-    localStorage.setItem(DISMISS_KEY_PREFIX + applicant.id, '1');
-    setDetailsOpen(false);
+    if (editingApplicant) localStorage.setItem(DISMISS_KEY_PREFIX + editingApplicant.id, '1');
+    setEditingApplicant(null);
   }
 
   function closeWelcome() {
-    localStorage.setItem(WELCOME_DISMISS_KEY_PREFIX + applicant.id, '1');
+    localStorage.setItem(WELCOME_DISMISS_KEY_PREFIX + primary.id, '1');
     setWelcomeOpen(false);
   }
 
-  const enriched = useMemo(() => (
-    roadmapTemplate === null ? null : enrichApplicant(applicant, todayStr(), roadmapTemplate)
-  ), [applicant, roadmapTemplate]);
-
   return (
     <>
-      <PageHeader
-        title={t('status.title')}
-        subtitle={t('status.subtitle')}
-        actions={
-          <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}>
-            <Pencil size={14} /> <span className="app-btn-label-responsive">{t('status.editDetails')}</span>
-          </button>
-        }
-      />
+      <PageHeader title={t('status.title')} subtitle={t('status.subtitle')} />
       <div className="app-content">
-        {enriched === null || checklistTemplate === null || roadmapTemplate === null ? (
+        {checklistTemplate === null || roadmapTemplate === null ? (
           <div className="app-empty">{t('common.loading')}</div>
         ) : (
-          <ApplicationCard a={enriched} checklistTemplate={checklistTemplate} roadmapTemplate={roadmapTemplate} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {applicants.map(applicant => (
+              <div key={applicant.id}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                  <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditingApplicant(applicant)}>
+                    <Pencil size={14} /> <span className="app-btn-label-responsive">{t('status.editDetails')}</span>
+                  </button>
+                </div>
+                <ApplicationCard
+                  a={enrichApplicant(applicant, todayStr(), roadmapTemplate)}
+                  checklistTemplate={checklistTemplate}
+                  roadmapTemplate={roadmapTemplate}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      <ApplicantDetailsModal open={detailsOpen} applicant={applicant} onClose={closeDetails} />
+      {editingApplicant && <ApplicantDetailsModal open applicant={editingApplicant} onClose={closeDetails} />}
       {welcomeOpen && <WelcomeModal content={welcome} onClose={closeWelcome} />}
     </>
   );

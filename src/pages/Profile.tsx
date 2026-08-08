@@ -4,10 +4,8 @@ import type { User } from 'firebase/auth';
 import PageHeader from '../components/PageHeader';
 import UserAvatar from '../components/UserAvatar';
 import SummaryStat from '../components/SummaryStat';
-import ApplicantDetailsModal from '../components/ApplicantDetailsModal';
 import { useApplicants } from '../hooks/useApplicants';
 import type { AppRole } from '../constants/roles';
-import type { Applicant } from '../types';
 import { signOut, uploadProfilePhoto, updateDisplayName } from '../services/authService';
 import { displayNameFor } from '../utils/userDisplay';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -15,11 +13,10 @@ import { useLanguage } from '../i18n/LanguageContext';
 interface ProfileProps {
   user: User;
   role: AppRole;
-  applicant?: Applicant | null;
   onUserUpdate: () => void;
 }
 
-export default function Profile({ user, role, applicant, onUserUpdate }: ProfileProps) {
+export default function Profile({ user, role, onUserUpdate }: ProfileProps) {
   const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -157,7 +154,7 @@ export default function Profile({ user, role, applicant, onUserUpdate }: Profile
           </button>
         </div>
 
-        {role === 'admin' ? <AdminSummary /> : <ApplicantSummary email={user.email} applicant={applicant} />}
+        {role === 'admin' ? <AdminSummary /> : <ApplicantSummary email={user.email} />}
       </div>
     </>
   );
@@ -181,25 +178,19 @@ function AdminSummary() {
   );
 }
 
-function ApplicantSummary({ email, applicant }: { email: string | null; applicant?: Applicant | null }) {
+// Editing your details now happens per-application on the "My Status"
+// dashboard — unambiguous even when you own more than one application
+// record — so this is informational only.
+function ApplicantSummary({ email }: { email: string | null }) {
   const { t } = useLanguage();
-  const [detailsOpen, setDetailsOpen] = useState(false);
   return (
     <div className="app-card app-card-pad">
       <div className="app-card-head">
         <div className="app-card-title">{t('profile.howThisWorks')}</div>
-        {applicant && (
-          <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setDetailsOpen(true)}>
-            <Pencil size={14} /> {t('status.editDetails')}
-          </button>
-        )}
       </div>
       <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.7, margin: 0 }}>
         {t('profile.howItWorksBody', { email: email ?? '' })}
       </p>
-      {applicant && (
-        <ApplicantDetailsModal open={detailsOpen} applicant={applicant} onClose={() => setDetailsOpen(false)} />
-      )}
     </div>
   );
 }

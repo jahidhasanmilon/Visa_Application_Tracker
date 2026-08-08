@@ -8,10 +8,13 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import type { Applicant, ChecklistItem } from '../../types';
 
 interface ApplicantChecklistProps {
-  applicant: Applicant;
+  // One person can own more than one application record — see
+  // linkApplicantAccount/firestore.rules — so each gets its own stacked
+  // checklist card below.
+  applicants: Applicant[];
 }
 
-export default function ApplicantChecklist({ applicant }: ApplicantChecklistProps) {
+export default function ApplicantChecklist({ applicants }: ApplicantChecklistProps) {
   const { t } = useLanguage();
   const template = useChecklistTemplate();
   return (
@@ -21,7 +24,11 @@ export default function ApplicantChecklist({ applicant }: ApplicantChecklistProp
         {template === null ? (
           <div className="app-empty">{t('common.loading')}</div>
         ) : (
-          <ChecklistCard applicant={applicant} template={template} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {applicants.map(applicant => (
+              <ChecklistCard key={applicant.id} applicant={applicant} template={template} />
+            ))}
+          </div>
         )}
       </div>
     </>
