@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Briefcase, KanbanSquare, UserCircle, CheckSquare, Milestone, Mail, BarChart3,
-  BookOpen, ShieldCheck, HelpCircle, LifeBuoy, Info, Compass, MessageCircleQuestion,
+  BookOpen, ShieldCheck, HelpCircle, LifeBuoy, Info, Compass, MessageCircleQuestion, FileText,
 } from 'lucide-react';
 
 export type NavSection = 'main' | 'account' | 'support';
@@ -36,6 +36,7 @@ export const APPLICANT_NAV = [
   { to: '/app/about', label: 'About', icon: Info, section: 'support' as NavSection },
   { to: '/app/how-to-use', label: 'How to Use', icon: Compass, section: 'support' as NavSection },
   { to: '/app/help', label: 'Help & Supports', icon: LifeBuoy, section: 'support' as NavSection },
+  { to: '/privacy', label: 'Privacy & Terms', icon: FileText, section: 'support' as NavSection },
 ];
 
 // Maps each nav item's route to its i18n key, since ADMIN_NAV/APPLICANT_NAV
@@ -56,6 +57,7 @@ export const NAV_LABEL_KEYS: Record<string, string> = {
   '/app/admins': 'nav.admins',
   '/app/profile': 'nav.profile',
   '/app/how-to-use': 'nav.howToUse',
+  '/privacy': 'nav.privacy',
 };
 
 export const NAV_SECTION_KEYS: Record<NavSection, string> = {
