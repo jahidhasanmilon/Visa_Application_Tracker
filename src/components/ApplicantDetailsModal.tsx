@@ -108,7 +108,7 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
             <TimeInput24 value={lastUpdatedParts.time} onChange={setLastUpdatedTime} />
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>
-            The 30-day reminder countdown counts down from this date and time — it jumps to now automatically only when you mark the reminder as Done.
+            The 30-day reminder countdown starts from this date and time — it jumps to now automatically only when you mark the reminder as Done.
           </div>
         </div>
 
