@@ -351,11 +351,20 @@ button.app-sidebar-close { display: none; }
   animation: app-flight-glow 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 .app-flight-plane {
-  position: absolute; top: 0; left: 0; color: var(--violet);
+  position: absolute; top: 0; left: 0; color: var(--violet); overflow: visible;
   offset-path: path('M12,90.5 C20,58 55,42 88,10.5');
   offset-rotate: auto;
+  /* The airplane glyph points "up" (nose toward its own top) in its native
+     24x24 coordinate space — rotating it 90deg makes the nose point along
+     +x, which is what offset-rotate: auto expects as the "facing forward"
+     baseline. */
+  transform: rotate(90deg);
   animation: app-flight-move 2.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
+.app-flight-smoke { fill: var(--muted-2); opacity: 0; animation: app-flight-smoke-puff 2.4s ease-out infinite; }
+.app-flight-smoke-1 { animation-delay: 0s; }
+.app-flight-smoke-2 { animation-delay: 0.12s; }
+.app-flight-smoke-3 { animation-delay: 0.24s; }
 @keyframes app-flight-trail {
   0%   { stroke-dashoffset: 100; opacity: 0; }
   8%   { opacity: 1; }
@@ -366,6 +375,12 @@ button.app-sidebar-close { display: none; }
   0%, 78% { opacity: 0; }
   90%     { opacity: 0.4; }
   100%    { opacity: 0; }
+}
+@keyframes app-flight-smoke-puff {
+  0%   { opacity: 0; }
+  8%   { opacity: 0.55; }
+  85%  { opacity: 0; }
+  100% { opacity: 0; }
 }
 @keyframes app-flight-move {
   0%   { offset-distance: 0%; opacity: 0; }

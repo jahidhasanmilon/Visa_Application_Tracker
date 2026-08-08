@@ -91,10 +91,19 @@ function LoadingScreen() {
             <rect y="8.67" width="20" height="4.33" fill="#ffce00" />
           </g>
         </svg>
-        {/* Nose points along +x at rest, so offset-rotate: auto keeps it
-            facing forward — true nose-first — the whole way along the curve. */}
-        <svg className="app-flight-plane" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-          <path d="M15,8 L9,4.3 L9,6.8 L1,8 L9,9.2 L9,11.7 Z" fill="currentColor" />
+        {/* A real airplane silhouette (top-down), nose-up in its own
+            coordinate space — .app-flight-plane rotates it 90deg so the
+            nose points along +x, matching offset-rotate: auto's convention
+            (see theme.css). Small circles behind the tail form an exhaust
+            trail that fades in sync with the flight. */}
+        <svg className="app-flight-plane" viewBox="0 0 24 26" width="18" height="19.5" aria-hidden="true">
+          <circle className="app-flight-smoke app-flight-smoke-1" cx="12" cy="22.3" r="1.1" />
+          <circle className="app-flight-smoke app-flight-smoke-2" cx="12" cy="23.9" r="0.85" />
+          <circle className="app-flight-smoke app-flight-smoke-3" cx="12" cy="25.2" r="0.6" />
+          <path
+            d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2.5 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"
+            fill="currentColor"
+          />
         </svg>
       </div>
     </div>
