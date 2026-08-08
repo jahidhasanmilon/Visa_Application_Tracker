@@ -84,9 +84,14 @@ function ChecklistCard({ applicant, template }: { applicant: Applicant; template
     const note = form.note.trim();
     let next: ChecklistItem[];
     if (editingId) {
-      next = items.map(i => i.id === editingId ? { ...i, label, note: note || undefined } : i);
+      next = items.map(i => {
+        if (i.id !== editingId) return i;
+        const { note: _oldNote, ...rest } = i;
+        return note ? { ...rest, label, note } : { ...rest, label };
+      });
     } else {
-      const newItem: ChecklistItem = { id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, label, note: note || undefined, done: false };
+      const base = { id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, label, done: false };
+      const newItem: ChecklistItem = note ? { ...base, note } : base;
       next = [...items, newItem];
     }
     setError('');
