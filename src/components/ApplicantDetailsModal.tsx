@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { updateMyDetails } from '../services/applicantsService';
+import { subscribeWelcome, DEFAULT_WELCOME } from '../services/welcomeService';
 import { todayStr, splitDateTimeUtc, combineDateTimeUtc } from '../utils/dateHelpers';
 import TimeInput24 from './TimeInput24';
-import type { Applicant } from '../types';
+import type { Applicant, WelcomeContent } from '../types';
 
 interface ApplicantDetailsModalProps {
   open: boolean;
@@ -22,6 +23,9 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
   const [lastUpdated, setLastUpdated] = useState(applicant.lastUpdated || todayStr());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [welcome, setWelcome] = useState<WelcomeContent>(DEFAULT_WELCOME);
+
+  useEffect(() => subscribeWelcome(setWelcome), []);
 
   if (!open) return null;
 
@@ -76,6 +80,17 @@ export default function ApplicantDetailsModal({ open, applicant, onClose }: Appl
             <input className="app-input" type="date" value={submitted} onChange={e => setSubmitted(e.target.value)} />
           </div>
         </div>
+        <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: -10, marginBottom: 16 }}>
+          Not shown directly on the embassy website — count back about 30 days from when you got your first Confirm Application request email.
+        </div>
+
+        {welcome.imageUrl && (
+          <img
+            src={welcome.imageUrl}
+            alt="Where to find these dates on the embassy website"
+            style={{ width: '100%', borderRadius: 10, marginBottom: 16, display: 'block' }}
+          />
+        )}
 
         <div className="app-field">
           <label>Last Edited (UTC) *</label>
