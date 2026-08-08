@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Plus, Pencil, Trash2, X, Paperclip, FileText, Bold, Italic, Underline, List, Heading, Link2 } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
-import FlightLoader from '../../components/FlightLoader';
 import {
   subscribeGuides, addGuide, updateGuide, deleteGuide, slugify,
   uploadGuideAttachment, deleteGuideAttachment,
@@ -124,7 +123,7 @@ export default function AdminGuides() {
       />
       <div className="app-content">
         {guides === null ? (
-          <FlightLoader />
+          <div className="app-empty">Loading…</div>
         ) : guides.length === 0 ? (
           <div className="app-card app-card-pad">
             <div className="app-empty">No resources yet — add your first one.</div>

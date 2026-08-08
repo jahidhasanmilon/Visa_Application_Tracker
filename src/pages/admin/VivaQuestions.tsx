@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Download } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
-import FlightLoader from '../../components/FlightLoader';
 import {
   subscribeVivaQuestions, addVivaQuestion, updateVivaQuestion, deleteVivaQuestion,
   saveVivaSectionOrder,
@@ -120,7 +119,7 @@ export default function AdminVivaQuestions() {
       />
       <div className="app-content">
         {questions === null ? (
-          <FlightLoader />
+          <div className="app-empty">Loading…</div>
         ) : questions.length === 0 ? (
           <div className="app-card app-card-pad">
             <div className="app-empty">No questions yet — add your first one, or import the starter set.</div>

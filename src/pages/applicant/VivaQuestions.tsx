@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
-import FlightLoader from '../../components/FlightLoader';
 import { subscribeVivaQuestions } from '../../services/vivaQuestionsService';
 import { useVivaSectionOrder } from '../../hooks/useVivaSectionOrder';
 import { mergeSectionOrder } from '../../utils/sectionOrder';
@@ -30,7 +29,7 @@ export default function ApplicantVivaQuestions() {
       <PageHeader title={t('vivaQuestions.title')} subtitle={t('vivaQuestions.subtitle')} />
       <div className="app-content">
         {questions === null ? (
-          <FlightLoader />
+          <div className="app-empty">{t('common.loading')}</div>
         ) : questions.length === 0 ? (
           <div className="app-card app-card-pad">
             <div className="app-empty">{t('vivaQuestions.empty')}</div>

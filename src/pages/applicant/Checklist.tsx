@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Check, Circle } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
-import FlightLoader from '../../components/FlightLoader';
 import { updateChecklist } from '../../services/applicantsService';
 import { useChecklistTemplate } from '../../hooks/useTemplates';
 import { effectiveChecklist } from '../../utils/dateHelpers';
@@ -20,7 +19,7 @@ export default function ApplicantChecklist({ applicant }: ApplicantChecklistProp
       <PageHeader title={t('checklist.title')} subtitle={t('checklist.subtitle')} />
       <div className="app-content">
         {template === null ? (
-          <FlightLoader />
+          <div className="app-empty">{t('common.loading')}</div>
         ) : (
           <ChecklistCard applicant={applicant} template={template} />
         )}

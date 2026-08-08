@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText, ExternalLink } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
-import FlightLoader from '../components/FlightLoader';
 import { subscribeGuideBySlug } from '../services/guidesService';
 import { useLanguage } from '../i18n/LanguageContext';
 import { renderSectionBody } from '../utils/richText';
@@ -36,7 +35,7 @@ export default function GuideDetail() {
     return (
       <>
         <PageHeader title={t('nav.guides')} actions={backLink} />
-        <div className="app-content"><FlightLoader /></div>
+        <div className="app-content"><div className="app-empty">{t('common.loading')}</div></div>
       </>
     );
   }
