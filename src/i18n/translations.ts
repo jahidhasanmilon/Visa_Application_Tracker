@@ -139,6 +139,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'checklist.empty': 'No checklist items yet.',
     'checklist.done': 'Done',
     'checklist.notYet': 'Pending',
+    'checklist.addItem': 'Add item',
+    'checklist.editItem': 'Edit item',
+    'checklist.itemLabel': 'Item',
+    'checklist.itemNote': 'Note (optional)',
 
     // Viva Questions
     'vivaQuestions.title': 'Interview Questions',
@@ -369,6 +373,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     'checklist.empty': 'এখনো কোনো checklist item নেই।',
     'checklist.done': 'হয়ে গেছে',
     'checklist.notYet': 'বাকি',
+    'checklist.addItem': 'Item যোগ করুন',
+    'checklist.editItem': 'Item এডিট করুন',
+    'checklist.itemLabel': 'Item',
+    'checklist.itemNote': 'নোট (ঐচ্ছিক)',
 
     // Viva Questions
     'vivaQuestions.title': 'ইন্টারভিউ প্রশ্ন',
