@@ -62,7 +62,7 @@ function LoadingScreen() {
     <div className="app-loading-screen">
       <div className="app-flight">
         <svg className="app-flight-svg" viewBox="0 0 100 110" width="100" height="110" aria-hidden="true">
-          {/* Decorative clouds along the route */}
+          {/* Decorative clouds scattered across the sky */}
           <g className="app-flight-cloud" transform="translate(38, 62)">
             <circle cx="0" cy="5" r="3.5" />
             <circle cx="4.5" cy="2.5" r="4.5" />
@@ -73,9 +73,39 @@ function LoadingScreen() {
             <circle cx="4.5" cy="2.5" r="4.5" />
             <circle cx="10" cy="5" r="3.5" />
           </g>
+          <g className="app-flight-cloud" transform="translate(14, 24) scale(0.6)">
+            <circle cx="0" cy="5" r="3.5" />
+            <circle cx="4.5" cy="2.5" r="4.5" />
+            <circle cx="10" cy="5" r="3.5" />
+          </g>
+          <g className="app-flight-cloud" transform="translate(72, 62) scale(0.65)">
+            <circle cx="0" cy="5" r="3.5" />
+            <circle cx="4.5" cy="2.5" r="4.5" />
+            <circle cx="10" cy="5" r="3.5" />
+          </g>
+          <g className="app-flight-cloud" transform="translate(28, 82) scale(0.5)">
+            <circle cx="0" cy="5" r="3.5" />
+            <circle cx="4.5" cy="2.5" r="4.5" />
+            <circle cx="10" cy="5" r="3.5" />
+          </g>
+          <g className="app-flight-cloud" transform="translate(86, 42) scale(0.55)">
+            <circle cx="0" cy="5" r="3.5" />
+            <circle cx="4.5" cy="2.5" r="4.5" />
+            <circle cx="10" cy="5" r="3.5" />
+          </g>
+          <g className="app-flight-cloud" transform="translate(6, 52) scale(0.45)">
+            <circle cx="0" cy="5" r="3.5" />
+            <circle cx="4.5" cy="2.5" r="4.5" />
+            <circle cx="10" cy="5" r="3.5" />
+          </g>
 
           <path className="app-flight-route" d={FLIGHT_PATH} />
-          <path className="app-flight-trail" d={FLIGHT_PATH} pathLength={100} />
+          <defs>
+            <mask id="app-flight-trail-mask">
+              <path d={FLIGHT_PATH} className="app-flight-trail-reveal" pathLength={100} />
+            </mask>
+          </defs>
+          <path className="app-flight-trail" d={FLIGHT_PATH} pathLength={100} mask="url(#app-flight-trail-mask)" />
 
           {/* Bangladesh — departure */}
           <g transform="translate(2, 84)">
