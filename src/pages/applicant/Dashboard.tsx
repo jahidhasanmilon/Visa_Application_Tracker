@@ -2,16 +2,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { Check, Pencil } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import ApplicantDetailsModal from '../../components/ApplicantDetailsModal';
+import WelcomeModal from '../../components/WelcomeModal';
 import InfoTooltip from '../../components/InfoTooltip';
 import LiveCountdown from '../../components/LiveCountdown';
 import { updateReminderStatus, updateRoadmap } from '../../services/applicantsService';
+import { subscribeWelcome, DEFAULT_WELCOME } from '../../services/welcomeService';
 import { enrichApplicant, effectiveRoadmap, effectiveChecklist, fmtDate, fmtDateTimeUtc, todayStr } from '../../utils/dateHelpers';
 import { getStatusMeta, REMINDER_OPTIONS, REMINDER_META } from '../../constants/status';
 import { useRoadmapTemplate, useChecklistTemplate } from '../../hooks/useTemplates';
 import { useLanguage } from '../../i18n/LanguageContext';
-import type { Applicant, ChecklistItem, EnrichedApplicant, ReminderStatus } from '../../types';
+import type { Applicant, ChecklistItem, EnrichedApplicant, ReminderStatus, WelcomeContent } from '../../types';
 
 const DISMISS_KEY_PREFIX = 'visa-tracker-details-prompt-dismissed-';
+const WELCOME_DISMISS_KEY_PREFIX = 'visa-tracker-welcome-dismissed-';
 
 function detailsIncomplete(a: Applicant): boolean {
   return !a.name.trim() || !a.created || !a.submitted;
@@ -26,16 +29,36 @@ export default function ApplicantDashboard({ applicant }: ApplicantDashboardProp
   const roadmapTemplate = useRoadmapTemplate();
   const checklistTemplate = useChecklistTemplate();
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [welcome, setWelcome] = useState<WelcomeContent>(DEFAULT_WELCOME);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+
+  useEffect(() => subscribeWelcome(setWelcome), []);
+
+  const welcomeDismissed = !!localStorage.getItem(WELCOME_DISMISS_KEY_PREFIX + applicant.id);
 
   useEffect(() => {
+    if (welcome.enabled && !welcomeDismissed) {
+      setWelcomeOpen(true);
+    }
+  }, [welcome, welcomeDismissed, applicant.id]);
+
+  // The "Add your details" prompt waits until the welcome popup (if any) has
+  // been dismissed, so a brand-new applicant isn't faced with two modals at once.
+  useEffect(() => {
+    if (welcomeOpen) return;
     if (detailsIncomplete(applicant) && !localStorage.getItem(DISMISS_KEY_PREFIX + applicant.id)) {
       setDetailsOpen(true);
     }
-  }, [applicant]);
+  }, [applicant, welcomeOpen]);
 
   function closeDetails() {
     localStorage.setItem(DISMISS_KEY_PREFIX + applicant.id, '1');
     setDetailsOpen(false);
+  }
+
+  function closeWelcome() {
+    localStorage.setItem(WELCOME_DISMISS_KEY_PREFIX + applicant.id, '1');
+    setWelcomeOpen(false);
   }
 
   const enriched = useMemo(() => (
@@ -62,6 +85,7 @@ export default function ApplicantDashboard({ applicant }: ApplicantDashboardProp
       </div>
 
       <ApplicantDetailsModal open={detailsOpen} applicant={applicant} onClose={closeDetails} />
+      {welcomeOpen && <WelcomeModal content={welcome} onClose={closeWelcome} />}
     </>
   );
 }

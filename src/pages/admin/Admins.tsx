@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, Eye, EyeOff, Check, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ShieldCheck, Plus, Trash2, Pencil, ArrowUp, ArrowDown, FileText, Eye, EyeOff, Check, X, Image as ImageIcon } from 'lucide-react';
 import PageHeader from '../../components/PageHeader';
 import CustomSectionForm from '../../components/CustomSectionForm';
 import { subscribeAdmins, addAdmin, removeAdmin } from '../../services/adminsService';
@@ -12,6 +12,7 @@ import {
   saveAboutHiddenSections, saveHelpHiddenSections,
 } from '../../services/siteContentService';
 import { saveCustomPages } from '../../services/customPagesService';
+import { subscribeWelcome, saveWelcome, uploadWelcomeImage, deleteWelcomeImage, DEFAULT_WELCOME } from '../../services/welcomeService';
 import { useApplicantNavOrder, useApplicantNavLabels } from '../../hooks/useNavOrder';
 import { useAboutSectionOrder } from '../../hooks/useAboutSectionOrder';
 import { useHelpSectionOrder } from '../../hooks/useHelpSectionOrder';
@@ -24,7 +25,7 @@ import { ABOUT_SECTION_LABELS, DEFAULT_ABOUT_SECTION_ORDER } from '../../constan
 import { HELP_SECTION_LABELS, DEFAULT_HELP_SECTION_ORDER } from '../../constants/helpSections';
 import { OWNER_EMAIL } from '../../constants/roles';
 import { useLanguage } from '../../i18n/LanguageContext';
-import type { CustomSection, AboutContent, HelpInfo } from '../../types';
+import type { CustomSection, AboutContent, HelpInfo, WelcomeContent } from '../../types';
 
 export default function AdminAdmins() {
   const { t } = useLanguage();
@@ -116,11 +117,104 @@ export default function AdminAdmins() {
           </div>
         </div>
 
+        <WelcomeMessageCard />
         <ApplicantNavOrderCard />
         <AboutSectionOrderCard />
         <HelpSectionOrderCard />
       </div>
     </>
+  );
+}
+
+// Shown once to a first-time applicant (see WelcomeModal.tsx / ApplicantDashboard.tsx).
+function WelcomeMessageCard() {
+  const [welcome, setWelcome] = useState<WelcomeContent>(DEFAULT_WELCOME);
+  const [draft, setDraft] = useState<WelcomeContent>(DEFAULT_WELCOME);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => subscribeWelcome(w => { setWelcome(w); setDraft(w); }), []);
+
+  const dirty = JSON.stringify(draft) !== JSON.stringify(welcome);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError('');
+    setUploading(true);
+    try {
+      const url = await uploadWelcomeImage(file);
+      setDraft(d => ({ ...d, imageUrl: url }));
+    } catch (err) {
+      console.error('uploadWelcomeImage failed', err);
+      setError('Image upload failed — only the owner account can upload images right now.');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
+  async function removeImage() {
+    await deleteWelcomeImage();
+    setDraft(d => ({ ...d, imageUrl: '' }));
+  }
+
+  async function save() {
+    setSaving(true);
+    setError('');
+    try {
+      await saveWelcome(draft);
+    } catch (err) {
+      console.error('saveWelcome failed', err);
+      setError('Could not save — check your connection and try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="app-card app-card-pad">
+      <div className="app-card-head">
+        <div className="app-card-title">First-time welcome message</div>
+      </div>
+      <p style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: -8, marginBottom: 14 }}>
+        Shown once to a new applicant on their first visit, with a link into How to Use. Turn it off any time.
+      </p>
+
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, cursor: 'pointer' }}>
+        <input type="checkbox" checked={draft.enabled} onChange={e => setDraft({ ...draft, enabled: e.target.checked })} />
+        <span style={{ fontSize: 13.5, fontWeight: 500 }}>Show this to new applicants</span>
+      </label>
+
+      <div className="app-field">
+        <label>Message</label>
+        <textarea className="app-textarea" value={draft.message} onChange={e => setDraft({ ...draft, message: e.target.value })} style={{ minHeight: 80 }} />
+      </div>
+
+      <div className="app-field">
+        <label>Image <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(optional)</span></label>
+        {draft.imageUrl && (
+          <div style={{ position: 'relative', marginBottom: 8, maxWidth: 280 }}>
+            <img src={draft.imageUrl} alt="" style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+            <button type="button" className="app-icon-btn" style={{ position: 'absolute', top: 6, right: 6, background: 'var(--surface)' }} onClick={removeImage} aria-label="Remove image">
+              <X size={14} />
+            </button>
+          </div>
+        )}
+        <button type="button" className="app-btn app-btn-ghost app-btn-sm" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+          <ImageIcon size={14} /> {uploading ? 'Uploading…' : draft.imageUrl ? 'Replace image' : 'Upload image'}
+        </button>
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+      </div>
+
+      {error && <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{error}</div>}
+
+      <button className="app-btn app-btn-primary app-btn-sm" onClick={save} disabled={saving || uploading || !dirty}>
+        {saving ? 'Saving…' : 'Save'}
+      </button>
+    </div>
   );
 }
 

@@ -161,6 +161,14 @@ export interface PrivacyContent {
   lastUpdated: string;
 }
 
+// Shown once to a first-time applicant (see WelcomeModal.tsx) — a short
+// message pointing them at the How to Use page, with an optional image.
+export interface WelcomeContent {
+  enabled: boolean;
+  message: string;
+  imageUrl: string;
+}
+
 export interface AboutTimelineItem {
   heading: string;
   body: string;

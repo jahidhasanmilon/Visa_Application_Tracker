@@ -143,6 +143,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'vivaQuestions.subtitle': 'Here are all the possible questions asked by the German Embassy during Opportunity Card visa interviews. This list will be continuously updated as new interview questions become available.',
     'vivaQuestions.empty': 'No questions published yet.',
 
+    // Welcome popup (first-time applicants)
+    'welcome.title': 'Welcome to VisaTrack',
+    'welcome.dismiss': 'Got it',
+    'welcome.howToUse': 'See How to Use',
+
     // How to Use
     'howToUse.title': 'How to Use This App',
     'howToUse.subtitle': 'A quick tour of everything on your dashboard.',
@@ -365,6 +370,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'vivaQuestions.title': 'ইন্টারভিউ প্রশ্ন',
     'vivaQuestions.subtitle': 'Germany Opportunity Card visa ইন্টারভিউতে German Embassy যেসব প্রশ্ন জিজ্ঞেস করতে পারে তার সবগুলো এখানে দেওয়া আছে। নতুন প্রশ্ন পাওয়া গেলে এই তালিকা নিয়মিত আপডেট করা হবে।',
     'vivaQuestions.empty': 'এখনো কোনো প্রশ্ন প্রকাশ করা হয়নি।',
+
+    // Welcome popup (first-time applicants)
+    'welcome.title': 'VisaTrack-এ স্বাগতম',
+    'welcome.dismiss': 'বুঝেছি',
+    'welcome.howToUse': 'How to Use দেখুন',
 
     // How to Use
     'howToUse.title': 'এই অ্যাপ যেভাবে ব্যবহার করবেন',
