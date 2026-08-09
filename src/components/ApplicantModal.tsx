@@ -8,12 +8,13 @@ interface ApplicantModalProps {
   isEditing: boolean;
   form: ApplicantFormData;
   setForm: (f: ApplicantFormData) => void;
+  error?: string;
   onSave: () => void;
   onClose: () => void;
 }
 
 export default function ApplicantModal({
-  open, isEditing, form, setForm, onSave, onClose,
+  open, isEditing, form, setForm, error, onSave, onClose,
 }: ApplicantModalProps) {
   if (!open) return null;
 
@@ -31,7 +32,7 @@ export default function ApplicantModal({
         <h3>{isEditing ? 'Edit applicant' : 'Add applicant'}</h3>
 
         <div className="app-field">
-          <label>Serial No</label>
+          <label>Serial No <span style={{ fontWeight: 400, color: 'var(--muted)' }}>(if they have one)</span></label>
           <input className="app-input" value={form.serialNo} onChange={e => setForm({ ...form, serialNo: e.target.value })} placeholder="e.g. AP/260/051125/000001183" />
         </div>
 
@@ -75,6 +76,8 @@ export default function ApplicantModal({
             {REMINDER_OPTIONS.map(r => <option key={r} value={r}>{REMINDER_LABELS[r]}</option>)}
           </select>
         </div>
+
+        {error && <div style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10 }}>{error}</div>}
 
         <div className="app-modal-actions">
           <button className="app-btn app-btn-ghost" onClick={onClose}>Cancel</button>

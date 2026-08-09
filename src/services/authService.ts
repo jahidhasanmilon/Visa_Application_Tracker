@@ -64,6 +64,7 @@ export function authErrorKey(code: string): string {
     case 'auth/weak-password': return 'login.err.weakPassword';
     case 'auth/popup-closed-by-user': return 'login.err.popupClosed';
     case 'auth/too-many-requests': return 'login.err.tooManyRequests';
+    case 'auth/network-request-failed': return 'login.err.network';
     default: return 'login.err.generic';
   }
 }

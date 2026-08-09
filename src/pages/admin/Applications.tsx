@@ -24,6 +24,7 @@ export default function AdminApplications() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingApplicant, setEditingApplicant] = useState<Applicant | null>(null);
   const [form, setForm] = useState<ApplicantFormData>(EMPTY_FORM);
+  const [formError, setFormError] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -41,6 +42,7 @@ export default function AdminApplications() {
   function openAdd() {
     setForm({ ...EMPTY_FORM, created: todayStr(), lastUpdated: todayStr() });
     setEditingApplicant(null);
+    setFormError('');
     setModalOpen(true);
   }
 
@@ -51,11 +53,19 @@ export default function AdminApplications() {
       lastUpdated: a.lastUpdated, reminderMailSent: a.reminderMailSent,
     });
     setEditingApplicant(a);
+    setFormError('');
     setModalOpen(true);
   }
 
   async function saveForm() {
-    if (!form.name.trim() || !form.serialNo.trim()) return;
+    // Serial No is deliberately optional here, same as the applicant's own
+    // "Add your details" form — someone who hasn't been assigned one yet
+    // (or hasn't been submitted yet) shouldn't block admin from adding them.
+    if (!form.name.trim()) {
+      setFormError('Name is required.');
+      return;
+    }
+    setFormError('');
     if (editingApplicant) {
       await updateApplicant(editingApplicant.id, form);
     } else {
@@ -114,6 +124,7 @@ export default function AdminApplications() {
         isEditing={!!editingApplicant}
         form={form}
         setForm={setForm}
+        error={formError}
         onSave={saveForm}
         onClose={() => setModalOpen(false)}
       />

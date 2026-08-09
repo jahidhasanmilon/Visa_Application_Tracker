@@ -88,6 +88,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.err.weakPassword': 'Password should be at least 6 characters.',
     'login.err.popupClosed': 'Google sign-in was closed before finishing.',
     'login.err.tooManyRequests': 'Too many attempts. Please wait a moment and try again.',
+    'login.err.network': "Couldn't reach the server — check your internet connection and try again.",
     'login.err.generic': 'Something went wrong. Please try again.',
     'login.createAccountInstead': 'Create an account',
 
@@ -334,6 +335,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     'login.err.weakPassword': 'পাসওয়ার্ড অন্তত 6 characters হতে হবে।',
     'login.err.popupClosed': 'শেষ হওয়ার আগেই Google sign-in বন্ধ হয়ে গেছে।',
     'login.err.tooManyRequests': 'অনেকবার চেষ্টা হয়ে গেছে। একটু পর আবার চেষ্টা করুন।',
+    'login.err.network': 'সার্ভারের সাথে সংযোগ করা যায়নি — আপনার ইন্টারনেট কানেকশন চেক করে আবার চেষ্টা করুন।',
     'login.err.generic': 'কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।',
     'login.createAccountInstead': 'একটা account তৈরি করুন',
 
