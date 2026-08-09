@@ -115,6 +115,15 @@ async function runReminderSweep(): Promise<{ sent: number; checked: number }> {
     if (!a.lastUpdated || a.reminderMailSent !== 'Not yet') continue;
 
     const lastUpdatedMs = new Date(a.lastUpdated).getTime();
+    // A NaN here (a stored value the Date constructor can't parse — e.g. a
+    // raw Firestore Timestamp instead of the ISO string every write path is
+    // supposed to produce) would make deadlineMs NaN too, and `now < NaN` is
+    // ALWAYS false in JS — the skip below would silently never fire and an
+    // email would go out regardless of the real countdown. Fail safe instead.
+    if (Number.isNaN(lastUpdatedMs)) {
+      logger.warn(`Skipping reminder for ${doc.id}: unparseable lastUpdated (${JSON.stringify(a.lastUpdated)}).`);
+      continue;
+    }
     const deadlineMs = lastUpdatedMs + REMINDER_WINDOW_MS;
     if (now < deadlineMs) continue;
 
