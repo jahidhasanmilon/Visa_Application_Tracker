@@ -6,10 +6,13 @@ import type { HowToUseSection } from '../../types';
 
 const EMPTY_FORM = { heading: '', body: '' };
 
-// Fixed sections (the ones the app ships with) can only be hidden, never
-// deleted — same hide-vs-delete split used for the About/Help/sidebar
-// custom-section editors elsewhere in this admin panel. Admin-added
-// sections get a real, permanent delete instead.
+// Unlike the About/Help/sidebar editors elsewhere in this admin panel,
+// every section here — including the ones the app ships with — gets both
+// a reversible Hide/Show toggle AND a permanent Remove, as independent
+// actions (not a shared button): hiding keeps it around to bring back
+// later, removing deletes it from the doc outright. If every section is
+// ever removed, subscribeHowToUse() reseeds the shipped defaults on next
+// load rather than showing a permanently blank page.
 export default function AdminHowToUse() {
   const [sections, setSections] = useState<HowToUseSection[] | null>(null);
   useEffect(() => subscribeHowToUse(setSections), []);
@@ -99,17 +102,16 @@ export default function AdminHowToUse() {
                   <button className="app-icon-btn" disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up"><ArrowUp size={14} /></button>
                   <button className="app-icon-btn" disabled={i === sections.length - 1} onClick={() => move(i, 1)} aria-label="Move down"><ArrowDown size={14} /></button>
                   <button className="app-icon-btn" onClick={() => openEdit(s)} aria-label="Edit section"><Pencil size={14} /></button>
-                  {s.fixed ? (
-                    <button className="app-icon-btn" onClick={() => toggleHidden(s)} aria-label={s.hidden ? 'Show section' : 'Hide section'}>
-                      {s.hidden ? <Eye size={14} /> : <EyeOff size={14} />}
-                    </button>
-                  ) : confirmDeleteId === s.id ? (
+                  <button className="app-icon-btn" onClick={() => toggleHidden(s)} aria-label={s.hidden ? 'Show section' : 'Hide section'}>
+                    {s.hidden ? <Eye size={14} /> : <EyeOff size={14} />}
+                  </button>
+                  {confirmDeleteId === s.id ? (
                     <div style={{ display: 'flex', gap: 4 }}>
                       <button className="app-btn app-btn-danger app-btn-sm" onClick={() => doDelete(s.id)}>Confirm</button>
                       <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setConfirmDeleteId(null)}>Cancel</button>
                     </div>
                   ) : (
-                    <button className="app-icon-btn" onClick={() => setConfirmDeleteId(s.id)} aria-label="Delete section"><Trash2 size={14} /></button>
+                    <button className="app-icon-btn" onClick={() => setConfirmDeleteId(s.id)} aria-label="Remove section"><Trash2 size={14} /></button>
                   )}
                 </div>
               </div>
