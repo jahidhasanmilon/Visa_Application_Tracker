@@ -77,7 +77,7 @@ export default function ApplicantVivaQuestions({ user }: ApplicantVivaQuestionsP
       <PageHeader
         title={t('vivaQuestions.title')}
         subtitle={t('vivaQuestions.subtitle')}
-        actions={<button className="app-btn app-btn-ghost app-btn-sm" onClick={openSuggest}><Plus size={14} /> {t('vivaQuestions.suggest')}</button>}
+        actions={<button className="app-btn app-btn-ghost app-btn-sm" onClick={openSuggest}><Plus size={14} /> <span className="app-btn-label-responsive">{t('vivaQuestions.suggest')}</span></button>}
       />
       <div className="app-content">
         {questions === null ? (

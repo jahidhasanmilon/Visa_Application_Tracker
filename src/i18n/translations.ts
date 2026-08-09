@@ -167,21 +167,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'welcome.dismiss': 'Got it',
     'welcome.howToUse': 'See How to Use',
 
-    // How to Use
+    // How to Use — section content itself now lives in Firestore
+    // (see howToUseService.ts), admin-editable; only the page title/subtitle
+    // stay as i18n strings here.
     'howToUse.title': 'How to Use This App',
     'howToUse.subtitle': 'A quick tour of everything on your dashboard.',
-    'howToUse.s1.heading': '1. My Status',
-    'howToUse.s1.body': 'Your dashboard shows your progress. Tap a step on the roadmap once you\'ve completed it — your status badge updates automatically to match the furthest step you\'ve finished. There\'s no separate "status" to set.',
-    'howToUse.s2.heading': '2. Edit my details',
-    'howToUse.s2.body': 'Use "Edit my details" (on your dashboard or Profile) to keep your name, Creation date, and Waiting List Joined Date accurate — check your German embassy account for these. These drive your waiting-time estimate, so keep them current.',
-    'howToUse.s3.heading': '3. Checklist',
-    'howToUse.s3.body': 'A to-do list of documents and steps to prepare. Tap an item to mark it done — this is your own personal checklist, separate from the roadmap.',
-    'howToUse.s4.heading': '4. Confirm Application Request (30-Day)',
-    'howToUse.s4.body': 'A live countdown — days, hours, minutes, and seconds — tracks the 30-day window since your record was last edited. Mark it "Done" once you\'ve checked in with the embassy; that\'s the only thing that resets it. Switching it back to "Not yet" won\'t restart the clock.',
-    'howToUse.s5.heading': '5. Guides & Resources',
-    'howToUse.s5.body': 'Step-by-step write-ups on applying for the visa, understanding the checklist, and applying for jobs — organized by category. No login needed to browse them.',
-    'howToUse.s6.heading': '6. Interview Questions',
-    'howToUse.s6.body': 'Common interview questions, grouped by topic (Personal Introduction, Education, Professional Background, and more), with notes on how to approach each one — worth reviewing before your embassy appointment.',
 
     // Profile
     'profile.title': 'Profile',
@@ -414,21 +404,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     'welcome.dismiss': 'বুঝেছি',
     'welcome.howToUse': 'How to Use দেখুন',
 
-    // How to Use
+    // How to Use — section content itself now lives in Firestore
+    // (see howToUseService.ts), admin-editable; only the page title/subtitle
+    // stay as i18n strings here.
     'howToUse.title': 'এই অ্যাপ যেভাবে ব্যবহার করবেন',
     'howToUse.subtitle': 'আপনার ড্যাশবোর্ডের সব কিছুর একটা দ্রুত পরিচিতি।',
-    'howToUse.s1.heading': '১. আমার স্ট্যাটাস',
-    'howToUse.s1.body': 'আপনার ড্যাশবোর্ডে আপনার অগ্রগতি দেখা যায়। roadmap-এর কোনো ধাপ শেষ করলে সেটাতে ট্যাপ করুন — আপনি যে ধাপ পর্যন্ত শেষ করেছেন তার সাথে মিলিয়ে status badge স্বয়ংক্রিয়ভাবে আপডেট হয়ে যায়। আলাদা করে "status" সেট করার কিছু নেই।',
-    'howToUse.s2.heading': '২. আমার তথ্য এডিট করুন',
-    'howToUse.s2.body': 'আপনার নাম, Creation date, আর Waiting List Joined Date ঠিক রাখতে ড্যাশবোর্ড বা Profile-এ "আমার তথ্য এডিট করুন" ব্যবহার করুন — এই তারিখগুলো আপনার German embassy account থেকে দেখে নিন। এগুলোর উপর ভিত্তি করেই আপনার অপেক্ষার সময়ের হিসাব হয়, তাই আপ টু ডেট রাখুন।',
-    'howToUse.s3.heading': '৩. চেকলিস্ট',
-    'howToUse.s3.body': 'যেসব document আর ধাপ প্রস্তুত করতে হবে তার একটা to-do list। কোনো item শেষ হলে ট্যাপ করে done করুন — এটা roadmap থেকে আলাদা, সম্পূর্ণ আপনার নিজের personal checklist।',
-    'howToUse.s4.heading': '৪. অ্যাপ্লিকেশন রিকোয়েস্ট কনফার্ম করুন (৩০ দিন)',
-    'howToUse.s4.body': 'আপনার রেকর্ড সর্বশেষ এডিট হওয়ার পর থেকে ৩০ দিনের window-টা এখন live countdown-এ (দিন, ঘণ্টা, মিনিট, সেকেন্ড) দেখানো হয়। দূতাবাসের সাথে খোঁজ নেওয়ার পর "হয়ে গেছে" মার্ক করুন — এটাই একমাত্র জিনিস যা countdown রিসেট করে। "এখনো হয়নি"-তে ফিরিয়ে দিলে countdown আবার শুরু হয় না।',
-    'howToUse.s5.heading': '৫. গাইড ও রিসোর্স',
-    'howToUse.s5.body': 'ভিসার জন্য আবেদন, checklist বোঝা, আর চাকরির জন্য আবেদন করা নিয়ে ধাপে ধাপে লেখা — category অনুযায়ী সাজানো। এগুলো দেখতে login লাগবে না।',
-    'howToUse.s6.heading': '৬. ইন্টারভিউ প্রশ্ন',
-    'howToUse.s6.body': 'সাধারণ ইন্টারভিউ প্রশ্ন, বিষয় অনুযায়ী ভাগ করা (Personal Introduction, Education, Professional Background আরও অনেক কিছু), প্রতিটার উত্তর কীভাবে দেবেন তার নোটসহ — দূতাবাসের অ্যাপয়েন্টমেন্টের আগে দেখে নেওয়া ভালো।',
 
     // Profile
     'profile.title': 'প্রোফাইল',

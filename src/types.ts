@@ -124,6 +124,17 @@ export interface VivaQuestion {
   section: string;
 }
 
+// A section on the applicant "How to Use" page. Fixed sections ship with
+// the app and can only be hidden, never deleted (see HideToggleButton
+// pattern elsewhere) — admin-added sections are fully removable.
+export interface HowToUseSection {
+  id: string;
+  heading: string;
+  body: string;
+  fixed?: boolean;
+  hidden?: boolean;
+}
+
 // Applicant-submitted question, held for admin review before it's added
 // as a real VivaQuestion. suggestedByUid backs the Firestore rule that
 // lets an applicant read only their own suggestions' status.

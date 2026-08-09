@@ -12,6 +12,7 @@ export const ADMIN_NAV = [
   { to: '/app/checklist', label: 'Checklist', icon: CheckSquare },
   { to: '/app/roadmap', label: 'Road to Success', icon: Milestone },
   { to: '/app/viva-questions', label: 'Interview Questions', icon: HelpCircle },
+  { to: '/app/how-to-use', label: 'How to Use', icon: Compass },
   { to: '/app/reminder-email', label: 'Reminder Email', icon: Mail },
   { to: '/app/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/app/guides', label: 'Guides & Resources', icon: BookOpen },
