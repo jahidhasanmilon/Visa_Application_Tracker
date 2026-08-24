@@ -155,7 +155,7 @@ button.app-sidebar-collapse-btn { display: none; flex-shrink: 0; }
   font-size: 15px;
   flex-shrink: 0;
 }
-.app-logo-text { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 16.5px; color: #fff; line-height: 1.1; }
+.app-logo-text { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; color: #fff; line-height: 1.1; letter-spacing: -0.01em; }
 .app-logo-sub { font-size: 10.5px; color: var(--sidebar-text-dim); letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; }
 
 /* ---------- Top bar (persistent, all screen sizes) / drawer nav ---------- */
@@ -269,7 +269,7 @@ button.app-sidebar-close { display: none; }
 /* Title/subtitle shrink and wrap their own text; actions stay pinned on
    the same row (top-right) instead of dropping to a new line below. */
 .app-topbar-title { min-width: 0; flex: 1 1 auto; }
-.app-page-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 25px; color: var(--ink); line-height: 1.2; }
+.app-page-title { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 30px; color: var(--ink); line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance; }
 .app-page-subtitle { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
 .app-topbar-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .app-content { padding: 0 34px 44px; display: flex; flex-direction: column; gap: 20px; }
@@ -457,9 +457,9 @@ button.app-sidebar-close { display: none; }
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
 }
-.app-card-pad { padding: 22px; }
-.app-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
-.app-card-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15.5px; }
+.app-card-pad { padding: 26px; }
+.app-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; gap: 12px; flex-wrap: wrap; }
+.app-card-title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 16.5px; letter-spacing: -0.005em; }
 .app-card-link { font-size: 12.5px; font-weight: 600; color: var(--violet); text-decoration: none; }
 
 /* ---------- Stat cards ---------- */
@@ -477,10 +477,10 @@ button.app-sidebar-close { display: none; }
 }
 .app-stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .app-stat-icon {
-  width: 36px; height: 36px; border-radius: 10px;
+  width: 40px; height: 40px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }
-.app-stat-value { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 28px; line-height: 1; }
+.app-stat-value { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 32px; line-height: 1; letter-spacing: -0.01em; }
 .app-stat-label { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
 
 .app-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; }
@@ -488,17 +488,17 @@ button.app-sidebar-close { display: none; }
 /* ---------- Buttons ---------- */
 .app-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  border: none; border-radius: 10px;
-  padding: 10px 16px;
+  border: none; border-radius: 12px;
+  padding: 11px 18px;
   font-size: 13.5px; font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
-  transition: opacity 0.15s, background 0.15s, transform 0.05s;
+  transition: opacity 0.15s, background 0.15s, transform 0.05s, box-shadow 0.15s;
   white-space: nowrap;
 }
 .app-btn:active { transform: translateY(1px); }
-.app-btn-primary { background: var(--btn-primary-bg); color: var(--btn-primary-text); }
-.app-btn-primary:hover { opacity: 0.9; }
+.app-btn-primary { background: var(--btn-primary-bg); color: var(--btn-primary-text); box-shadow: var(--shadow-sm); }
+.app-btn-primary:hover { opacity: 0.9; box-shadow: var(--shadow); }
 .app-btn-accent { background: var(--accent); color: #3A2400; }
 .app-btn-accent:hover { opacity: 0.9; }
 .app-btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border); }
@@ -743,7 +743,7 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 }
 
 @media (max-width: 560px) {
-  .app-page-title { font-size: 21px; }
+  .app-page-title { font-size: 24px; }
   .app-topbar { padding: 16px 14px 12px; }
   .app-content { padding: 0 14px 28px; gap: 14px; }
   .app-card-pad { padding: 16px; }
