@@ -122,7 +122,7 @@ export function KanbanSkeleton() {
 export function ListDetailSkeleton() {
   return (
     <div className="app-content">
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 300px) 1fr', gap: 20, alignItems: 'start' }}>
+      <div className="app-split-panel">
         <div className="app-card app-card-pad">
           <Skeleton height={38} radius={10} style={{ marginBottom: 14 }} />
           {Array.from({ length: 8 }).map((_, i) => (

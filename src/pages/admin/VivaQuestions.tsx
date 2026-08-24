@@ -136,11 +136,11 @@ export default function AdminVivaQuestions() {
         title="Interview Questions"
         subtitle="Interview-prep questions every applicant sees, grouped by section, with your notes underneath."
         actions={
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <button className="app-btn app-btn-ghost" onClick={importSeed} disabled={importing || questions === null}>
-              <Download size={16} /> {importing ? 'Importing…' : 'Import starter questions'}
+              <Download size={16} /> <span className="app-btn-label-responsive">{importing ? 'Importing…' : 'Import starter questions'}</span>
             </button>
-            <button className="app-btn app-btn-primary" onClick={() => openAdd()}><Plus size={16} /> New question</button>
+            <button className="app-btn app-btn-primary" onClick={() => openAdd()}><Plus size={16} /> <span className="app-btn-label-responsive">New question</span></button>
           </div>
         }
       />

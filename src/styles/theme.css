@@ -485,6 +485,13 @@ button.app-sidebar-close { display: none; }
 
 .app-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; }
 
+/* Applicant-list + detail-panel split used by admin Checklist/Roadmap (and
+   their loading skeleton) — minmax(0, 1fr) on the second column (not plain
+   1fr) so its content can't force the row wider than the viewport; the
+   680px breakpoint below collapses to one column before the fixed-min-width
+   first column would otherwise overflow a narrow phone. */
+.app-split-panel { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+
 /* ---------- Buttons ---------- */
 .app-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
@@ -731,6 +738,7 @@ table.app-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .app-auth-screen { grid-template-columns: 1fr; }
   .app-auth-art { display: none; }
   .app-kanban { grid-template-columns: minmax(210px, 1fr); }
+  .app-split-panel { grid-template-columns: minmax(0, 1fr); }
 
   /* Plain logo + name, no card/background — pinned to the top-left corner
      of the form panel (mirrors the theme toggle pinned top-right), in

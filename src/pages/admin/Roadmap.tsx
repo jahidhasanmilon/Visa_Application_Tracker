@@ -69,7 +69,7 @@ export default function AdminRoadmap() {
             </button>
           </div>
         )}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 300px) 1fr', gap: 20, alignItems: 'start' }}>
+        <div className="app-split-panel">
           <div className="app-card app-card-pad">
             <div className="app-input-wrap" style={{ marginBottom: 14 }}>
               <Search size={16} />
