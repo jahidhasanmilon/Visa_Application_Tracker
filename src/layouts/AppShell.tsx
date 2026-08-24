@@ -126,12 +126,12 @@ export default function AppShell({ user, role }: AppShellProps) {
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
             {role === 'admin' ? <NotificationBell /> : <ApplicantNotificationBell uid={user.uid} />}
-            <ProfileToggleButton user={user} />
             <LanguageToggle />
             <ThemeToggle />
             <button className="app-icon-btn app-topbar-hamburger" onClick={() => setMobileNavOpen(true)} aria-label="Open menu">
               <Menu size={20} />
             </button>
+            <ProfileToggleButton user={user} />
           </div>
         </div>
         <div className="app-main-content">
