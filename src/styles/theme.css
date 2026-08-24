@@ -264,7 +264,7 @@ button.app-sidebar-close { display: none; }
 .app-main-content { flex: 1 0 auto; }
 .app-topbar {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
-  padding: 30px 34px 22px;
+  padding: 30px 34px 14px;
 }
 /* Title/subtitle shrink and wrap their own text; actions stay pinned on
    the same row (top-right) instead of dropping to a new line below. */
