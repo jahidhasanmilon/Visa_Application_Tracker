@@ -19,17 +19,17 @@ html.lang-bn .app-brand-font {
   --muted: #6E6C8A;
   --muted-2: #A7A5C2;
 
-  --sidebar: #14101F;
-  --sidebar-2: #1C1730;
+  --sidebar: #1C1733;
+  --sidebar-2: #241E42;
   --sidebar-text: #ADA9CE;
   --sidebar-text-dim: #716C93;
-  --sidebar-active: #2E2350;
+  --sidebar-active: #2C2555;
 
   --accent: #F5A524;
   --accent-ink: #6B4400;
   --accent-soft: #FDF0DA;
-  --violet: #7C3AED;
-  --violet-soft: #EFE7FC;
+  --violet: #4B5875;
+  --violet-soft: #E7E9F0;
 
   --success: #12B76A;
   --success-soft: #DFF7EB;
@@ -43,9 +43,9 @@ html.lang-bn .app-brand-font {
   --neutral: #8B899E;
   --neutral-soft: #ECEBF2;
 
-  --radius-sm: 9px;
-  --radius: 16px;
-  --radius-lg: 24px;
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
   --shadow-sm: 0 1px 2px rgba(25, 23, 53, 0.06);
   --shadow: 0 8px 24px rgba(25, 23, 53, 0.08);
   --shadow-lg: 0 20px 48px rgba(25, 23, 53, 0.16);
@@ -57,18 +57,18 @@ html.lang-bn .app-brand-font {
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --ink: #EEEBFA;
-  --bg: #0B0A14;
-  --surface: #16131F;
-  --surface-2: #1D1929;
-  --border: #2C2740;
+  --ink: #EDEBFA;
+  --bg: #121022;
+  --surface: #1B1832;
+  --surface-2: #221E3D;
+  --border: #332E56;
   --muted: #A8A4CC;
   --muted-2: #726D99;
 
   --accent-ink: #FFD79B;
   --accent-soft: rgba(245, 165, 36, 0.16);
-  --violet: #9B6BFF;
-  --violet-soft: rgba(155, 107, 255, 0.22);
+  --violet: #8A94AC;
+  --violet-soft: rgba(75, 88, 117, 0.32);
 
   --success-soft: rgba(18, 183, 106, 0.18);
   --info-soft: rgba(62, 123, 250, 0.2);
@@ -81,7 +81,7 @@ html.lang-bn .app-brand-font {
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
 
-  --btn-primary-bg: #EEEBFA;
+  --btn-primary-bg: #EDEBFA;
   --btn-primary-text: #191735;
 }
 
