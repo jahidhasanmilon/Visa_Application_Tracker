@@ -81,7 +81,7 @@ export default function ApplicantDashboard({ applicants }: ApplicantDashboardPro
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {applicants.map(applicant => (
               <div key={applicant.id}>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 2 }}>
                   <button className="app-btn app-btn-ghost app-btn-sm" onClick={() => setEditingApplicant(applicant)}>
                     <Pencil size={14} /> <span className="app-btn-label-responsive">{t('status.editDetails')}</span>
                   </button>
